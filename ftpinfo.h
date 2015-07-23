@@ -6,30 +6,30 @@
  */
 
 struct info_header {
-   struct info_header *next;
-   struct info_header **prev;
+	struct info_header *next;
+	struct info_header **prev;
 
-   magic_verify;
+	magic_verify;
 
-   b32   unique;
+	b32   unique;
 
-   struct   my_info *infos;
-   struct  my_info **last_info_p;
+	struct   my_info *infos;
+	struct  my_info **last_info_p;
 
-   boolean  case_sensitive;
-   b8 name[0];
+	boolean  case_sensitive;
+	b8 name[0];
 };
 
 typedef struct my_info {
-   struct   my_info *next;
+	struct   my_info *next;
 
-   magic_verify;
+	magic_verify;
 
-   b32   size;
-   b32   blocks;
-   b32   flags;
-   struct   DateStamp modified;
-   b8 name[0];    // speichert "Name\0Kommentar"
+	b32   size;
+	b32   blocks;
+	b32   flags;
+	struct   DateStamp modified;
+	b8 name[0];    // speichert "Name\0Kommentar"
 } ftpinfo;
 
 #define MYFLAG_LINK     0x100000 /* for indicating links with our normal protection bits */

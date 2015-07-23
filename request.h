@@ -12,16 +12,16 @@ ABA 25/05/2005
 #ifdef __amigaos4__
 struct gim *make_gim(b8 *name, b32 textpen, b32 lightpen, b32 darkpen, struct Screen *s,
 			struct IntuitionBase *IntuitionBase, struct IntuitionIFace * IIntuition,
-            struct GfxBase *GfxBase, struct GraphicsIFace * IGraphics);
+			struct GfxBase *GfxBase, struct GraphicsIFace * IGraphics);
 void free_gim(struct gim *gim, struct IntuitionBase *IntuitionBase, struct IntuitionIFace * IIntuition,
-            struct GfxBase *GfxBase, struct GraphicsIFace * IGraphics);
+			struct GfxBase *GfxBase, struct GraphicsIFace * IGraphics);
 #else
 struct gim *make_gim(b8 *name, b32 textpen, b32 lightpen, b32 darkpen, struct Screen *s,
 			struct IntuitionBase *IntuitionBase, struct GfxBase *GfxBase);
 void free_gim(struct gim *gim, struct IntuitionBase *IntuitionBase, struct GfxBase *GfxBase);
 #endif*/
 struct gim *make_gim(b8 *name, b32 textpen, b32 lightpen, b32 darkpen, struct Screen *s,
-			IntuitionParamDef, GraphicsParamDef );
+	IntuitionParamDef, GraphicsParamDef);
 void free_gim(struct gim *gim, IntuitionParamDef, GraphicsParamDef);
 
 boolean user_pass_request(struct site_s *sp, struct Window *canw);
@@ -43,9 +43,9 @@ struct gim {
 
 typedef struct status_message {
 	struct Message header;
-	
+
 	magic_verify;
-	
+
 	b16 command;
 	b16 data;
 	struct site_s *this_site;

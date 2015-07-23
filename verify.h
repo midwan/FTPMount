@@ -6,8 +6,8 @@
  */
 
 #if defined(VERIFY) || defined(MINI_VERIFY)
-/* #include <exec/lists.h>
-   #include <exec/nodes.h> */
+ /* #include <exec/lists.h>
+	#include <exec/nodes.h> */
 
 #define magic_verify	unsigned long	magic
 #define MAGIC 0x49a72fc0
@@ -33,12 +33,12 @@ void string_alert(char *, int, char *, char *);
 #define check_memory() track_check()
 
 struct bink {
-   struct bink *next;
-   struct bink **prev;
-   unsigned long size;
-   unsigned long type;
-   int line;
-   char *file, *typename;
+	struct bink *next;
+	struct bink **prev;
+	unsigned long size;
+	unsigned long type;
+	int line;
+	char *file, *typename;
 };
 
 void *track_malloc(int, unsigned long, unsigned long, char *, int, char *, char *);

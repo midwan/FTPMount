@@ -7,54 +7,54 @@
 
 
 typedef union {
-   struct {
-      b8 a;
-      b8 b;
-      b8 c;
-      b8 d;
-   } dot;
-   b32 l;
+	struct {
+		b8 a;
+		b8 b;
+		b8 c;
+		b8 d;
+	} dot;
+	b32 l;
 } ipnum;
 
 typedef union {
-   struct {
-      b8 a;
-      b8 b;
-   } dot;
-   b16 w;
+	struct {
+		b8 a;
+		b8 b;
+	} dot;
+	b16 w;
 } portnum;
 
 /* something like an iorequest ... probably a real exec device
    implementation would be good, but for now just DIY */
 
 typedef struct tcpm {
-   struct   Message header;
+	struct   Message header;
 
-   magic_verify;
+	magic_verify;
 
-   b32   command;
-   void  *ident;     /* stores pointer to context information */
+	b32   command;
+	void  *ident;     /* stores pointer to context information */
 
-   ipnum address;
-   portnum  port;
+	ipnum address;
+	portnum  port;
 
-   void  *data;
-   struct   tcpm  *interrupt;
-   b32   length;
+	void  *data;
+	struct   tcpm  *interrupt;
+	b32   length;
 
-   b32   result;
-   b32   error;
-   b32   flags;
-   b32   userid;
-   void  *userdata;
+	b32   result;
+	b32   error;
+	b32   flags;
+	b32   userid;
+	void  *userdata;
 } tcpmessage;
 
 typedef struct {
-   magic_verify;
+	magic_verify;
 
-   sb32  fd;
-   void  *connecting_port;
-   boolean  eof;
+	sb32  fd;
+	void  *connecting_port;
+	boolean  eof;
 } tcpident;
 
 #define V_tcpmessage 4159

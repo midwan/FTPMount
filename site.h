@@ -8,43 +8,43 @@
 #define READ_BUFFER_LENGTH 200
 
 typedef struct site_s {
-   struct site_s *next;
+	struct site_s *next;
 
-   magic_verify;
+	magic_verify;
 
-   struct my_lock *lock_list;
-   struct my_file_info *file_list;
-   struct tcpm *control, *intr, *cfile;
-   struct StandardPacket *death_packet;
-   struct MsgPort *port, *sync, *rank;
-   struct info_header *infos;
-   b8 *user, *password;
-   b8 *cwd, *root;
-   b8 *host;
-   b32 cfile_type;
-   b32 abort_signals, disconnect_signals;
-   struct Window *status_window;
-   struct Gadget *abort_gadget, *disconnect_gadget;
+	struct my_lock *lock_list;
+	struct my_file_info *file_list;
+	struct tcpm *control, *intr, *cfile;
+	struct StandardPacket *death_packet;
+	struct MsgPort *port, *sync, *rank;
+	struct info_header *infos;
+	b8 *user, *password;
+	b8 *cwd, *root;
+	b8 *host;
+	b32 cfile_type;
+	b32 abort_signals, disconnect_signals;
+	struct Window *status_window;
+	struct Gadget *abort_gadget, *disconnect_gadget;
 
-   struct IntuitionBase *IBase;
-   struct GfxBase *GBase;
-   struct Library *GTBase;
+	struct IntuitionBase *IBase;
+	struct GfxBase *GBase;
+	struct Library *GTBase;
 #ifdef __amigaos4__
-   struct IntuitionIFace * pIIntuition;
-   struct GraphicsIFace  * pIGraphics;
-   struct GadToolsIFace  * pIGadTools;
+	struct IntuitionIFace * pIIntuition;
+	struct GraphicsIFace  * pIGraphics;
+	struct GadToolsIFace  * pIGadTools;
 #endif
 
-   boolean connected, read_banners, unix_paths, open_status, quick;
-   boolean needs_user, needs_password, case_sensitive, all_messages, error_messages;
-   b16 port_number;
-   boolean comment;
-   b16 no_lock_conn_idle;
+	boolean connected, read_banners, unix_paths, open_status, quick;
+	boolean needs_user, needs_password, case_sensitive, all_messages, error_messages;
+	b16 port_number;
+	boolean comment;
+	b16 no_lock_conn_idle;
 
-   b8 site_state;
-   b8 read_buffer[READ_BUFFER_LENGTH];
+	b8 site_state;
+	b8 read_buffer[READ_BUFFER_LENGTH];
 
-   b8 name[0];
+	b8 name[0];
 } site;
 
 #define V_site 29545
@@ -59,10 +59,10 @@ void state_change(site *, b16);
 
 #define IDLE_INTERVAL 20   /* 20 second interval */
 
-// Vielfache von IDLE_INTERVAL
-#define NO_LOCK_NO_CONN_IDLE 1      // ??, wenn keine Locks und keine Connection
-#define NO_LOCK_CONN_IDLE 6         // disconnect, wenn keine Locks mehr
-#define LOCK_CONN_IDLE 15           // ??, wenn Locks vorhanden
+/* Vielfache von IDLE_INTERVAL */
+#define NO_LOCK_NO_CONN_IDLE 1      /* ??, wenn keine Locks und keine Connection */
+#define NO_LOCK_CONN_IDLE 6         /* disconnect, wenn keine Locks mehr */
+#define LOCK_CONN_IDLE 15           /* ??, wenn Locks vorhanden */
 
 #define SS_DISCONNECTED 1
 #define SS_CONNECTING 2
