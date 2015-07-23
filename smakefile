@@ -1,0 +1,60 @@
+#
+## smakefile for FTPMount V2.0 2003-03-08
+#
+
+TARGET	= FTPMount-Handler
+
+#
+
+CC	= sc
+RM	= delete quiet
+
+#
+
+DEST = obj
+
+OBJS = $(DEST)/startup.o \
+       $(DEST)/tcp.o \
+       $(DEST)/connect.o \
+       $(DEST)/listen.o \
+       $(DEST)/ftpinfo.o \
+       $(DEST)/split.o \
+       $(DEST)/site.o \
+       $(DEST)/local.o \
+       $(DEST)/request.o \
+       $(DEST)/decrypt_password.o
+
+#
+
+CFLAGS	= NOVER
+LNKFLAGS= LINK
+
+#
+
+all: $(TARGET)
+
+#
+
+..c.o:
+	$(CC) $(CFLAGS) OBJNAME=$@ $<
+
+#
+
+$(TARGET): $(OBJS)
+	$(CC) $(LNKFLAGS) TO $@ WITH <<
+	$(OBJS)
+	<
+
+clean:
+	-$(RM) $(DEST)/$(TARGET) $(OBJS)
+
+$(DEST)/startup.o: startup.c FTPMount.h verify.h tcp.h site.h local.h request.h strings.h
+$(DEST)/tcp.o: tcp.c FTPMount.h verify.h tcp.h
+$(DEST)/connect.o: connect.c FTPMount.h verify.h tcp.h site.h split.h ftpinfo.h connect.h request.h strings.h
+$(DEST)/listen.o: listen.c FTPMount.h verify.h tcp.h site.h split.h request.h
+$(DEST)/ftpinfo.o: ftpinfo.c FTPMount.h verify.h tcp.h site.h split.h ftpinfo.h connect.h
+$(DEST)/split.o: split.c FTPMount.h verify.h tcp.h site.h split.h
+$(DEST)/site.o: site.c FTPMount.h verify.h tcp.h site.h split.h ftpinfo.h connect.h request.h strings.h
+$(DEST)/local.o: local.c FTPMount.h verify.h tcp.h site.h split.h local.h
+$(DEST)/request.o: request.c FTPMount.h verify.h site.h strings.h request.h
+$(DEST)/decrypt_password.o: decrypt_password.c FTPMount.h verify.h
