@@ -8,16 +8,15 @@
 */
 
 #define __USE_INLINE__ /* 2005-05-14 ABA : OS4 */
+#define __USE_BASETYPE__ /* 2005-05-14 ABA : OS4 */
 
 #include <stdio.h>
 #include <string.h>
+#include <strings.h>
 #include <stdlib.h>
 #include <ctype.h>
-
-#define __USE_BASETYPE__ /* 2005-05-14 ABA : OS4 */
-
-#include <exec/types.h>
-#include <exec/execbase.h>
+#include <stdint.h>
+#include <proto/exec.h>
 #include <dos/dostags.h>
 #include <intuition/sghooks.h>
 #include <devices/timer.h>
@@ -127,13 +126,6 @@ static inline void free(void *p)
 #endif
 
 /* evtypes.h */
-typedef unsigned long b32;
-typedef unsigned char b8;
-typedef unsigned short b16;
-
-typedef signed long sb32;
-typedef signed char sb8;
-typedef signed short sb16;
 
 typedef void(*ptf)();
 
@@ -166,16 +158,6 @@ static void * const NULL = 0;
 
 typedef enum { false = (1 == 0), true = (1 == 1) } boolean;
 
-#if !defined(__amigaos4__)
-/*#ifdef AMIGA */
-/*#define strcasecmp strncmp */
-#define strnicmp strncasecmp
-#define stricmp strcasecmp
-/*#endif */
-#endif
-
-
-
 /* NB: this only works for y a power of 2 */
 #define ROUND_UP(x, y) ((x + y - 1) & (~(y - 1)))
 
@@ -196,8 +178,8 @@ typedef struct my_lock {
 
 	struct my_lock *next;
 	struct MsgPort *port;
-	b32 rfsl, lastkey;
-	b8 fname[0];
+	unsigned long rfsl, lastkey;
+	unsigned char fname[1];
 } lock;
 
 #define V_file_info 26217
@@ -209,14 +191,14 @@ typedef struct my_file_info
 {
 	magic_verify;
 	struct my_file_info *next;
-	b32 rfarg; /* real file arg */
-	b32 rpos, vpos, end; /* real file position, virtual file position, file end */
+	unsigned long rfarg; /* real file arg */
+	unsigned long rpos, vpos, end; /* real file position, virtual file position, file end */
 	struct MsgPort *port;
 	struct tcpm *tm;
-	b16 type;
+	unsigned short type;
 	boolean seek_end, eof, closed;
-	b8 first_block[FIRST_BLOCK_SIZE];
-	b8 fname[0];
+	unsigned char first_block[FIRST_BLOCK_SIZE];
+	unsigned char fname[1];
 } file_info;
 
 /* special internal packets */
@@ -234,8 +216,8 @@ typedef struct my_file_info
 #define global extern
 #endif
 
-global struct ExecBase *SysBase;
-global struct DosLibrary *DOSBase;
+/*global struct ExecBase *SysBase;
+global struct DosLibrary *DOSBase; */
 global struct IntuitionBase *IntuitionBase;
 global struct GfxBase *GfxBase;
 global struct Library *GadToolsBase;
@@ -305,5 +287,5 @@ global struct Catalog *cat;
 global unsigned char *volume_name;
 
 #ifdef DECLARE_GLOBALS_HERE
-unsigned char *ver = (unsigned char*)"$VER: FTPMount " VERSION "." REVISION " (2006-11-27)";  /* 03-03-09 */
+unsigned char *ver = (unsigned char*)"$VER: FTPMount " VERSION "." REVISION " (2015-08-09)";
 #endif

@@ -8,20 +8,20 @@
 
 typedef union {
 	struct {
-		b8 a;
-		b8 b;
-		b8 c;
-		b8 d;
+		unsigned char a;
+		unsigned char b;
+		unsigned char c;
+		unsigned char d;
 	} dot;
-	b32 l;
+	unsigned long l;
 } ipnum;
 
 typedef union {
 	struct {
-		b8 a;
-		b8 b;
+		unsigned char a;
+		unsigned char b;
 	} dot;
-	b16 w;
+	unsigned short w;
 } portnum;
 
 /* something like an iorequest ... probably a real exec device
@@ -32,7 +32,7 @@ typedef struct tcpm {
 
 	magic_verify;
 
-	b32   command;
+	unsigned long   command;
 	void  *ident;     /* stores pointer to context information */
 
 	ipnum address;
@@ -40,19 +40,19 @@ typedef struct tcpm {
 
 	void  *data;
 	struct   tcpm  *interrupt;
-	b32   length;
+	unsigned long   length;
 
-	b32   result;
-	b32   error;
-	b32   flags;
-	b32   userid;
+	unsigned long   result;
+	unsigned long   error;
+	unsigned long   flags;
+	unsigned long   userid;
 	void  *userdata;
 } tcpmessage;
 
 typedef struct {
 	magic_verify;
 
-	sb32  fd;
+	signed long  fd;
 	void  *connecting_port;
 	boolean  eof;
 } tcpident;
@@ -105,9 +105,9 @@ typedef struct {
 #define FLAG_READLINE      1
 
 #ifndef	__MORPHOS__
-void SAVEDS ASM tcp_handler(REG(a0, b8 *parent_port));
+void SAVEDS ASM tcp_handler(REG(a0, unsigned char *parent_port));
 #else
-void tcp_handler(b8 *parent_port);
+void tcp_handler(unsigned char *parent_port);
 #endif
-void unique_name(void *, b8 *, b8 *);
+void unique_name(void *, unsigned char *, unsigned char *);
 

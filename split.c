@@ -10,9 +10,9 @@
 #include "site.h"
 #include "split.h"
 
-boolean collapse(b8 *s)
+boolean collapse(unsigned char *s)
 {
-	b8 *t, *u;
+	unsigned char *t, *u;
 
 	t = s;
 	u = s;
@@ -62,9 +62,9 @@ boolean collapse(b8 *s)
 	return true;
 }
 
-boolean split_data(lock *l, b8 *z, split *sd)
+boolean split_data(lock *l, unsigned char *z, split *sd)
 {
-	b8 *s, *t;
+	unsigned char *s, *t;
 	int len1, len2, len3;
 	/*
 	 * sigh ... all that work to separate the libs to processes ... just
@@ -84,7 +84,7 @@ boolean split_data(lock *l, b8 *z, split *sd)
 		return true;
 	}
 
-	s = (b8 *)allocate(z[0] + 1, V_cstr);
+	s = (unsigned char *)allocate(z[0] + 1, V_cstr);
 	if (!s) {
 		sd->work = nil;
 		return false;
@@ -144,7 +144,7 @@ boolean split_data(lock *l, b8 *z, split *sd)
 		len1 = strlen(l->port->mp_Node.ln_Name);
 		len2 = strlen(z);
 
-		s = (b8 *)allocate(len1 + len2 + 2, V_cstr);
+		s = (unsigned char *)allocate(len1 + len2 + 2, V_cstr);
 		if (!s) {
 			deallocate(sd->work, V_cstr);
 			sd->work = nil;
@@ -169,7 +169,7 @@ boolean split_data(lock *l, b8 *z, split *sd)
 		len2 = strlen(l->fname);
 		len3 = strlen(z);
 
-		s = (b8 *)allocate(len1 + len2 + len3 + 3, V_cstr);
+		s = (unsigned char *)allocate(len1 + len2 + len3 + 3, V_cstr);
 		if (!s) {
 			deallocate(sd->work, V_cstr);
 			sd->work = nil;
@@ -224,11 +224,11 @@ resolve:
 
 	/* ok, we don't have a '/' so check for .info or Unnamed or
 	   Disk or Default ... they are "special" */
-	if (stricmp(s, "Disk") == 0 ||
-		strnicmp(s, "Unnamed", 7) == 0 ||
-		stricmp(s, ".backdrop") == 0 ||
-		stricmp(s, "Default") == 0 ||
-		stricmp(&s[strlen(s) - 5], ".info") == 0) {
+	if (strcasecmp(s, "Disk") == 0 ||
+		strcasecmp(s, "Unnamed", 7) == 0 ||
+		strcasecmp(s, ".backdrop") == 0 ||
+		strcasecmp(s, "Default") == 0 ||
+		strcasecmp(&s[strlen(s) - 5], ".info") == 0) {
 		sd->port = local_port;
 		sd->path = s;
 		return true;

@@ -9,11 +9,11 @@ typedef struct {
 	magic_verify;
 
 	struct MsgPort *port;
-	b8 *path;
-	b8 *work;
+	unsigned char *path;
+	unsigned char *work;
 } split;
 
 #define V_split 29552
 
-boolean split_data(lock *, b8 *, split *);
+boolean split_data(lock *, unsigned char *, split *);
 void end_split(split *);

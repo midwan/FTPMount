@@ -19,14 +19,14 @@ struct DosLibrary *DOSBase;
 struct DOSIFace *IDOS;
 #endif
 
-BSTR ctobstr(b8 *s)
+BSTR ctobstr(unsigned char *s)
 {
-	b8 *z;
+	unsigned char *z;
 	int len;
 
 	len = strlen((char*)s);
 
-	z = (b8 *)allocate(len + 1, V_bstr);
+	z = (unsigned char *)allocate(len + 1, V_bstr);
 	if (!z) return 0;
 
 	z[0] = len;
@@ -35,7 +35,7 @@ BSTR ctobstr(b8 *s)
 		memcpy(&z[1], s, len);
 	}
 
-	return (BSTR)((b32)z >> 2);
+	return (BSTR)((unsigned long)z >> 2);
 }
 
 void free_bstr(BSTR b)
@@ -58,14 +58,14 @@ void SAVEDS local_handler(void)
 	struct Message *msg;
 	struct DosPacket *dp;
 	struct MsgPort *local, *reply, *sync;
-	b32 signals;
+	unsigned long signals;
 	split sd, sd2;
 	lock *locks, **slock, *new_lock, *nlock;
-	b32 rfsl;   /* real file system lock */
+	unsigned long rfsl;   /* real file system lock */
 	struct FileInfoBlock *fib;
 	struct FileHandle *fh;
 	file_info *fi;
-	b32 o1, o2, o3, o4;     /* stores for original dp->dp_Arg1 etc */
+	unsigned long o1, o2, o3, o4;     /* stores for original dp->dp_Arg1 etc */
 	BSTR b, b2;
 
 	locks = 0;
@@ -159,7 +159,7 @@ void SAVEDS local_handler(void)
 
 				Forbid();
 				dp->dp_Res1 = DOSTRUE;
-				dp->dp_Res2 = (b32)locks;  /* so they can adopt them */
+				dp->dp_Res2 = (unsigned long)locks;  /* so they can adopt them */
 
 				PutMsg(reply, dp->dp_Link);
 
@@ -168,7 +168,7 @@ void SAVEDS local_handler(void)
 				return;
 			case ACTION_LOCATE_OBJECT:
 				if (!split_data((lock *)(dp->dp_Arg1 << 2),
-					(b8 *)(dp->dp_Arg2 << 2), &sd)) {
+					(unsigned char *)(dp->dp_Arg2 << 2), &sd)) {
 					dp->dp_Res1 = 0;
 					dp->dp_Res2 = ERROR_NO_FREE_STORE;
 					break;
@@ -244,11 +244,11 @@ void SAVEDS local_handler(void)
 				new_lock->rfsl = rfsl;
 				new_lock->fl.fl_Access = dp->dp_Arg3;
 				new_lock->fl.fl_Task = ftp_port;
-				new_lock->fl.fl_Volume = (b32)ftp_volume >> 2;
+				new_lock->fl.fl_Volume = (unsigned long)ftp_volume >> 2;
 
 				end_split(&sd);
 
-				dp->dp_Res1 = (b32)new_lock >> 2;
+				dp->dp_Res1 = (unsigned long)new_lock >> 2;
 				dp->dp_Res2 = 0;
 
 				break;
@@ -291,7 +291,7 @@ void SAVEDS local_handler(void)
 				break;
 			case ACTION_DELETE_OBJECT:
 				if (!split_data((lock *)(dp->dp_Arg1 << 2),
-					(b8 *)(dp->dp_Arg2 << 2), &sd)) {
+					(unsigned char *)(dp->dp_Arg2 << 2), &sd)) {
 					dp->dp_Res1 = DOSFALSE;
 					dp->dp_Res2 = ERROR_NO_FREE_STORE;
 					break;
@@ -325,14 +325,14 @@ void SAVEDS local_handler(void)
 				break;
 			case ACTION_RENAME_OBJECT:
 				if (!split_data((lock *)(dp->dp_Arg1 << 2),
-					(b8 *)(dp->dp_Arg2 << 2), &sd)) {
+					(unsigned char *)(dp->dp_Arg2 << 2), &sd)) {
 					dp->dp_Res1 = DOSFALSE;
 					dp->dp_Res2 = ERROR_NO_FREE_STORE;
 					break;
 				}
 
 				if (!split_data((lock *)(dp->dp_Arg3 << 2),
-					(b8 *)(dp->dp_Arg4 << 2), &sd2)) {
+					(unsigned char *)(dp->dp_Arg4 << 2), &sd2)) {
 					end_split(&sd);
 					dp->dp_Res1 = DOSFALSE;
 					dp->dp_Res2 = ERROR_NO_FREE_STORE;
@@ -346,7 +346,7 @@ void SAVEDS local_handler(void)
 
 				if (!sd2.path) {  /* this is rename Unnamed1 to "ucc.gu.uwa..." */
 					if (sd2.work) deallocate(sd2.work, V_cstr);
-					sd2.work = (b8 *)allocate(strlen(sd2.port->mp_Node.ln_Name) + 1, V_cstr);
+					sd2.work = (unsigned char *)allocate(strlen(sd2.port->mp_Node.ln_Name) + 1, V_cstr);
 					if (!sd2.work) {
 						dp->dp_Res1 = DOSFALSE;
 						dp->dp_Res2 = ERROR_NO_FREE_STORE;
@@ -439,15 +439,15 @@ void SAVEDS local_handler(void)
 				new_lock->rfsl = rfsl;
 				new_lock->fl.fl_Access = SHARED_LOCK;
 				new_lock->fl.fl_Task = ftp_port;
-				new_lock->fl.fl_Volume = (b32)ftp_volume >> 2;
+				new_lock->fl.fl_Volume = (unsigned long)ftp_volume >> 2;
 
-				dp->dp_Res1 = (b32)new_lock >> 2;
+				dp->dp_Res1 = (unsigned long)new_lock >> 2;
 				dp->dp_Res2 = 0;
 
 				break;
 			case ACTION_SET_PROTECT:
 				if (!split_data((lock *)(dp->dp_Arg2 << 2),
-					(b8 *)(dp->dp_Arg3 << 2), &sd)) {
+					(unsigned char *)(dp->dp_Arg3 << 2), &sd)) {
 					dp->dp_Res1 = DOSFALSE;
 					dp->dp_Res2 = ERROR_NO_FREE_STORE;
 					break;
@@ -482,7 +482,7 @@ void SAVEDS local_handler(void)
 				break;
 			case ACTION_CREATE_DIR:
 				if (!split_data((lock *)(dp->dp_Arg1 << 2),
-					(b8 *)(dp->dp_Arg2 << 2), &sd)) {
+					(unsigned char *)(dp->dp_Arg2 << 2), &sd)) {
 					dp->dp_Res1 = DOSFALSE;
 					dp->dp_Res2 = ERROR_NO_FREE_STORE;
 					break;
@@ -558,7 +558,7 @@ void SAVEDS local_handler(void)
 				break;
 			case ACTION_SET_COMMENT:
 				if (!split_data((lock *)(dp->dp_Arg2 << 2),
-					(b8 *)(dp->dp_Arg3 << 2), &sd)) {
+					(unsigned char *)(dp->dp_Arg3 << 2), &sd)) {
 					dp->dp_Res1 = DOSFALSE;
 					dp->dp_Res2 = ERROR_NO_FREE_STORE;
 					break;
@@ -621,9 +621,9 @@ void SAVEDS local_handler(void)
 				new_lock->rfsl = ftphosts_lock;
 				new_lock->fl.fl_Access = SHARED_LOCK;
 				new_lock->fl.fl_Task = ftp_port;
-				new_lock->fl.fl_Volume = (b32)ftp_volume >> 2;
+				new_lock->fl.fl_Volume = (unsigned long)ftp_volume >> 2;
 
-				dp->dp_Res1 = (b32)new_lock >> 2;
+				dp->dp_Res1 = (unsigned long)new_lock >> 2;
 				dp->dp_Res2 = 0;
 
 				break;
@@ -701,7 +701,7 @@ void SAVEDS local_handler(void)
 			case ACTION_FINDINPUT:
 			case ACTION_FINDOUTPUT:
 				if (!split_data((lock *)(dp->dp_Arg2 << 2),
-					(b8 *)(dp->dp_Arg3 << 2), &sd)) {
+					(unsigned char *)(dp->dp_Arg3 << 2), &sd)) {
 					dp->dp_Res1 = DOSFALSE;
 					dp->dp_Res2 = ERROR_NO_FREE_STORE;
 					break;
@@ -750,7 +750,7 @@ void SAVEDS local_handler(void)
 				if (dp->dp_Res1) {
 					fh->fh_Type = ftp_port;
 					fi->rfarg = fh->fh_Args;
-					fh->fh_Args = (b32)fi;
+					fh->fh_Args = (unsigned long)fi;
 					fi->port = local;
 					fi->type = dp->dp_Type;
 				}
@@ -823,7 +823,7 @@ void SAVEDS local_handler(void)
 				if (dp->dp_Res1) {
 					fh->fh_Type = ftp_port;
 					fi->rfarg = fh->fh_Args;
-					fh->fh_Args = (b32)fi;
+					fh->fh_Args = (unsigned long)fi;
 					fi->port = local;
 					fi->type = dp->dp_Type;
 				}
@@ -850,7 +850,7 @@ void SAVEDS local_handler(void)
 
 				new_lock->fl.fl_Access = SHARED_LOCK;
 				new_lock->fl.fl_Task = ftp_port;
-				new_lock->fl.fl_Volume = (b32)ftp_volume >> 2;
+				new_lock->fl.fl_Volume = (unsigned long)ftp_volume >> 2;
 
 				verify(fi, V_file_info);
 
@@ -860,7 +860,7 @@ void SAVEDS local_handler(void)
 				lock_message(ftphosts_lock, dp);
 				WaitPort(sync); GetMsg(sync);
 
-				fh->fh_Args = (b32)fi;
+				fh->fh_Args = (unsigned long)fi;
 
 				if (dp->dp_Res1) {
 					new_lock->rfsl = dp->dp_Res1;
@@ -868,7 +868,7 @@ void SAVEDS local_handler(void)
 					new_lock->next = locks;
 					locks = new_lock;
 
-					dp->dp_Res1 = (b32)new_lock >> 2;
+					dp->dp_Res1 = (unsigned long)new_lock >> 2;
 					dp->dp_Res2 = 0;
 				}
 				else {
@@ -889,7 +889,7 @@ void SAVEDS local_handler(void)
 				lock_message(ftphosts_lock, dp);
 				WaitPort(sync); GetMsg(sync);
 
-				fh->fh_Args = (b32)fi;
+				fh->fh_Args = (unsigned long)fi;
 
 				break;
 			default:

@@ -7,20 +7,20 @@
 
 void init_connect(site *);
 void disconnect(site *);
-boolean change_dir(site *sp, b8 *);
-b8 *cd_parent(site *sp, b8 *);
+boolean change_dir(site *sp, unsigned char *);
+unsigned char *cd_parent(site *sp, unsigned char *);
 boolean get_list(site *sp, struct info_header *ih);
 
-b32 read_file(site *sp, b8 *, b32 *);
-b32 write_file(site *sp, b8 *, b32 *);
+unsigned long read_file(site *sp, unsigned char *, unsigned long *);
+unsigned long write_file(site *sp, unsigned char *, unsigned long *);
 
-b32 open_file(site *sp, b8 *, boolean, b8 *);
+unsigned long open_file(site *sp, unsigned char *, boolean, unsigned char *);
 void close_file(site *sp, boolean normal_close);
 
-b32 delete_file(site *sp, b8 *);
-b32 delete_directory(site *sp, b8 *);
-b32 make_directory(site *sp, b8 *);
-b32 rename_object(site *sp, b8 *, b8 *);
+unsigned long delete_file(site *sp, unsigned char *);
+unsigned long delete_directory(site *sp, unsigned char *);
+unsigned long make_directory(site *sp, unsigned char *);
+unsigned long rename_object(site *sp, unsigned char *, unsigned char *);
 
 void interrupt_message(site *sp, tcpmessage *tm);
 

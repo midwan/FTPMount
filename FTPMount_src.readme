@@ -1,0 +1,38 @@
+The source code, scoptions file and smakefile is for SAS/C >= 6.50.
+
+I put no effort into it so far to make it compile with other
+compilers such as GCC or VBCC.
+
+I'm using the RoadShow includes (don't ask, I won't give them to you)
+but if you by chance have a copy of the AmiTCP includes that
+actually works this should be fine with some minor adjustments
+to FTPMount.h , I only was to lazy to generate working includes
+from the AmiTCP .FD files.
+Maybe the MIAMI includes will do also.
+
+So with some includes stored under
+
+sc:netinclude
+
+it should compile.
+
+
+Just open a shell in the source-dir and call "smake".
+
+If you like to compile the debug-version you only have to
+delete the object files and remove the "/*" / "*/" around
+the "#define DEBUGSTATUS 1" in "FTPMount.h".
+
+To compile for a different CPU just adjust
+"CPU=68000" in "SCoptions" to what you need.
+
+
+I only started to reformat the source-files and to remove the
+old debug code from "verify_code.h" but only "startup.c" looks
+like I prefer "my" sources to look like.
+After all I found the bug that drove me into it and
+trimming the sources seems not necessary to me any further.
+
+My changes are marked with "/* 2003-03-0xx rri */".
+
+Have a nice day - Rudolph

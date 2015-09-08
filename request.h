@@ -5,22 +5,22 @@
  * fees beyond distribution costs are levied.
  */
 
-struct Window *connect_req(struct site_s *sp, b8 *);
+struct Window *connect_req(struct site_s *sp, unsigned char *);
 void close_req(struct site_s *sp, struct Window *);
 /*
 ABA 25/05/2005
 #ifdef __amigaos4__
-struct gim *make_gim(b8 *name, b32 textpen, b32 lightpen, b32 darkpen, struct Screen *s,
+struct gim *make_gim(unsigned char *name, unsigned long textpen, unsigned long lightpen, unsigned long darkpen, struct Screen *s,
 			struct IntuitionBase *IntuitionBase, struct IntuitionIFace * IIntuition,
 			struct GfxBase *GfxBase, struct GraphicsIFace * IGraphics);
 void free_gim(struct gim *gim, struct IntuitionBase *IntuitionBase, struct IntuitionIFace * IIntuition,
 			struct GfxBase *GfxBase, struct GraphicsIFace * IGraphics);
 #else
-struct gim *make_gim(b8 *name, b32 textpen, b32 lightpen, b32 darkpen, struct Screen *s,
+struct gim *make_gim(unsigned char *name, unsigned long textpen, unsigned long lightpen, unsigned long darkpen, struct Screen *s,
 			struct IntuitionBase *IntuitionBase, struct GfxBase *GfxBase);
 void free_gim(struct gim *gim, struct IntuitionBase *IntuitionBase, struct GfxBase *GfxBase);
 #endif*/
-struct gim *make_gim(b8 *name, b32 textpen, b32 lightpen, b32 darkpen, struct Screen *s,
+struct gim *make_gim(unsigned char *name, unsigned long textpen, unsigned long lightpen, unsigned long darkpen, struct Screen *s,
 	IntuitionParamDef, GraphicsParamDef);
 void free_gim(struct gim *gim, IntuitionParamDef, GraphicsParamDef);
 
@@ -46,8 +46,8 @@ typedef struct status_message {
 
 	magic_verify;
 
-	b16 command;
-	b16 data;
+	unsigned short command;
+	unsigned short data;
 	struct site_s *this_site;
 } status_message;
 

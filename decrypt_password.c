@@ -1,15 +1,15 @@
 
 #include "FTPMount.h" /* 03-03-08 rri */
 
-b8 *decrypt_password(b8 *s)
+unsigned char *decrypt_password(unsigned char *s)
 {
-	b8 *password, *pz;
+	unsigned char *password, *pz;
 	long l, zufallszahl;
 #define DECODEBYTE(z1, z2)  ( (((z1) - 42) / 4 << 4) | ((z2) - 47) / 3 )
 
 	// Länge muß Vielfaches von 10 sein
 	if (strlen((char*)s) % 10 != 0) return nil;
-	if ((password = (b8 *)allocate(strlen((char*)s) / 10 * 3, V_cstr)) == nil) return nil;
+	if ((password = (unsigned char *)allocate(strlen((char*)s) / 10 * 3, V_cstr)) == nil) return nil;
 
 	pz = password;
 

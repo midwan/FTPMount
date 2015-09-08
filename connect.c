@@ -19,12 +19,9 @@
 
 #define ERROR_GARBAGE_RECEIVED 15
 
+extern ftpinfo *get_info(site *, unsigned char *);
 
-extern ftpinfo *get_info(site *, b8 *);
-
-
-
-b8 *grow_info(b8 *a, b8 *b, int n)
+unsigned char *grow_info(unsigned char *a, unsigned char *b, int n)
 /*
  * concatenates a and b (not null terminated of length n) and returns
  * an allocated string with the result.  a is freed.
@@ -32,7 +29,7 @@ b8 *grow_info(b8 *a, b8 *b, int n)
  *    b may not
  */
 {
-	b8 *c, *d;
+	unsigned char *c, *d;
 	int len;
 
 	if (a)
@@ -42,7 +39,7 @@ b8 *grow_info(b8 *a, b8 *b, int n)
 
 	len += n + 1;
 
-	c = (b8 *)allocate(len, V_cstr);
+	c = (unsigned char *)allocate(len, V_cstr);
 	if (!c)
 	{
 		if (a)
@@ -80,9 +77,7 @@ b8 *grow_info(b8 *a, b8 *b, int n)
 	return c;
 }
 
-
-
-boolean substr(b8 *s, b8 *ss)
+boolean substr(unsigned char *s, unsigned char *ss)
 /*
  * returns true if s contains ss (non-case-sensitive)
  * s may be nil, in which case false is returned
@@ -95,16 +90,14 @@ boolean substr(b8 *s, b8 *ss)
 	len = strlen(ss);
 
 	while (*s) {
-		if (strnicmp(s, ss, len) == 0) return true;
+		if (strncasecmp(s, ss, len) == 0) return true;
 		s++;
 	}
 
 	return false;
 }
 
-
-
-void inform(struct IntuitionBase *IntuitionBase, b8 *title, b8 *text, b8 *site, b32 errno)
+void inform(struct IntuitionBase *IntuitionBase, unsigned char *title, unsigned char *text, unsigned char *site, unsigned long errno)
 {
 	struct EasyStruct es;
 
@@ -116,8 +109,6 @@ void inform(struct IntuitionBase *IntuitionBase, b8 *title, b8 *text, b8 *site, 
 
 	EasyRequest(nil, &es, nil, site, errno);
 }
-
-
 
 tcpmessage *new_message(site *sp)
 /*
@@ -143,8 +134,6 @@ tcpmessage *new_message(site *sp)
 
 	return (tcpmessage *)intr->data;
 }
-
-
 
 void interrupt_message(site *sp, tcpmessage *tm)
 /*
@@ -178,9 +167,7 @@ void interrupt_message(site *sp, tcpmessage *tm)
 	return;
 }
 
-
-
-b32 control_write(site *sp, b8 *command, b32 csig)
+unsigned long control_write(site *sp, unsigned char *command, unsigned long csig)
 /*
  * writes the string command to the control connection
  * Inputs:
@@ -193,7 +180,7 @@ b32 control_write(site *sp, b8 *command, b32 csig)
 {
 	tcpmessage *tm;
 	struct MsgPort *sync;
-	b32 signals, rsigs;
+	unsigned long signals, rsigs;
 
 	verify(sp, V_site);
 	truth(command != nil);
@@ -238,9 +225,7 @@ b32 control_write(site *sp, b8 *command, b32 csig)
 	return tm->error;
 }
 
-
-
-b32 make_connection(site *sp, tcpmessage *tm, b8 *addr, b16 port, b32 csig)
+unsigned long make_connection(site *sp, tcpmessage *tm, unsigned char *addr, unsigned short port, unsigned long csig)
 /*
  * make a connection to a remote host
  * Inputs:
@@ -255,7 +240,7 @@ b32 make_connection(site *sp, tcpmessage *tm, b8 *addr, b16 port, b32 csig)
  */
 {
 	struct MsgPort *sync;
-	b32 signals, rsigs, asigs;
+	unsigned long signals, rsigs, asigs;
 
 	verify(sp, V_site);
 	verify(tm, V_tcpmessage);
@@ -292,8 +277,6 @@ b32 make_connection(site *sp, tcpmessage *tm, b8 *addr, b16 port, b32 csig)
 	return tm->error;
 }
 
-
-
 void break_connection(site *sp, tcpmessage *tm)
 /*
  * do a TCP_CLOSE on tm
@@ -315,9 +298,7 @@ void break_connection(site *sp, tcpmessage *tm)
 	return;
 }
 
-
-
-boolean passive_response(b8 *s, b8 *addr, b16 *portp)
+boolean passive_response(unsigned char *s, unsigned char *addr, unsigned short *portp)
 /*
  * parse the response to a PASV command
  * Inputs:
@@ -329,8 +310,8 @@ boolean passive_response(b8 *s, b8 *addr, b16 *portp)
  * true if it was a valid PASV response
  */
 {
-	b8 *t;
-	b16 ncommas, portn;
+	unsigned char *t;
+	unsigned short ncommas, portn;
 
 	truth(s != nil);
 	truth(addr != nil);
@@ -394,9 +375,7 @@ boolean passive_response(b8 *s, b8 *addr, b16 *portp)
 		return true;
 }
 
-
-
-b32 response(site *sp, b32 csig, b8 **infop, b8 *code)
+unsigned long response(site *sp, unsigned long csig, unsigned char **infop, unsigned char *code)
 /*
  * reads response from remote server on sp->control
  * Inputs:
@@ -411,8 +390,8 @@ b32 response(site *sp, b32 csig, b8 **infop, b8 *code)
 {
 	tcpmessage *tm;
 	struct MsgPort *sync;
-	b32 signals, rsigs, asigs;
-	b8 *info, *z;
+	unsigned long signals, rsigs, asigs;
+	unsigned char *info, *z;
 
 	verify(sp, V_site);
 
@@ -530,21 +509,21 @@ b32 response(site *sp, b32 csig, b8 **infop, b8 *code)
 
 
 
-b16 numeric_reply(b8 *s)
+unsigned short numeric_reply(unsigned char *s)
 {
-	return (b16)((s[0] - '0') * 100 + (s[1] - '0') * 10 + (s[2] - '0'));
+	return (unsigned short)((s[0] - '0') * 100 + (s[1] - '0') * 10 + (s[2] - '0'));
 }
 
 
 
-boolean retry_cancel(struct IntuitionBase *IntuitionBase, b8 *title, b8 *info)
+boolean retry_cancel(struct IntuitionBase *IntuitionBase, unsigned char *title, unsigned char *info)
 /*
  * paged information with retry/cancel buttons
  * returns true for retry
  *    info may be nil (well, sortof)
  */
 {
-	b8 *z, *s, tmp;
+	unsigned char *z, *s, tmp;
 	struct EasyStruct es;
 	int nlines;
 
@@ -596,13 +575,13 @@ more:
 
 
 
-void ok(struct IntuitionBase *IntuitionBase, b8 *title, b8 *info)
+void ok(struct IntuitionBase *IntuitionBase, unsigned char *title, unsigned char *info)
 /*
  * paged information with ok button
  *    info may be nil (sortof)
  */
 {
-	b8 *z, *s, tmp;
+	unsigned char *z, *s, tmp;
 	struct EasyStruct es;
 	int nlines;
 
@@ -715,7 +694,7 @@ void disconnect(site *sp)
 
 
 
-b32 read_file(site *sp, b8 *s, b32 *length)
+unsigned long read_file(site *sp, unsigned char *s, unsigned long *length)
 /*
  * read *length bytes from open file
  * Inputs:
@@ -729,7 +708,7 @@ b32 read_file(site *sp, b8 *s, b32 *length)
 {
 	tcpmessage *tm;
 	struct MsgPort *sync;
-	b32 signals, asigs, rsigs;
+	unsigned long signals, asigs, rsigs;
 
 	verify(sp, V_site);
 	truth(s != nil);
@@ -785,7 +764,7 @@ b32 read_file(site *sp, b8 *s, b32 *length)
 
 
 
-b32 write_file(site *sp, b8 *s, b32 *length)
+unsigned long write_file(site *sp, unsigned char *s, unsigned long *length)
 /*
  * write *length bytes to an open file (almost identical copy to read_file above)
  * Inputs:
@@ -799,7 +778,7 @@ b32 write_file(site *sp, b8 *s, b32 *length)
 {
 	tcpmessage *tm;
 	struct MsgPort *sync;
-	b32 signals, asigs, rsigs;
+	unsigned long signals, asigs, rsigs;
 
 	verify(sp, V_site);
 	truth(s != nil);
@@ -855,7 +834,7 @@ b32 write_file(site *sp, b8 *s, b32 *length)
 
 
 
-b32 open_file(site *sp, b8 *s, boolean writing, b8 *leaf_name)
+unsigned long open_file(site *sp, unsigned char *s, boolean writing, unsigned char *leaf_name)
 /*
  * open file with name in s
  * Inputs:
@@ -870,10 +849,10 @@ b32 open_file(site *sp, b8 *s, boolean writing, b8 *leaf_name)
 {
 	tcpmessage *tm, *newtm;
 	struct MsgPort *sync;
-	b8 reply[4], *info;
-	b8 *leaf;
-	b32 error;
-	b16 port_number;
+	unsigned char reply[4], *info;
+	unsigned char *leaf;
+	unsigned long error;
+	unsigned short port_number;
 	file_info *fi;
 
 	verify(sp, V_site);
@@ -1131,8 +1110,8 @@ void close_file(site *sp, boolean normal_close)
 	tcpmessage *tm, *filetm, *ret;
 	file_info *fi;
 	struct MsgPort *sync;
-	b8 *info, reply[4], flush[FLUSH_SIZE];
-	b32 signals, asigs, rsigs;
+	unsigned char *info, reply[4], flush[FLUSH_SIZE];
+	unsigned long signals, asigs, rsigs;
 
 	verify(sp, V_site);
 
@@ -1350,7 +1329,7 @@ void close_file(site *sp, boolean normal_close)
 
 
 
-b32 delete_file(site *sp, b8 *s)
+unsigned long delete_file(site *sp, unsigned char *s)
 /*
  * delete file with name in s
  * Inputs:
@@ -1361,10 +1340,10 @@ b32 delete_file(site *sp, b8 *s)
  * standard file system errors
  */
 {
-	b8 *leaf;
-	b32 error;
+	unsigned char *leaf;
+	unsigned long error;
 	boolean perm;
-	b8 *info, reply[3];
+	unsigned char *info, reply[3];
 	ftpinfo *fi;
 
 	verify(sp, V_site);
@@ -1437,7 +1416,7 @@ b32 delete_file(site *sp, b8 *s)
 
 
 
-b32 delete_directory(site *sp, b8 *s)
+unsigned long delete_directory(site *sp, unsigned char *s)
 /*
  * delete directory with name in s
  * Inputs:
@@ -1448,10 +1427,10 @@ b32 delete_directory(site *sp, b8 *s)
  * standard file system errors
  */
 {
-	b8 *leaf;
-	b32 error;
+	unsigned char *leaf;
+	unsigned long error;
 	boolean perm, no_such;
-	b8 *info, reply[3];
+	unsigned char *info, reply[3];
 	ftpinfo *fi;
 
 	verify(sp, V_site);
@@ -1529,7 +1508,7 @@ b32 delete_directory(site *sp, b8 *s)
 
 
 
-b32 make_directory(site *sp, b8 *s)
+unsigned long make_directory(site *sp, unsigned char *s)
 /*
  * make directory with name in s
  * Inputs:
@@ -1540,10 +1519,10 @@ b32 make_directory(site *sp, b8 *s)
  * standard file system errors
  */
 {
-	b8 *leaf;
-	b32 error;
+	unsigned char *leaf;
+	unsigned long error;
 	boolean exists;
-	b8 *info, reply[3];
+	unsigned char *info, reply[3];
 
 	verify(sp, V_site);
 	truth(s != nil);
@@ -1608,7 +1587,7 @@ b32 make_directory(site *sp, b8 *s)
 
 
 
-b32 rename_object(site *sp, b8 *from, b8 *to)
+unsigned long rename_object(site *sp, unsigned char *from, unsigned char *to)
 /*
  * renames file 'from' to 'to'
  * Inputs:
@@ -1619,8 +1598,8 @@ b32 rename_object(site *sp, b8 *from, b8 *to)
  * file system error, or 0 indicating success
  */
 {
-	b8 *leaf1, *leaf2;
-	b8 *info, reply[3];
+	unsigned char *leaf1, *leaf2;
+	unsigned char *info, reply[3];
 	boolean perm, exist;
 
 	if (sp->unix_paths)
@@ -1741,7 +1720,7 @@ b32 rename_object(site *sp, b8 *from, b8 *to)
 
 
 
-boolean change_dir(site *sp, b8 *new_dir)
+boolean change_dir(site *sp, unsigned char *new_dir)
 /*
  * change directory to new_dir
  * Inputs:
@@ -1754,8 +1733,8 @@ boolean change_dir(site *sp, b8 *new_dir)
 {
 	tcpmessage *tm;
 	struct MsgPort *sync;
-	b8 *info, reply[4];
-	b8 *z, *s;
+	unsigned char *info, reply[4];
+	unsigned char *z, *s;
 
 	verify(sp, V_site);
 	truth(new_dir != nil);
@@ -1879,7 +1858,7 @@ boolean change_dir(site *sp, b8 *new_dir)
 
 		if (reply[0] == '2')
 		{
-			sp->cwd = (b8 *)allocate(strlen(new_dir) + 1, V_cstr);
+			sp->cwd = (unsigned char *)allocate(strlen(new_dir) + 1, V_cstr);
 			if (sp->cwd)
 			{
 				strcpy(sp->cwd, new_dir);
@@ -1940,7 +1919,7 @@ boolean change_dir(site *sp, b8 *new_dir)
 
 	sp->unix_paths = false;
 
-	sp->cwd = (b8 *)allocate(strlen(new_dir) + 1, V_cstr);
+	sp->cwd = (unsigned char *)allocate(strlen(new_dir) + 1, V_cstr);
 	if (sp->cwd)
 	{
 		strcpy(sp->cwd, new_dir);
@@ -1993,7 +1972,7 @@ fail_to_root:
 
 
 
-b8 *cd_parent(site *sp, b8 *path)
+unsigned char *cd_parent(site *sp, unsigned char *path)
 /*
  * change to the parent dir of the object described by path
  * Inputs:
@@ -2005,7 +1984,7 @@ b8 *cd_parent(site *sp, b8 *path)
  * or nil ... generally indicates gross error or dir not found
  */
 {
-	b8 *leaf;
+	unsigned char *leaf;
 	boolean cd;
 
 	verify(sp, V_site);
@@ -2047,7 +2026,7 @@ static char *months[] = { "JAN ", "FEB ", "MAR ", "APR ", "MAY ", "JUN ",
 			   "JUL ", "AUG ", "SEP ", "OCT ", "NOV ", "DEC " };
 
 
-void convert_nt_entry(b8 *is)          // Input String from add_info()
+void convert_nt_entry(unsigned char *is)          // Input String from add_info()
 /*
  *  if this is a WinNT entry, convert (in place) to a
  *  *nix style record. (Unix, Linux, Xenix...)
@@ -2058,16 +2037,16 @@ void convert_nt_entry(b8 *is)          // Input String from add_info()
  *  all rights reserved by him.
  */
 {
-	static b8   *nt_buf = 0;
+	static unsigned char   *nt_buf = 0;
  /* jetzt global, da auch in add_info() benötigt wird
 	static char *months[] = {  "Jan ", "Feb ", "Mar ", "Apr ", "May ", "Jun ",
 				"Jul ", "Aug ", "Sep ", "Oct ", "Nov ", "Dec " };
  */
-	b8    *c1, *c2, tbuf[32], c;
+	unsigned char    *c1, *c2, tbuf[32], c;
 	short i;
 
 	if (!nt_buf)                        // if our conversion buf not alloc'd
-		nt_buf = (b8*)allocate(READ_BUFFER_LENGTH, V_cstr);
+		nt_buf = (unsigned char*)allocate(READ_BUFFER_LENGTH, V_cstr);
 
 	// ***** verify inbuffer viable, MsDos-like, conversion buf alloc'd *****
 
@@ -2167,7 +2146,7 @@ void convert_nt_entry(b8 *is)          // Input String from add_info()
 
 
 
-void add_info(struct info_header *ih, b8 *s)
+void add_info(struct info_header *ih, unsigned char *s)
 /*
  * parses s and adds the information to header ih
  * Inputs:
@@ -2175,11 +2154,11 @@ void add_info(struct info_header *ih, b8 *s)
  * s  : line returned from LIST
  */
 {
-	b32 perm;   // permission bits
-	b32 size;   // file size
-	b8 *ende, *linkname = nil, *user, *group;
+	unsigned long perm;   // permission bits
+	unsigned long size;   // file size
+	unsigned char *ende, *linkname = nil, *user, *group;
 	int tag, monat, jahr;
-	b8 tempd[15], tempt[10];
+	unsigned char tempd[15], tempt[10];
 	struct DateTime dtime;
 
 	convert_nt_entry(s);          // if NT entry, convert to Unix format (RJF)
@@ -2429,7 +2408,7 @@ void add_info(struct info_header *ih, b8 *s)
 	} // if
 
 	{
-		b8 kommentar[256];
+		unsigned char kommentar[256];
 
 		strcpy(kommentar, user);
 		strcat(kommentar, " / ");
@@ -2460,9 +2439,9 @@ boolean get_list(site *sp, struct info_header *ih)
 {
 	tcpmessage *tm, *listm;
 	struct MsgPort *sync;
-	b8 reply[3], *info;
-	b16 portn;
-	b32 signals, asigs, rsigs;
+	unsigned char reply[3], *info;
+	unsigned short portn;
+	unsigned long signals, asigs, rsigs;
 
 	verify(sp, V_site);
 	verify(ih, V_info_header);
@@ -2620,9 +2599,9 @@ boolean prelim(site *sp, struct Window *w)
  * true if setup was successful
  */
 {
-	b32 csig;
-	b8 *info, reply[3];
-	b8 *s, *z;
+	unsigned long csig;
+	unsigned char *info, reply[3];
+	unsigned char *s, *z;
 
 	DS(kprintf("** preliminary setup stuff (site %s)\n", sp->host))
 
@@ -2685,7 +2664,7 @@ boolean prelim(site *sp, struct Window *w)
 										z++;
 									if (*z)
 									{
-										sp->root = (b8 *)allocate(z - s + 1, V_cstr);
+										sp->root = (unsigned char *)allocate(z - s + 1, V_cstr);
 										if (sp->root)
 										{
 											if (z != s)
@@ -2747,8 +2726,8 @@ void login(site *sp, struct Window *w)
 {
 	tcpmessage *tm;
 	struct MsgPort *sync;
-	b8 reply[4], *info;
-	b32 csig;
+	unsigned char reply[4], *info;
+	unsigned long csig;
 	boolean early_success = false;
 
 	tm = sp->control;
@@ -2966,11 +2945,11 @@ retry_login:
 void init_connect(site *sp)
 {
 	struct Window *w;
-	b8 *z;
+	unsigned char *z;
 	tcpmessage *tm, *intr;
 	struct MsgPort *sync;
-	b8 reply[3], *info;
-	b32 signals, csig;
+	unsigned char reply[3], *info;
+	unsigned long signals, csig;
 
 	verify(sp, V_site);
 

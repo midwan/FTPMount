@@ -20,18 +20,18 @@ struct DosPacket *fh_listen(void)
 	struct InfoData *id;
 	struct FileHandle *fh;
 	file_info *fi;
-	b32 signals;
+	unsigned long signals;
 	split sd, sd2;
 	lock *my_lock, *lock2;
 	site *my_site;
 	status_message *sm;
-	b8 *s, *name;
+	unsigned char *s, *name;
 
 #ifdef __amigaos4__
 	struct ExecIFace * IExec = (struct ExecIFace *)((*((struct ExecBase **) 4))->MainInterface);
 #endif
 
-	b32 pass_key = 0;
+	unsigned long pass_key = 0;
 	boolean write_protect = false, disabled = false;
 
 	signals = (1 << ftp_port->mp_SigBit) | (1 << status_control->mp_SigBit);
@@ -90,7 +90,7 @@ struct DosPacket *fh_listen(void)
 				}
 
 				if (!split_data((lock *)(dp->dp_Arg1 << 2),
-					(b8 *)(dp->dp_Arg2 << 2), &sd)) {
+					(unsigned char *)(dp->dp_Arg2 << 2), &sd)) {
 					/* might be ERROR_NO_FREE_STORE, but hey */
 					dp->dp_Res1 = 0;
 					dp->dp_Res2 = ERROR_INVALID_COMPONENT_NAME;
@@ -103,8 +103,8 @@ struct DosPacket *fh_listen(void)
 
 				continue;
 			case ACTION_RENAME_DISK:   /* Relabel() */
-				name = (b8 *)(dp->dp_Arg1 << 2);
-				s = (b8 *)allocate(name[0] + 2, V_bstr);
+				name = (unsigned char *)(dp->dp_Arg1 << 2);
+				s = (unsigned char *)allocate(name[0] + 2, V_bstr);
 				if (!s) {
 					dp->dp_Res1 = DOSFALSE;
 					dp->dp_Res2 = ERROR_NO_FREE_STORE;
@@ -116,7 +116,7 @@ struct DosPacket *fh_listen(void)
 				s[1 + s[0]] = 0;
 
 				/* perhaps should do some mutual exclusion here ... */
-				ftp_volume->dol_Name = (b32)s >> 2;
+				ftp_volume->dol_Name = (unsigned long)s >> 2;
 
 				deallocate(volume_name, V_bstr);
 				volume_name = s;
@@ -146,7 +146,7 @@ struct DosPacket *fh_listen(void)
 			case ACTION_SET_PROTECT:
 			case ACTION_SET_COMMENT:
 				if (!split_data((lock *)(dp->dp_Arg2 << 2),
-					(b8 *)(dp->dp_Arg3 << 2), &sd)) {
+					(unsigned char *)(dp->dp_Arg3 << 2), &sd)) {
 					dp->dp_Res1 = DOSFALSE;
 					dp->dp_Res2 = ERROR_INVALID_COMPONENT_NAME;
 					break;
@@ -159,14 +159,14 @@ struct DosPacket *fh_listen(void)
 				continue;
 			case ACTION_RENAME_OBJECT:
 				if (!split_data((lock *)(dp->dp_Arg1 << 2),
-					(b8 *)(dp->dp_Arg2 << 2), &sd)) {
+					(unsigned char *)(dp->dp_Arg2 << 2), &sd)) {
 					dp->dp_Res1 = DOSFALSE;
 					dp->dp_Res2 = ERROR_INVALID_COMPONENT_NAME;
 					break;
 				}
 
 				if (!split_data((lock *)(dp->dp_Arg3 << 2),
-					(b8 *)(dp->dp_Arg4 << 2), &sd2)) {
+					(unsigned char *)(dp->dp_Arg4 << 2), &sd2)) {
 					dp->dp_Res1 = DOSFALSE;
 					dp->dp_Res2 = ERROR_INVALID_COMPONENT_NAME;
 
@@ -201,7 +201,7 @@ struct DosPacket *fh_listen(void)
 				continue;
 			case ACTION_DELETE_OBJECT:
 				if (!split_data((lock *)(dp->dp_Arg1 << 2),
-					(b8 *)(dp->dp_Arg2 << 2), &sd)) {
+					(unsigned char *)(dp->dp_Arg2 << 2), &sd)) {
 					dp->dp_Res1 = DOSFALSE;
 					dp->dp_Res2 = ERROR_INVALID_COMPONENT_NAME;
 					break;
@@ -214,7 +214,7 @@ struct DosPacket *fh_listen(void)
 				continue;
 			case ACTION_CREATE_DIR:
 				if (!split_data((lock *)(dp->dp_Arg1 << 2),
-					(b8 *)(dp->dp_Arg2 << 2), &sd)) {
+					(unsigned char *)(dp->dp_Arg2 << 2), &sd)) {
 					dp->dp_Res1 = DOSFALSE;
 					dp->dp_Res2 = ERROR_INVALID_COMPONENT_NAME;
 					break;
@@ -246,7 +246,7 @@ struct DosPacket *fh_listen(void)
 				id->id_NumBlocksUsed = 1;
 				id->id_BytesPerBlock = 1024;
 				id->id_DiskType = ID_DOS_DISK;
-				id->id_VolumeNode = (b32)ftp_volume >> 2;
+				id->id_VolumeNode = (unsigned long)ftp_volume >> 2;
 				id->id_InUse = 0;
 
 				dp->dp_Res1 = DOSTRUE;
@@ -267,7 +267,7 @@ struct DosPacket *fh_listen(void)
 				id->id_NumBlocksUsed = 1;
 				id->id_BytesPerBlock = 1024;
 				id->id_DiskType = ID_DOS_DISK;
-				id->id_VolumeNode = (b32)ftp_volume >> 2;
+				id->id_VolumeNode = (unsigned long)ftp_volume >> 2;
 				id->id_InUse = 0;
 
 				dp->dp_Res1 = DOSTRUE;
@@ -332,7 +332,7 @@ struct DosPacket *fh_listen(void)
 			case ACTION_FINDINPUT:
 			case ACTION_FINDOUTPUT:
 				if (!split_data((lock *)(dp->dp_Arg2 << 2),
-					(b8 *)(dp->dp_Arg3 << 2), &sd)) {
+					(unsigned char *)(dp->dp_Arg3 << 2), &sd)) {
 					/* might be ERROR_NO_FREE_STORE, but hey */
 					dp->dp_Res1 = DOSFALSE;
 					dp->dp_Res2 = ERROR_INVALID_COMPONENT_NAME;
@@ -478,7 +478,7 @@ void fh_ignore(void)
 	struct Message *msg;
 	struct MsgPort *reply;
 	struct DosPacket *dp;
-	b32 signals;
+	unsigned long signals;
 	lock *l;
 
 	signals = (1 << ftp_port->mp_SigBit);

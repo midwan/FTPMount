@@ -8,7 +8,7 @@
 
 #define DECLARE_GLOBALS_HERE 1
 
-#include "FTPMount.h" /* 03-03-02 rri */
+#include "FTPMount.h"
 #include "tcp.h"
 #include "site.h"
 #include "local.h"
@@ -35,7 +35,7 @@ void close_libraries(void);
 boolean make_gims(void);
 void free_gims(void);
 
-void startup_error(b8 *s);
+void startup_error(unsigned char *s);
 
 boolean get_anon_login(void);
 
@@ -48,14 +48,15 @@ void shutdown_status(void);
 void setup_strings(void);
 void cleanup_strings(void);
 
-void SAVEDS start(void)
+/*void SAVEDS start(void) */
+int main (void)
 {
 	struct Process *me;
 	struct Message *msg;
 	struct DosPacket *dp;
 	struct MsgPort *reply;
 	struct DateTime dtime;
-	b8 temp[15];
+	unsigned char temp[15];
 
 	SysBase = *(struct ExecBase **)4;
 
@@ -191,11 +192,11 @@ void SAVEDS start(void)
 	dp->dp_Res1 = DOSFALSE;
 	Forbid();	/* this is so they can't unloadseg us until we have finished */
 	PutMsg(reply, dp->dp_Link);
-	return;
+	return 0;
 }
 
 
-void startup_error(b8 *s)
+void startup_error(unsigned char *s)
 {
 	struct EasyStruct es;
 
@@ -573,8 +574,8 @@ void free_gims(void)
 boolean get_anon_login(void)
 {
 #define BUFF_SIZE  100
-	b8 user[BUFF_SIZE], host[BUFF_SIZE];
-	sb32 i, j;
+	unsigned char user[BUFF_SIZE], host[BUFF_SIZE];
+	signed long i, j;
 	struct EasyStruct es;
 
 	es.es_StructSize = sizeof(struct EasyStruct);
@@ -588,7 +589,7 @@ boolean get_anon_login(void)
 	/* four cases here */
 	if (i >= 0 && j >= 0)
 	{
-		anon_login = (b8 *)AllocVec(i + j + 2, 0); /* 2003-03-09 rri */
+		anon_login = (unsigned char *)AllocVec(i + j + 2, 0); /* 2003-03-09 rri */
 		if (!anon_login) return false;
 
 		strcpy(anon_login, user);
@@ -597,7 +598,7 @@ boolean get_anon_login(void)
 	}
 	else if (i < 0 && j >= 0)
 	{
-		anon_login = (b8 *)AllocVec(j + 9, 0); /* 2003-03-09 rri */
+		anon_login = (unsigned char *)AllocVec(j + 9, 0); /* 2003-03-09 rri */
 		if (!anon_login) return false;
 
 		strcpy((char*)anon_login, "unknown@");
@@ -612,7 +613,7 @@ boolean get_anon_login(void)
 	}
 	else if (i >= 0 && j < 0)
 	{
-		anon_login = (b8 *)AllocVec(i + 9, 0); /* 2003-03-09 rri */
+		anon_login = (unsigned char *)AllocVec(i + 9, 0); /* 2003-03-09 rri */
 		if (!anon_login) return false;
 
 		strcpy((char*)anon_login, (char*)user);
@@ -627,7 +628,7 @@ boolean get_anon_login(void)
 	}
 	else
 	{
-		anon_login = (b8 *)AllocVec(16, 0); /* 2003-03-09 rri */
+		anon_login = (unsigned char *)AllocVec(16, 0); /* 2003-03-09 rri */
 		if (!anon_login)
 			return false;
 		strcpy((char*)anon_login, "unknown@unknown");
@@ -644,7 +645,7 @@ boolean get_anon_login(void)
 
 boolean create_volume(void)
 {
-	b32 vlen;
+	unsigned long vlen;
 
 	ftp_volume = (struct DosList *) AllocVec(sizeof(struct DosList), MEMF_PUBLIC); /* 2003-03-09 rri */
 	if (ftp_volume)
@@ -657,13 +658,13 @@ boolean create_volume(void)
 		ftp_volume->dol_misc.dol_volume.dol_DiskType = ID_DOS_DISK;
 
 		vlen = strlen("FTPMount");
-		volume_name = (b8 *)AllocVec(vlen + 2, MEMF_PUBLIC); /* 2003-03-09 rri */
+		volume_name = (unsigned char *)AllocVec(vlen + 2, MEMF_PUBLIC); /* 2003-03-09 rri */
 		if (volume_name)
 		{
 			volume_name[0] = vlen;
 			strcpy((char*)&volume_name[1], "FTPMount");
 
-			ftp_volume->dol_Name = (b32)volume_name >> 2;
+			ftp_volume->dol_Name = (unsigned long)volume_name >> 2;
 			if (AddDosEntry(ftp_volume)) return true;
 			FreeVec(volume_name); /* 2003-03-09 rri */
 		}
@@ -784,7 +785,7 @@ void setup_strings(void)
 	{
 		for (i = 0; i < NUM_MSGS; i++)
 		{
-			strings[i] = (b8*)GetCatalogStr(cat, i, (STRPTR)strings[i]);
+			strings[i] = (unsigned char*)GetCatalogStr(cat, i, (STRPTR)strings[i]);
 		}
 	}
 }

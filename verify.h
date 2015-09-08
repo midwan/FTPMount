@@ -49,7 +49,7 @@ void track_init(void);
 void track_check(void);
 
 #else
-#define magic_verify	char nothing[0]
+#define magic_verify	char nothing[1]
 #define MAGIC 0x49a72fc0
 #define verify(x,y)
 #define ensure(x,y)

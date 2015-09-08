@@ -19,12 +19,12 @@
 #define V_rastport 1001
 #define V_bitmap 1008
 
-struct RastPort *make_rastport(b32 width, b32 height, b32 depth, GraphicsParamDef)
+struct RastPort *make_rastport(unsigned long width, unsigned long height, unsigned long depth, GraphicsParamDef)
 {
 	struct RastPort *rp;
 	struct BitMap *bm;
 	int i;
-	b8 *z;
+	unsigned char *z;
 
 	rp = (struct RastPort *)allocate_flags(sizeof(*rp), MEMF_PUBLIC | MEMF_CLEAR, V_rastport);
 	if (!rp) return 0;
@@ -35,7 +35,7 @@ struct RastPort *make_rastport(b32 width, b32 height, b32 depth, GraphicsParamDe
 
 		bm->Planes[0] = AllocRaster(width, height * depth);
 		if (bm->Planes[0]) {
-			z = (b8 *)bm->Planes[0];
+			z = (unsigned char *)bm->Planes[0];
 			for (i = 1; i < depth; i++) {
 				z += bm->BytesPerRow * bm->Rows;
 				bm->Planes[i] = (void *)z;
@@ -73,13 +73,13 @@ struct IntuiText nulltext = {
    (void *)0
 };
 
-struct gim *make_gim(b8 *name, b32 textpen, b32 lightpen, b32 darkpen, struct Screen *s,
+struct gim *make_gim(unsigned char *name, unsigned long textpen, unsigned long lightpen, unsigned long darkpen, struct Screen *s,
 	IntuitionParamDef, GraphicsParamDef)
 {
 	struct IntuiText txt;
 	int width, height, owidth, oheight;
 	struct gim *gim;
-	sb32 x, y, Rx, Ry, Rx2, Ry2, R2, new_delta, old_delta;
+	signed long x, y, Rx, Ry, Rx2, Ry2, R2, new_delta, old_delta;
 
 	txt.FrontPen = textpen;
 	txt.BackPen = 0;
@@ -286,7 +286,7 @@ void free_gadget(struct Gadget *g)
 	deallocate(g, V_Gadget);
 }
 
-struct Window *connect_req(site *sp, b8 *s)
+struct Window *connect_req(site *sp, unsigned char *s)
 {
 	struct Window *w;
 #ifdef __amigaos4__
@@ -297,12 +297,12 @@ struct Window *connect_req(site *sp, b8 *s)
 	struct GfxBase *GfxBase;
 #endif
 	struct Screen *pub_screen;
-	b32 screen_modeID;
+	unsigned long screen_modeID;
 	struct Rectangle rect;
 	struct Gadget *cancel;
 	struct IntuiText txt;
 	int width, swidth, sheight, fheight;
-	b8 *z;
+	unsigned char *z;
 
 	verify(sp, V_site);
 
@@ -321,7 +321,7 @@ struct Window *connect_req(site *sp, b8 *s)
 			if (QueryOverscan(screen_modeID, &rect, OSCAN_TEXT)) {
 				cancel = make_gadget(cancel_gim);
 				if (cancel) {
-					z = (b8 *)allocate(strlen(s) + 19, V_cstr);
+					z = (unsigned char *)allocate(strlen(s) + 19, V_cstr);
 					if (z) {
 						strcpy(z, strings[MSG_CONNECTING_TO]);
 						strcat(z, s);
@@ -377,7 +377,7 @@ struct Window *connect_req(site *sp, b8 *s)
 							w->UserData = (void *)cancel;
 							cancel->LeftEdge = w->Width - w->BorderRight - fheight / 2 - cancel->Width;
 							cancel->TopEdge = w->Height - w->BorderBottom - fheight / 3 - cancel->Height;
-							AddGadget(w, cancel, (b32)0);
+							AddGadget(w, cancel, (unsigned long)0);
 							RefreshGList(cancel, w, nil, 1);
 
 							return w;
@@ -428,8 +428,8 @@ void close_req(site *sp, struct Window *w)
 }
 
 struct phdata {
-	b8 password[MAX_PASS_LENGTH + 1];
-	b8 undo[MAX_PASS_LENGTH + 1];
+	unsigned char password[MAX_PASS_LENGTH + 1];
+	unsigned char undo[MAX_PASS_LENGTH + 1];
 };
 
 #if defined(__MORPHOS__)
@@ -437,12 +437,12 @@ boolean password_hook(void)
 #else
 boolean SAVEDS ASM password_hook(REG(a0, struct Hook *hook),
 	REG(a2, struct SGWork *sgw),
-	REG(a1, b32 *msg))
+	REG(a1, unsigned long *msg))
 #endif
 {
 #ifdef	__MORPHOS__
 	struct Hook		*hook = (struct Hook *)REG_A0;
-	b32				*msg = (b32 *)REG_A1;
+	unsigned long				*msg = (unsigned long *)REG_A1;
 	struct SGWork	*sgw = (struct SGWork *)REG_A2;
 #endif
 
@@ -502,14 +502,14 @@ boolean user_pass_request(site *sp, struct Window *canw)
 	struct NewGadget user, pass;
 	struct Screen *s;
 	void *vi;
-	b32 screen_modeID;
+	unsigned long screen_modeID;
 	struct Rectangle rect;
 	struct Window *w;
-	sb32 swidth, sheight, fheight, wheight;
-	b32 signals, csig;
+	signed long swidth, sheight, fheight, wheight;
+	unsigned long signals, csig;
 	struct IntuiMessage *im;
 	struct Hook pass_hook;
-	b8 *z;
+	unsigned char *z;
 	struct phdata phd;
 
 #ifdef __amigaos4__
@@ -537,15 +537,15 @@ boolean user_pass_request(site *sp, struct Window *canw)
 	glist = nil;
 
 #ifndef	__MORPHOS__
-	pass_hook.h_Entry = (b32(*)())password_hook;
-	pass_hook.h_SubEntry = (b32(*)())nil;
+	pass_hook.h_Entry = (unsigned long(*)())password_hook;
+	pass_hook.h_SubEntry = (unsigned long(*)())nil;
 	pass_hook.h_Data = (void *)&phd;
 #else
 	PassHookEmul.Trap = TRAP_LIB;
 	PassHookEmul.Extension = 0;
 	PassHookEmul.Func = (void(*)())password_hook;
-	pass_hook.h_Entry = (b32(*)())&PassHookEmul;
-	pass_hook.h_SubEntry = (b32(*)())nil;
+	pass_hook.h_Entry = (unsigned long(*)())&PassHookEmul;
+	pass_hook.h_SubEntry = (unsigned long(*)())nil;
 	pass_hook.h_Data = (void *)&phd;
 #endif
 
@@ -630,7 +630,7 @@ boolean user_pass_request(site *sp, struct Window *canw)
 						passg = gad = CreateGadget(STRING_KIND, gad, &pass,
 							GTST_String, sp->password,
 							GTST_MaxChars, MAX_PASS_LENGTH,
-							GTST_EditHook, (b32)&pass_hook,
+							GTST_EditHook, (unsigned long)&pass_hook,
 							TAG_END
 							);
 
@@ -725,7 +725,7 @@ listen:
 
 					z = ((struct StringInfo *)userg->SpecialInfo)->Buffer;
 					if (z[0] != '\0') {
-						sp->user = (b8 *)allocate(strlen(z) + 1, V_cstr);
+						sp->user = (unsigned char *)allocate(strlen(z) + 1, V_cstr);
 						if (sp->user) {
 							strcpy(sp->user, z);
 						}
@@ -736,7 +736,7 @@ listen:
 
 					z = phd.password;
 					if (z[0] != '\0') {
-						sp->password = (b8 *)allocate(strlen(z) + 1, V_cstr);
+						sp->password = (unsigned char *)allocate(strlen(z) + 1, V_cstr);
 						if (sp->password) {
 							strcpy(sp->password, z);
 						}
@@ -794,10 +794,10 @@ struct Window *open_main_window(struct List *site_labels, IntuitionParamDef, Gad
 	struct NewGadget ng;
 	struct Screen *s;
 	void *vi;
-	b32 screen_modeID;
+	unsigned long screen_modeID;
 	struct Rectangle rect;
 	struct Window *w;
-	sb32 swidth, sheight;
+	signed long swidth, sheight;
 
 	glist = nil;
 
@@ -915,7 +915,7 @@ struct List *site_list(void)
 			return l;
 		}
 
-		n->ln_Name = (b8 *)allocate(strlen(sp->name) + 1, V_cstr);
+		n->ln_Name = (unsigned char *)allocate(strlen(sp->name) + 1, V_cstr);
 		if (!n->ln_Name) {
 			Permit();
 			deallocate(n, V_Node);
@@ -949,7 +949,7 @@ void draw_fill_bar(site *sp, IntuitionParamDef, GraphicsParamDef)
 {
 	struct Window *w;
 	struct RastPort *rp;
-	b32 x1, y1, x2, y2, gap;
+	unsigned long x1, y1, x2, y2, gap;
 
 	verify(sp, V_site);
 
@@ -1001,9 +1001,9 @@ void update_fill_bar(site *sp, IntuitionParamDef, GraphicsParamDef)
 {
 	struct Window *w;
 	struct RastPort *rp;
-	b32 x1, y1, x2, y2, gap;
+	unsigned long x1, y1, x2, y2, gap;
 	struct IntuiText txt;
-	b8 buffer[20], *z;
+	unsigned char buffer[20], *z;
 	file_info *fip;
 
 	verify(sp, V_site);
@@ -1207,9 +1207,9 @@ void open_status_window(site *sp, struct MsgPort *wport, IntuitionParamDef, Grap
 {
 	struct Screen *s;
 	struct Rectangle rect;
-	b32 screen_modeID;
+	unsigned long screen_modeID;
 	struct Gadget *aborg, *disg;
-	b16 swidth, sheight, fheight;
+	unsigned short swidth, sheight, fheight;
 	struct Window *w;
 
 	verify(sp, V_site);
@@ -1269,7 +1269,7 @@ void open_status_window(site *sp, struct MsgPort *wport, IntuitionParamDef, Grap
 						aborg->TopEdge = disg->TopEdge;
 						aborg->LeftEdge = disg->LeftEdge - aborg->Width - fheight / 2;
 
-						AddGList(w, aborg, (b32)-1, 2, nil);
+						AddGList(w, aborg, (unsigned long)-1, 2, nil);
 						RefreshGadgets(aborg, w, nil);
 
 						sp->status_window = w;
@@ -1342,8 +1342,8 @@ void SAVEDS status_handler(void)
 #endif
 	CxObj *broker, *filter, *sender, *translate;
 	CxMsg *cxmsg;
-	b32 signals;
-	b32 msgid, msgtype;
+	unsigned long signals;
+	unsigned long msgid, msgtype;
 	struct Window *mainw;
 	struct NewBroker nb;
 	struct List *site_labels;

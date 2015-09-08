@@ -17,8 +17,8 @@
   * ftpinfo routines
   */
 
-void add_ftpinfo(struct info_header *ih, b8 *name, b8 *comment, struct DateStamp ds,
-	b32 size, b32 blocks, b32 flags)
+void add_ftpinfo(struct info_header *ih, unsigned char *name, unsigned char *comment, struct DateStamp ds,
+	unsigned long size, unsigned long blocks, unsigned long flags)
 {
 	ftpinfo *fi;
 
@@ -75,7 +75,7 @@ void free_info_header(struct info_header *ih)
 	return;
 }
 
-struct info_header *new_info_header(site *sp, b8 *name)
+struct info_header *new_info_header(site *sp, unsigned char *name)
 {
 	struct info_header *ih;
 
@@ -101,7 +101,7 @@ struct info_header *new_info_header(site *sp, b8 *name)
 	return ih;
 }
 
-struct info_header *find_info_header(site *sp, b8 *name)
+struct info_header *find_info_header(site *sp, unsigned char *name)
 {
 	struct info_header *ih;
 
@@ -117,7 +117,7 @@ struct info_header *find_info_header(site *sp, b8 *name)
 	}
 	else {
 		while (ih) {
-			if (stricmp(ih->name, name) == 0) return ih;
+			if (strcasecmp(ih->name, name) == 0) return ih;
 			ih = ih->next;
 		}
 	}
@@ -125,7 +125,7 @@ struct info_header *find_info_header(site *sp, b8 *name)
 	return nil;
 }
 
-ftpinfo *find_info(struct info_header *ih, b8 *name)
+ftpinfo *find_info(struct info_header *ih, unsigned char *name)
 {
 	ftpinfo *fi, *found;
 
@@ -148,11 +148,11 @@ ftpinfo *find_info(struct info_header *ih, b8 *name)
 		while (fi) {
 			if (!(fi->flags & MYFLAG_DELETED))
 			{
-				if (stricmp(fi->name, name) == 0)
+				if (strcasecmp(fi->name, name) == 0)
 				{
 					found = fi;
 
-					if (strcmp(fi->name, name) == 0)
+					if (strcasecmp(fi->name, name) == 0)
 					{
 						break;
 					}

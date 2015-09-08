@@ -64,7 +64,7 @@ void free_tcpmessage(tcpmessage *tm)
 }
 
 
-tcpident *new_tcpident(sb32 fd)
+tcpident *new_tcpident(signed long fd)
 {
 	tcpident *ti;
 
@@ -86,7 +86,7 @@ void free_tcpident(tcpident *ti)
 }
 
 
-void fix_read_set(struct List *wait_list, fd_set *reads, sb32 *max_fd)
+void fix_read_set(struct List *wait_list, fd_set *reads, signed long *max_fd)
 // was macht dies??
 {
 	tcpmessage *tm;
@@ -112,7 +112,7 @@ void fix_read_set(struct List *wait_list, fd_set *reads, sb32 *max_fd)
 }
 
 
-void fix_write_set(struct List *wait_list, fd_set *writes, sb32 *max_fd)
+void fix_write_set(struct List *wait_list, fd_set *writes, signed long *max_fd)
 // was macht dies??
 {
 	tcpmessage *tm;
@@ -137,9 +137,9 @@ void fix_write_set(struct List *wait_list, fd_set *writes, sb32 *max_fd)
 }
 
 #ifdef __amigaos4__
-void non_blocking(struct Library *SocketBase, struct SocketIFace * ISocket, sb32 fd)
+void non_blocking(struct Library *SocketBase, struct SocketIFace * ISocket, signed long fd)
 #else
-void non_blocking(struct Library *SocketBase, sb32 fd)
+void non_blocking(struct Library *SocketBase, signed long fd)
 #endif
 {
 	long one;
@@ -149,11 +149,11 @@ void non_blocking(struct Library *SocketBase, sb32 fd)
 }
 
 
-void unique_name(void *tp, b8 *s, b8 *buffer)
+void unique_name(void *tp, unsigned char *s, unsigned char *buffer)
 {
-	b32 task;
+	unsigned long task;
 
-	task = (b32)tp;
+	task = (unsigned long)tp;
 
 	buffer[0] = (task >> 28) & 0xf;
 	buffer[1] = (task >> 24) & 0xf;
@@ -177,14 +177,14 @@ void unique_name(void *tp, b8 *s, b8 *buffer)
 }
 
 #ifdef __amigaos4__
-void tcp_read(struct Library *SocketBase, struct SocketIFace * ISocket, tcpmessage *tm, struct List *wait_list, fd_set *reads, sb32 *max_fd)
+void tcp_read(struct Library *SocketBase, struct SocketIFace * ISocket, tcpmessage *tm, struct List *wait_list, fd_set *reads, signed long *max_fd)
 #else
-void tcp_read(struct Library *SocketBase, tcpmessage *tm, struct List *wait_list, fd_set *reads, sb32 *max_fd)
+void tcp_read(struct Library *SocketBase, tcpmessage *tm, struct List *wait_list, fd_set *reads, signed long *max_fd)
 #endif
 {
 	tcpident *ti;
-	sb32 result = 0; /* 2003-03-08 rri */
-	b8 *s;
+	signed long result = 0; /* 2003-03-08 rri */
+	unsigned char *s;
 
 	truth(SocketBase != nil);
 #ifdef __amigaos4__
@@ -353,13 +353,13 @@ void tcp_read(struct Library *SocketBase, tcpmessage *tm, struct List *wait_list
 }
 
 #ifdef __amigaos4__
-void tcp_write(struct Library *SocketBase, struct SocketIFace * ISocket, tcpmessage *tm, struct List *wait_list, fd_set *writes, sb32 *max_fd)
+void tcp_write(struct Library *SocketBase, struct SocketIFace * ISocket, tcpmessage *tm, struct List *wait_list, fd_set *writes, signed long *max_fd)
 #else
-void tcp_write(struct Library *SocketBase, tcpmessage *tm, struct List *wait_list, fd_set *writes, sb32 *max_fd)
+void tcp_write(struct Library *SocketBase, tcpmessage *tm, struct List *wait_list, fd_set *writes, signed long *max_fd)
 #endif
 {
 	tcpident *ti;
-	sb32 result;
+	signed long result;
 
 	truth(SocketBase != nil);
 #ifdef __amigaos4__
@@ -446,14 +446,14 @@ void tcp_write(struct Library *SocketBase, tcpmessage *tm, struct List *wait_lis
 }
 
 #ifdef __amigaos4__
-void tcp_read_more(struct Library *SocketBase, struct SocketIFace * ISocket, tcpmessage *tm, struct List *wait_list, fd_set *reads, sb32 *max_fd)
+void tcp_read_more(struct Library *SocketBase, struct SocketIFace * ISocket, tcpmessage *tm, struct List *wait_list, fd_set *reads, signed long *max_fd)
 #else
-void tcp_read_more(struct Library *SocketBase, tcpmessage *tm, struct List *wait_list, fd_set *reads, sb32 *max_fd)
+void tcp_read_more(struct Library *SocketBase, tcpmessage *tm, struct List *wait_list, fd_set *reads, signed long *max_fd)
 #endif
 {
 	tcpident *ti;
-	sb32 result;
-	b8 *s;
+	signed long result;
+	unsigned char *s;
 
 	truth(SocketBase != nil);
 #ifdef __amigaos4__
@@ -472,7 +472,7 @@ void tcp_read_more(struct Library *SocketBase, tcpmessage *tm, struct List *wait
 
 	if (tm->flags & FLAG_READLINE)
 	{
-		s = (b8 *)tm->data + tm->result;
+		s = (unsigned char *)tm->data + tm->result;
 
 		while (1)
 		{
@@ -546,7 +546,7 @@ void tcp_read_more(struct Library *SocketBase, tcpmessage *tm, struct List *wait
 	}
 	else
 	{
-		result = recv(ti->fd, (b8 *)tm->data + tm->result, tm->length - tm->result, 0);
+		result = recv(ti->fd, (unsigned char *)tm->data + tm->result, tm->length - tm->result, 0);
 		if (result == tm->length - tm->result) {  /* satisfied! */
 			tm->result = tm->length;
 			tm->error = NO_ERROR;
@@ -605,13 +605,13 @@ void tcp_read_more(struct Library *SocketBase, tcpmessage *tm, struct List *wait
 }
 
 #ifdef __amigaos4__
-void tcp_write_more(struct Library *SocketBase, struct SocketIFace * ISocket, tcpmessage *tm, struct List *wait_list, fd_set *writes, sb32 *max_fd)
+void tcp_write_more(struct Library *SocketBase, struct SocketIFace * ISocket, tcpmessage *tm, struct List *wait_list, fd_set *writes, signed long *max_fd)
 #else
-void tcp_write_more(struct Library *SocketBase, tcpmessage *tm, struct List *wait_list, fd_set *writes, sb32 *max_fd)
+void tcp_write_more(struct Library *SocketBase, tcpmessage *tm, struct List *wait_list, fd_set *writes, signed long *max_fd)
 #endif
 {
 	tcpident *ti;
-	sb32 result;
+	signed long result;
 
 	truth(SocketBase != nil);
 #ifdef __amigaos4__
@@ -628,7 +628,7 @@ void tcp_write_more(struct Library *SocketBase, tcpmessage *tm, struct List *wai
 		ti = tm->ident;
 	verify(ti, V_tcpident);
 
-	result = send(ti->fd, (b8 *)tm->data + tm->result, tm->length - tm->result, 0);
+	result = send(ti->fd, (unsigned char *)tm->data + tm->result, tm->length - tm->result, 0);
 	if (result == tm->length - tm->result)
 	{  /* satisfied! */
 		tm->result = tm->length;
@@ -674,13 +674,13 @@ void tcp_write_more(struct Library *SocketBase, tcpmessage *tm, struct List *wai
 }
 
 #ifdef __amigaos4__
-void tcp_listen(struct Library *SocketBase, struct SocketIFace * ISocket, tcpmessage *tm, struct List *wait_list, fd_set *reads, sb32 *max_fd)
+void tcp_listen(struct Library *SocketBase, struct SocketIFace * ISocket, tcpmessage *tm, struct List *wait_list, fd_set *reads, signed long *max_fd)
 #else
-void tcp_listen(struct Library *SocketBase, tcpmessage *tm, struct List *wait_list, fd_set *reads, sb32 *max_fd)
+void tcp_listen(struct Library *SocketBase, tcpmessage *tm, struct List *wait_list, fd_set *reads, signed long *max_fd)
 #endif
 {
 	tcpident *ti;
-	sb32 result, socklen;
+	signed long result, socklen;
 	struct sockaddr_in sin;
 	struct hostent *he;
 	tcpmessage *wait_tm;
@@ -807,7 +807,7 @@ void tcp_accept(struct Library *SocketBase, tcpmessage *tm, struct List *wait_li
 	tcpident *ti, *accept_ti;
 	tcpmessage  *accept_tm, *wait_tm;
 	struct sockaddr_in sin;
-	sb32  	sin_len, result;
+	signed long  	sin_len, result;
 
 	truth(SocketBase != nil);
 #ifdef __amigaos4__
@@ -882,9 +882,9 @@ void tcp_accept(struct Library *SocketBase, tcpmessage *tm, struct List *wait_li
 }
 
 #ifdef __amigaos4__
-void tcp_close(struct Library *SocketBase, struct SocketIFace * ISocket, tcpmessage *tm, struct List *wait_list, fd_set *reads, fd_set *writes, sb32 *max_fd)
+void tcp_close(struct Library *SocketBase, struct SocketIFace * ISocket, tcpmessage *tm, struct List *wait_list, fd_set *reads, fd_set *writes, signed long *max_fd)
 #else
-void tcp_close(struct Library *SocketBase, tcpmessage *tm, struct List *wait_list, fd_set *reads, fd_set *writes, sb32 *max_fd)
+void tcp_close(struct Library *SocketBase, tcpmessage *tm, struct List *wait_list, fd_set *reads, fd_set *writes, signed long *max_fd)
 #endif
 {
 	tcpident *ti, *iti;
@@ -995,7 +995,7 @@ void do_connect(struct Library *SocketBase, tcpmessage *mess, struct MsgPort *pp
 	/* bits of the following inspired by the source to NcFTP ... thanks go to Mike Gleason */
 	struct sockaddr_in sin;
 	struct hostent *he;
-	sb32 result, s;
+	signed long result, s;
 
 	truth(SocketBase != nil);
 #ifdef __amigaos4__
@@ -1108,9 +1108,9 @@ void do_connect(struct Library *SocketBase, tcpmessage *mess, struct MsgPort *pp
 
 
 #ifndef	__MORPHOS__
-void SAVEDS ASM connect_child(REG(a0, b8 *parent_port))
+void SAVEDS ASM connect_child(REG(a0, unsigned char *parent_port))
 #else
-void connect_child(b8 *parent_port)
+void connect_child(unsigned char *parent_port)
 #endif
 {
 	struct Library *SocketBase;
@@ -1195,7 +1195,7 @@ void tcp_connect(struct Library *SocketBase, tcpmessage *tm, struct List *wait_l
 #endif
 {
 	struct Process *child;
-	b8 buffer[30];
+	unsigned char buffer[30];
 	struct MsgPort *tmp_port;
 	tcpmessage *child_tm;
 
@@ -1334,7 +1334,7 @@ void tcp_connected(struct Library *SocketBase, tcpmessage *tm, struct List *wait
 	tcpident *ti;
 	tcpmessage *itm, *nitm, *wait_tm;
 	struct MsgPort *their_port;	/* to identify which child */
-	sb32 s;
+	signed long s;
 
 	truth(SocketBase != nil);
 #ifdef __amigaos4__
@@ -1482,7 +1482,7 @@ void tcp_connected(struct Library *SocketBase, tcpmessage *tm, struct List *wait
 
 
 
-void tcp_interrupt(tcpmessage *tm, struct List *wait_list, fd_set *reads, fd_set *writes, sb32 *max_fd)
+void tcp_interrupt(tcpmessage *tm, struct List *wait_list, fd_set *reads, fd_set *writes, signed long *max_fd)
 {
 	tcpident *ti;
 	tcpmessage *itm, *nitm;
@@ -1566,7 +1566,7 @@ void tcp_peername(struct Library *SocketBase, tcpmessage *tm)
 	tcpident *ti;
 	struct sockaddr_in sin;
 	struct hostent *he;
-	sb32 sin_len, len;
+	signed long sin_len, len;
 
 	truth(SocketBase != nil);
 #ifdef __amigaos4__
@@ -1622,7 +1622,7 @@ void tcp_peername(struct Library *SocketBase, tcpmessage *tm)
 	}
 
 	memcpy(tm->data, he->h_name, len);
-	((b8 *)tm->data)[len] = 0;
+	((unsigned char *)tm->data)[len] = 0;
 
 	tm->error = NO_ERROR;
 	tm->result = true;
@@ -1669,7 +1669,7 @@ void tcp_service(struct Library *SocketBase, tcpmessage *tm)
 
 struct MsgPort *running_running(tcpmessage *emergency, struct MsgPort *commands)
 {
-	b32		tcp_signal, signal_tmp;
+	unsigned long		tcp_signal, signal_tmp;
 	tcpmessage  *tm, *tm2;
 	tcpident 	*ti;
 	struct Library *SocketBase = nil;
@@ -1678,7 +1678,7 @@ struct MsgPort *running_running(tcpmessage *emergency, struct MsgPort *commands)
 #endif
 	struct List waiting;
 	fd_set	read_set, write_set, read_tmp, write_tmp;
-	sb32  	max_fd, n;
+	signed long  	max_fd, n;
 	struct MsgPort *death_port;
 
 	NewList(&waiting);	/* list of waiting requests */
@@ -2083,9 +2083,9 @@ struct MsgPort *running_running(tcpmessage *emergency, struct MsgPort *commands)
 
 
 #ifndef	__MORPHOS__
-void SAVEDS ASM tcp_handler(REG(a0, b8 *parent_port))
+void SAVEDS ASM tcp_handler(REG(a0, unsigned char *parent_port))
 #else
-void tcp_handler(b8 *parent_port)
+void tcp_handler(unsigned char *parent_port)
 #endif
 {
 	struct MsgPort *mp, *tcp_commands;

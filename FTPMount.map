@@ -1,0 +1,38 @@
+FTPMount-Handler        09-Jul-15 16:20:32  Hunk Section                Page 1-1
+
+ num hunk         size filename         punit    type         base  alv     size
+   0 text         d068 obj/startup.o    startup. code            0    9     1554
+                       obj/tcp.o        tcp.c    code         158c    3     19dc
+                       obj/connect.o    connect. code         2f7c   10     2d50
+                       obj/listen.o     listen.c code         5d08    0      790
+                       obj/ftpinfo.o    ftpinfo. code         6498    0      230
+                       obj/split.o      split.c  code         66c8    0      4b8
+                       obj/site.o       site.c   code         6b80    0     2858
+                       obj/local.o      local.c  code         93d8    0      de4
+                       obj/request.o    request. code         a1bc    0     2734
+                       obj/decrypt_pass decrypt_ code         c8f0    0      160
+                       Lib:amiga.lib    sprintf. code         ca50    0       28
+                       LIB:sc.lib       _cxamemc code         ca78    0       94
+                       LIB:sc.lib       _cxamems code         cb0c    0       94
+                       LIB:sc.lib       newlist  code         cba0    0       14
+                       LIB:sc.lib       createpo code         cbb4    0       c0
+                       LIB:sc.lib       createex code         cc74    0       6c
+                       LIB:sc.lib       strnicmp code         cce0    0       a8
+                       LIB:sc.lib       stricmp. code         cd88    0       3c
+                       LIB:sc.lib       stcl_d.o code         cdc4    0       3c
+                       LIB:sc.lib       _stcd_l. code         ce00    0       54
+                       LIB:sc.lib       _stcd_i. code         ce54    0       54
+                       LIB:sc.lib       dummy.c  code         cea8    0        4
+                       LIB:sc.lib       _CXD33.o code         ceac    0       c4
+                       LIB:sc.lib       strstr.o code         cf70    0       3c
+                       LIB:sc.lib       strchr.o code         cfac    0       18
+                       LIB:sc.lib       strcat.o code         cfc4    0       18
+                       LIB:sc.lib       strncpy. code         cfdc    0       24
+                       LIB:sc.lib       atol.c   code         d000    0       34
+                       LIB:sc.lib       atoi.c   code         d034    0       34
+   1 __MERGED      3b4 obj/startup.o    startup. data            0    0      1b4
+                       obj/connect.o    connect. data          1b4    0       34
+                       obj/request.o    request. data          1e8    0       14
+                       LIB:sc.lib       ctype.c  data          1fc    0      104
+                       obj/startup.o    startup. bss           300    0       ac
+                       obj/local.o      local.c  bss           3ac    0        8

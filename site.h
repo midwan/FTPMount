@@ -18,11 +18,11 @@ typedef struct site_s {
 	struct StandardPacket *death_packet;
 	struct MsgPort *port, *sync, *rank;
 	struct info_header *infos;
-	b8 *user, *password;
-	b8 *cwd, *root;
-	b8 *host;
-	b32 cfile_type;
-	b32 abort_signals, disconnect_signals;
+	unsigned char *user, *password;
+	unsigned char *cwd, *root;
+	unsigned char *host;
+	unsigned long cfile_type;
+	unsigned long abort_signals, disconnect_signals;
 	struct Window *status_window;
 	struct Gadget *abort_gadget, *disconnect_gadget;
 
@@ -37,25 +37,25 @@ typedef struct site_s {
 
 	boolean connected, read_banners, unix_paths, open_status, quick;
 	boolean needs_user, needs_password, case_sensitive, all_messages, error_messages;
-	b16 port_number;
+	unsigned short port_number;
 	boolean comment;
-	b16 no_lock_conn_idle;
+	unsigned short no_lock_conn_idle;
 
-	b8 site_state;
-	b8 read_buffer[READ_BUFFER_LENGTH];
+	unsigned char site_state;
+	unsigned char read_buffer[READ_BUFFER_LENGTH];
 
-	b8 name[0];
+	unsigned char name[1];
 } site;
 
 #define V_site 29545
 
-struct MsgPort *get_site(b8 *s);
+struct MsgPort *get_site(unsigned char *s);
 void SAVEDS site_handler(void);
 void remove_site(site *);
 void shutdown_sites(void);
 void suspend_sites(void);
 
-void state_change(site *, b16);
+void state_change(site *, unsigned short);
 
 #define IDLE_INTERVAL 20   /* 20 second interval */
 

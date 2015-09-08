@@ -117,7 +117,7 @@
 #define NUM_MSGS 108
 
 #ifdef DECLARE_GLOBALS_HERE
-b8 *strings[] = {
+unsigned char *strings[] = {
 	"ctrl alt f",
 	"Hosts",
 	"Can't find Hosts dir",
@@ -228,6 +228,6 @@ b8 *strings[] = {
 	"PORT"
 };
 #else
-extern b8 *strings[NUM_MSGS];
+extern unsigned char *strings[NUM_MSGS];
 #endif
 
