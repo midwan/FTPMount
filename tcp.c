@@ -6,11 +6,11 @@
  * AmigaOS4 port (c) 2005-2006 Alexandre BALABAN (alexandre (at) free (dot) fr)
  */
 
- /*
+/*
   * a message passing API for amitcp
   */
 
-#include	<dos/dos.h>
+#include <dos/dos.h>
 #ifdef __amigaos4__
 #include    <sys/select.h> /* 22-11-06 ABA : OS4/up4 */
 #endif
@@ -18,22 +18,22 @@
 #include "tcp.h"
 
 #ifdef __MORPHOS__
-  // This is missing from the MorphOS SDK
+// This is missing from the MorphOS SDK
 #ifndef UNIQUE_ID
 #define UNIQUE_ID	(-1)
 #endif
 #endif
 
-tcpmessage *new_tcpmessage(struct MsgPort *reply_port)
+tcpmessage* new_tcpmessage(struct MsgPort* reply_port)
 {
-	tcpmessage *z;
+	tcpmessage* z;
 
 	z = (tcpmessage *)allocate(sizeof(*z), V_tcpmessage);
 	if (!z) return nil;
 
 	ensure(z, V_tcpmessage);
 
-	z->header.mn_Node.ln_Type = NT_MESSAGE;
+	z->header.mn_Node.ln_Type = NT_MESSAGE ;
 	z->header.mn_Node.ln_Pri = 0;
 	z->header.mn_Node.ln_Name = "TCPMessage";
 	z->header.mn_ReplyPort = reply_port;
@@ -55,7 +55,7 @@ tcpmessage *new_tcpmessage(struct MsgPort *reply_port)
 }
 
 
-void free_tcpmessage(tcpmessage *tm)
+void free_tcpmessage(tcpmessage* tm)
 {
 	verify(tm, V_tcpmessage);
 	ensure(tm, 0);
@@ -64,9 +64,9 @@ void free_tcpmessage(tcpmessage *tm)
 }
 
 
-tcpident *new_tcpident(signed long fd)
+tcpident* new_tcpident(signed long fd)
 {
-	tcpident *ti;
+	tcpident* ti;
 
 	ti = (tcpident *)allocate(sizeof(*ti), V_tcpident);
 	if (!ti) return nil;
@@ -77,7 +77,7 @@ tcpident *new_tcpident(signed long fd)
 }
 
 
-void free_tcpident(tcpident *ti)
+void free_tcpident(tcpident* ti)
 {
 	verify(ti, V_tcpident);
 	ensure(ti, 0);
@@ -86,18 +86,18 @@ void free_tcpident(tcpident *ti)
 }
 
 
-void fix_read_set(struct List *wait_list, fd_set *reads, signed long *max_fd)
+void fix_read_set(struct List* wait_list, fd_set* reads, signed long* max_fd)
 // was macht dies??
 {
-	tcpmessage *tm;
-	tcpident *ti;
+	tcpmessage* tm;
+	tcpident* ti;
 
 	FD_ZERO(reads);
 	*max_fd = -1;
 
 	for (tm = (tcpmessage *)wait_list->lh_Head;
-	tm->header.mn_Node.ln_Succ;
-		tm = (tcpmessage *)tm->header.mn_Node.ln_Succ)
+	     tm->header.mn_Node.ln_Succ;
+	     tm = (tcpmessage *)tm->header.mn_Node.ln_Succ)
 	{
 		ti = tm->ident;
 		verify(ti, V_tcpident);
@@ -112,18 +112,18 @@ void fix_read_set(struct List *wait_list, fd_set *reads, signed long *max_fd)
 }
 
 
-void fix_write_set(struct List *wait_list, fd_set *writes, signed long *max_fd)
+void fix_write_set(struct List* wait_list, fd_set* writes, signed long* max_fd)
 // was macht dies??
 {
-	tcpmessage *tm;
-	tcpident *ti;
+	tcpmessage* tm;
+	tcpident* ti;
 
 	FD_ZERO(writes);
 	*max_fd = -1;
 
 	for (tm = (tcpmessage *)wait_list->lh_Head;
-	tm->header.mn_Node.ln_Succ;
-		tm = (tcpmessage *)tm->header.mn_Node.ln_Succ)
+	     tm->header.mn_Node.ln_Succ;
+	     tm = (tcpmessage *)tm->header.mn_Node.ln_Succ)
 	{
 		ti = tm->ident;
 		verify(ti, V_tcpident);
@@ -139,7 +139,7 @@ void fix_write_set(struct List *wait_list, fd_set *writes, signed long *max_fd)
 #ifdef __amigaos4__
 void non_blocking(struct Library *SocketBase, struct SocketIFace * ISocket, signed long fd)
 #else
-void non_blocking(struct Library *SocketBase, signed long fd)
+void non_blocking(struct Library* SocketBase, signed long fd)
 #endif
 {
 	long one;
@@ -149,7 +149,7 @@ void non_blocking(struct Library *SocketBase, signed long fd)
 }
 
 
-void unique_name(void *tp, unsigned char *s, unsigned char *buffer)
+void unique_name(void* tp, unsigned char* s, unsigned char* buffer)
 {
 	unsigned long task;
 
@@ -179,12 +179,12 @@ void unique_name(void *tp, unsigned char *s, unsigned char *buffer)
 #ifdef __amigaos4__
 void tcp_read(struct Library *SocketBase, struct SocketIFace * ISocket, tcpmessage *tm, struct List *wait_list, fd_set *reads, signed long *max_fd)
 #else
-void tcp_read(struct Library *SocketBase, tcpmessage *tm, struct List *wait_list, fd_set *reads, signed long *max_fd)
+void tcp_read(struct Library* SocketBase, tcpmessage* tm, struct List* wait_list, fd_set* reads, signed long* max_fd)
 #endif
 {
-	tcpident *ti;
+	tcpident* ti;
 	signed long result = 0; /* 2003-03-08 rri */
-	unsigned char *s;
+	unsigned char* s;
 
 	truth(SocketBase != nil);
 #ifdef __amigaos4__
@@ -198,7 +198,7 @@ void tcp_read(struct Library *SocketBase, tcpmessage *tm, struct List *wait_list
 
 	DS(kprintf("  TCP_READ %ld bytes", tm->length))
 
-		ti = tm->ident;
+	ti = tm->ident;
 
 	if (!ti)
 	{
@@ -206,7 +206,7 @@ void tcp_read(struct Library *SocketBase, tcpmessage *tm, struct List *wait_list
 		tm->error = ERROR_NO_CONNECTION;
 
 		DS(kprintf("  -> result = %ld ($%08lx), error = %ld\n", tm->result, tm->result, tm->error))
-			ReplyMsg(&tm->header);
+		ReplyMsg(&tm->header);
 		return;
 	}
 
@@ -216,10 +216,10 @@ void tcp_read(struct Library *SocketBase, tcpmessage *tm, struct List *wait_list
 	{
 		tm->result = 0;
 		if (ti->eof) tm->error = ERROR_EOF;
-		else			tm->error = NO_ERROR;
+		else tm->error = NO_ERROR;
 
 		DS(kprintf("  -> result = %ld ($%08lx), error = %ld\n", tm->result, tm->result, tm->error))
-			ReplyMsg(&tm->header);
+		ReplyMsg(&tm->header);
 		return;
 	}
 
@@ -239,32 +239,33 @@ void tcp_read(struct Library *SocketBase, tcpmessage *tm, struct List *wait_list
 				if (*s == '\r' || *s == '\n')
 				{
 					if (tm->result == 1)
-					{  /* blank line ... skip it */
+					{ /* blank line ... skip it */
 						tm->result--;
 						continue;
 					}
 					tm->error = NO_ERROR;
 
 					DS(kprintf("  -> result = %ld ($%08lx), error = %ld\n", tm->result, tm->result, tm->error))
-						ReplyMsg(&tm->header);
+					ReplyMsg(&tm->header);
 					return;
 				}
 				s++;
-				if (tm->result == tm->length) {
+				if (tm->result == tm->length)
+				{
 					tm->error = NO_ERROR;
 					DS(kprintf("  -> result = %ld ($%08lx), error = %ld\n", tm->result, tm->result, tm->error))
-						ReplyMsg(&tm->header);
+					ReplyMsg(&tm->header);
 					return;
 				}
 				continue;
 			}
 			else if (result == 0)
-			{  /* got to be EOF */
+			{ /* got to be EOF */
 				ti->eof = true;
 				tm->error = ERROR_EOF;
 
 				DS(kprintf("  -> result = %ld ($%08lx), error = %ld\n", tm->result, tm->result, tm->error))
-					ReplyMsg(&tm->header);
+				ReplyMsg(&tm->header);
 				return;
 			}
 			else
@@ -274,17 +275,17 @@ void tcp_read(struct Library *SocketBase, tcpmessage *tm, struct List *wait_list
 				case EINTR:
 				case EWOULDBLOCK: /* nothing there to read yet */
 					DS(kprintf("  -> (wait_list) result = %ld ($%08lx), error = %ld\n", tm->result, tm->result, tm->error))
-						AddTail(wait_list, (struct Node *)tm);
+					AddTail(wait_list, (struct Node *)tm);
 					FD_SET(ti->fd, reads);
 					if (ti->fd > *max_fd)
 						*max_fd = ti->fd;
 					return;
 
-				default: 	/* something went wrong */
+				default: /* something went wrong */
 					tm->error = ERROR_LOST_CONNECTION;
 
 					DS(kprintf("  -> result = %ld ($%08lx), error = %ld\n", tm->result, tm->result, tm->error))
-						ReplyMsg(&tm->header);
+					ReplyMsg(&tm->header);
 				}
 				return;
 			}
@@ -294,24 +295,24 @@ void tcp_read(struct Library *SocketBase, tcpmessage *tm, struct List *wait_list
 	{
 		result = recv(ti->fd, tm->data, tm->length, 0);
 		if (result == tm->length)
-		{	/* satisfied immediately */
+		{ /* satisfied immediately */
 			tm->result = tm->length;
 			tm->error = NO_ERROR;
 
 			DS(kprintf("  -> result = %ld ($%08lx), error = %ld\n", tm->result, tm->result, tm->error))
-				ReplyMsg(&tm->header);
+			ReplyMsg(&tm->header);
 			return;
 		}
 	}
 
 	if (result == 0)
-	{   /* got to be EOF */
+	{ /* got to be EOF */
 		ti->eof = true;
 		tm->result = 0;
 		tm->error = ERROR_EOF;
 
 		DS(kprintf("  -> result = %ld ($%08lx), error = %ld\n", tm->result, tm->result, tm->error))
-			ReplyMsg(&tm->header);
+		ReplyMsg(&tm->header);
 		return;
 	}
 
@@ -325,18 +326,18 @@ void tcp_read(struct Library *SocketBase, tcpmessage *tm, struct List *wait_list
 		case EWOULDBLOCK: /* nothing there to read yet */
 			tm->result = 0;
 			DS(kprintf("  -> (wait_list) result = %ld ($%08lx), error = %ld\n", tm->result, tm->result, tm->error))
-				AddTail(wait_list, (struct Node *)tm);
+			AddTail(wait_list, (struct Node *)tm);
 			FD_SET(ti->fd, reads);
 			if (ti->fd > *max_fd)
 				*max_fd = ti->fd;
 			return;
 
-		default: 	/* something went wrong */
+		default: /* something went wrong */
 			tm->result = 0;
 			tm->error = ERROR_LOST_CONNECTION;
 
 			DS(kprintf("  -> result = %ld ($%08lx), error = %ld\n", tm->result, tm->result, tm->error))
-				ReplyMsg(&tm->header);
+			ReplyMsg(&tm->header);
 			return;
 		}
 	}
@@ -345,7 +346,7 @@ void tcp_read(struct Library *SocketBase, tcpmessage *tm, struct List *wait_list
 
 	tm->result = result;
 	DS(kprintf("  -> (wait_list) result = %ld ($%08lx), error = %ld\n", tm->result, tm->result, tm->error))
-		AddTail(wait_list, (struct Node *)tm);
+	AddTail(wait_list, (struct Node *)tm);
 	FD_SET(ti->fd, reads);
 	if (ti->fd > *max_fd)
 		*max_fd = ti->fd;
@@ -355,10 +356,10 @@ void tcp_read(struct Library *SocketBase, tcpmessage *tm, struct List *wait_list
 #ifdef __amigaos4__
 void tcp_write(struct Library *SocketBase, struct SocketIFace * ISocket, tcpmessage *tm, struct List *wait_list, fd_set *writes, signed long *max_fd)
 #else
-void tcp_write(struct Library *SocketBase, tcpmessage *tm, struct List *wait_list, fd_set *writes, signed long *max_fd)
+void tcp_write(struct Library* SocketBase, tcpmessage* tm, struct List* wait_list, fd_set* writes, signed long* max_fd)
 #endif
 {
-	tcpident *ti;
+	tcpident* ti;
 	signed long result;
 
 	truth(SocketBase != nil);
@@ -373,7 +374,7 @@ void tcp_write(struct Library *SocketBase, tcpmessage *tm, struct List *wait_lis
 
 	DS(kprintf("  TCP_WRITE %ld bytes", tm->length))
 
-		ti = tm->ident;
+	ti = tm->ident;
 
 	if (!ti)
 	{
@@ -381,7 +382,7 @@ void tcp_write(struct Library *SocketBase, tcpmessage *tm, struct List *wait_lis
 		tm->error = ERROR_NO_CONNECTION;
 
 		DS(kprintf("  -> result = %ld ($%08lx), error = %ld\n", tm->result, tm->result, tm->error))
-			ReplyMsg(&tm->header);
+		ReplyMsg(&tm->header);
 		return;
 	}
 
@@ -393,7 +394,7 @@ void tcp_write(struct Library *SocketBase, tcpmessage *tm, struct List *wait_lis
 		tm->error = NO_ERROR;
 
 		DS(kprintf("  -> result = %ld ($%08lx), error = %ld\n", tm->result, tm->result, tm->error))
-			ReplyMsg(&tm->header);
+		ReplyMsg(&tm->header);
 		return;
 	}
 
@@ -401,12 +402,12 @@ void tcp_write(struct Library *SocketBase, tcpmessage *tm, struct List *wait_lis
 
 	result = send(ti->fd, tm->data, tm->length, 0);
 	if (result == tm->length)
-	{   /* satisfied immediately */
+	{ /* satisfied immediately */
 		tm->result = tm->length;
 		tm->error = NO_ERROR;
 
 		DS(kprintf("  -> result = %ld ($%08lx), error = %ld\n", tm->result, tm->result, tm->error))
-			ReplyMsg(&tm->header);
+		ReplyMsg(&tm->header);
 		return;
 	}
 
@@ -417,20 +418,20 @@ void tcp_write(struct Library *SocketBase, tcpmessage *tm, struct List *wait_lis
 		switch (Errno())
 		{
 		case EWOULDBLOCK:
-		case EINTR: 	/* write couldn't get through immediately */
+		case EINTR: /* write couldn't get through immediately */
 			tm->result = 0;
 			DS(kprintf("  -> (wait_list) result = %ld ($%08lx), error = %ld\n", tm->result, tm->result, tm->error))
-				AddTail(wait_list, (struct Node *)tm);
+			AddTail(wait_list, (struct Node *)tm);
 			FD_SET(ti->fd, writes);
 			if (ti->fd > *max_fd)
 				*max_fd = ti->fd;
 			return;
 
-		default: 	/* something has gone wrong */
+		default: /* something has gone wrong */
 			tm->result = 0;
 			tm->error = ERROR_LOST_CONNECTION;
 			DS(kprintf("  -> result = %ld ($%08lx), error = %ld\n", tm->result, tm->result, tm->error))
-				ReplyMsg(&tm->header);
+			ReplyMsg(&tm->header);
 			return;
 		}
 	}
@@ -439,7 +440,7 @@ void tcp_write(struct Library *SocketBase, tcpmessage *tm, struct List *wait_lis
 
 	tm->result = result;
 	DS(kprintf("  -> (wait_list) result = %ld ($%08lx), error = %ld\n", tm->result, tm->result, tm->error))
-		AddTail(wait_list, (struct Node *)tm);
+	AddTail(wait_list, (struct Node *)tm);
 	FD_SET(ti->fd, writes);
 	if (ti->fd > *max_fd) *max_fd = ti->fd;
 	return;
@@ -448,12 +449,12 @@ void tcp_write(struct Library *SocketBase, tcpmessage *tm, struct List *wait_lis
 #ifdef __amigaos4__
 void tcp_read_more(struct Library *SocketBase, struct SocketIFace * ISocket, tcpmessage *tm, struct List *wait_list, fd_set *reads, signed long *max_fd)
 #else
-void tcp_read_more(struct Library *SocketBase, tcpmessage *tm, struct List *wait_list, fd_set *reads, signed long *max_fd)
+void tcp_read_more(struct Library* SocketBase, tcpmessage* tm, struct List* wait_list, fd_set* reads, signed long* max_fd)
 #endif
 {
-	tcpident *ti;
+	tcpident* ti;
 	signed long result;
-	unsigned char *s;
+	unsigned char* s;
 
 	truth(SocketBase != nil);
 #ifdef __amigaos4__
@@ -467,7 +468,7 @@ void tcp_read_more(struct Library *SocketBase, tcpmessage *tm, struct List *wait
 
 	DS(kprintf("  TCP_READ more %ld bytes", tm->length))
 
-		ti = tm->ident;
+	ti = tm->ident;
 	verify(ti, V_tcpident);
 
 	if (tm->flags & FLAG_READLINE)
@@ -483,7 +484,7 @@ void tcp_read_more(struct Library *SocketBase, tcpmessage *tm, struct List *wait
 				if (*s == '\r' || *s == '\n')
 				{
 					if (tm->result == 1)
-					{  /* blank line ... skip it */
+					{ /* blank line ... skip it */
 						tm->result--;
 						continue;
 					}
@@ -491,7 +492,7 @@ void tcp_read_more(struct Library *SocketBase, tcpmessage *tm, struct List *wait
 
 					Remove((struct Node *)tm);
 					DS(kprintf("  -> (remove) result = %ld ($%08lx), error = %ld\n", tm->result, tm->result, tm->error))
-						ReplyMsg(&tm->header);
+					ReplyMsg(&tm->header);
 
 					fix_read_set(wait_list, reads, max_fd);
 					return;
@@ -503,7 +504,7 @@ void tcp_read_more(struct Library *SocketBase, tcpmessage *tm, struct List *wait
 
 					Remove((struct Node *)tm);
 					DS(kprintf("  -> (remove) result = %ld ($%08lx), error = %ld\n", tm->result, tm->result, tm->error))
-						ReplyMsg(&tm->header);
+					ReplyMsg(&tm->header);
 
 					fix_read_set(wait_list, reads, max_fd);
 					return;
@@ -511,13 +512,13 @@ void tcp_read_more(struct Library *SocketBase, tcpmessage *tm, struct List *wait
 				continue;
 			}
 			else if (result == 0)
-			{  /* got to be EOF */
+			{ /* got to be EOF */
 				ti->eof = true;
 				tm->error = ERROR_EOF;
 
 				Remove((struct Node *)tm);
 				DS(kprintf("  -> (remove) result = %ld ($%08lx), error = %ld\n", tm->result, tm->result, tm->error))
-					ReplyMsg(&tm->header);
+				ReplyMsg(&tm->header);
 
 				fix_read_set(wait_list, reads, max_fd);
 				return;
@@ -530,12 +531,12 @@ void tcp_read_more(struct Library *SocketBase, tcpmessage *tm, struct List *wait
 				case EWOULDBLOCK: /* nothing there to read yet */
 					return;
 
-				default: 	/* something went wrong */
+				default: /* something went wrong */
 					tm->error = ERROR_LOST_CONNECTION;
 
 					Remove((struct Node *)tm);
 					DS(kprintf("  -> (remove) result = %ld ($%08lx), error = %ld\n", tm->result, tm->result, tm->error))
-						ReplyMsg(&tm->header);
+					ReplyMsg(&tm->header);
 
 					fix_read_set(wait_list, reads, max_fd);
 					return;
@@ -547,26 +548,28 @@ void tcp_read_more(struct Library *SocketBase, tcpmessage *tm, struct List *wait
 	else
 	{
 		result = recv(ti->fd, (unsigned char *)tm->data + tm->result, tm->length - tm->result, 0);
-		if (result == tm->length - tm->result) {  /* satisfied! */
+		if (result == tm->length - tm->result)
+		{ /* satisfied! */
 			tm->result = tm->length;
 			tm->error = NO_ERROR;
 
 			Remove((struct Node *)tm); /* remove from wait_list */
 			DS(kprintf("  -> (remove) result = %ld ($%08lx), error = %ld\n", tm->result, tm->result, tm->error))
-				ReplyMsg(&tm->header);  	/* send it back completed */
+			ReplyMsg(&tm->header); /* send it back completed */
 
 			fix_read_set(wait_list, reads, max_fd);
 
 			return;
 		}
 
-		if (result == 0) {	/* got to be EOF */
+		if (result == 0)
+		{ /* got to be EOF */
 			ti->eof = true;
 			tm->error = ERROR_EOF;
 
 			Remove((struct Node *)tm); /* as above */
 			DS(kprintf("  -> (remove) result = %ld ($%08lx), error = %ld\n", tm->result, tm->result, tm->error))
-				ReplyMsg(&tm->header);
+			ReplyMsg(&tm->header);
 
 			fix_read_set(wait_list, reads, max_fd);
 
@@ -583,12 +586,12 @@ void tcp_read_more(struct Library *SocketBase, tcpmessage *tm, struct List *wait
 			case EWOULDBLOCK: /* nothing more to read yet */
 				return;
 
-			default: 	/* something went wrong */
+			default: /* something went wrong */
 				tm->error = ERROR_LOST_CONNECTION;
 
 				Remove((struct Node *)tm);
 				DS(kprintf("  -> (remove) result = %ld ($%08lx), error = %ld\n", tm->result, tm->result, tm->error))
-					ReplyMsg(&tm->header);
+				ReplyMsg(&tm->header);
 
 				fix_read_set(wait_list, reads, max_fd);
 
@@ -600,17 +603,17 @@ void tcp_read_more(struct Library *SocketBase, tcpmessage *tm, struct List *wait
 
 		tm->result += result;
 		DS(kprintf("  -> result = %ld ($%08lx), error = %ld\n", tm->result, tm->result, tm->error))
-			return;  			/* keep waiting */
+		return; /* keep waiting */
 	}
 }
 
 #ifdef __amigaos4__
 void tcp_write_more(struct Library *SocketBase, struct SocketIFace * ISocket, tcpmessage *tm, struct List *wait_list, fd_set *writes, signed long *max_fd)
 #else
-void tcp_write_more(struct Library *SocketBase, tcpmessage *tm, struct List *wait_list, fd_set *writes, signed long *max_fd)
+void tcp_write_more(struct Library* SocketBase, tcpmessage* tm, struct List* wait_list, fd_set* writes, signed long* max_fd)
 #endif
 {
-	tcpident *ti;
+	tcpident* ti;
 	signed long result;
 
 	truth(SocketBase != nil);
@@ -625,18 +628,18 @@ void tcp_write_more(struct Library *SocketBase, tcpmessage *tm, struct List *wai
 
 	DS(kprintf("  TCP_WRITE more %ld bytes", tm->length))
 
-		ti = tm->ident;
+	ti = tm->ident;
 	verify(ti, V_tcpident);
 
 	result = send(ti->fd, (unsigned char *)tm->data + tm->result, tm->length - tm->result, 0);
 	if (result == tm->length - tm->result)
-	{  /* satisfied! */
+	{ /* satisfied! */
 		tm->result = tm->length;
 		tm->error = NO_ERROR;
 
 		Remove((struct Node *)tm);
 		DS(kprintf("  -> (remove) result = %ld ($%08lx), error = %ld\n", tm->result, tm->result, tm->error))
-			ReplyMsg(&tm->header);
+		ReplyMsg(&tm->header);
 
 		fix_write_set(wait_list, writes, max_fd);
 
@@ -650,15 +653,15 @@ void tcp_write_more(struct Library *SocketBase, tcpmessage *tm, struct List *wai
 		switch (Errno())
 		{
 		case EWOULDBLOCK:
-		case EINTR: 	/* write blocked again */
+		case EINTR: /* write blocked again */
 			return;
 
-		default: 	/* something has gone wrong */
+		default: /* something has gone wrong */
 			tm->error = ERROR_LOST_CONNECTION;
 
 			Remove((struct Node *)tm);
 			DS(kprintf("  -> (remove) result = %ld ($%08lx), error = %ld\n", tm->result, tm->result, tm->error))
-				ReplyMsg(&tm->header);
+			ReplyMsg(&tm->header);
 
 			fix_write_set(wait_list, writes, max_fd);
 
@@ -670,20 +673,20 @@ void tcp_write_more(struct Library *SocketBase, tcpmessage *tm, struct List *wai
 
 	tm->result += result;
 	DS(kprintf("  -> result = %ld ($%08lx), error = %ld\n", tm->result, tm->result, tm->error))
-		return;
+	return;
 }
 
 #ifdef __amigaos4__
 void tcp_listen(struct Library *SocketBase, struct SocketIFace * ISocket, tcpmessage *tm, struct List *wait_list, fd_set *reads, signed long *max_fd)
 #else
-void tcp_listen(struct Library *SocketBase, tcpmessage *tm, struct List *wait_list, fd_set *reads, signed long *max_fd)
+void tcp_listen(struct Library* SocketBase, tcpmessage* tm, struct List* wait_list, fd_set* reads, signed long* max_fd)
 #endif
 {
-	tcpident *ti;
+	tcpident* ti;
 	signed long result, socklen;
 	struct sockaddr_in sin;
-	struct hostent *he;
-	tcpmessage *wait_tm;
+	struct hostent* he;
+	tcpmessage* wait_tm;
 
 	truth(SocketBase != nil);
 #ifdef __amigaos4__
@@ -697,19 +700,20 @@ void tcp_listen(struct Library *SocketBase, tcpmessage *tm, struct List *wait_li
 
 	DS(kprintf("  TCP_LISTEN\n"))
 
-		if (tm->ident)
-		{
-			tm->result = false;
-			tm->error = ERROR_ALREADY_CONNECTED;
+	if (tm->ident)
+	{
+		tm->result = false;
+		tm->error = ERROR_ALREADY_CONNECTED;
 
-			ReplyMsg(&tm->header);
-			return;
-		}
+		ReplyMsg(&tm->header);
+		return;
+	}
 
 	memset(&sin, 0, sizeof(sin));
 
 	he = gethostbyname("localhost");
-	if (!he) {
+	if (!he)
+	{
 		tm->result = false;
 		tm->error = ERROR_UNKNOWN_HOST;
 
@@ -721,7 +725,7 @@ void tcp_listen(struct Library *SocketBase, tcpmessage *tm, struct List *wait_li
 	sin.sin_port = tm->port.w;
 	memcpy(&sin.sin_addr.s_addr, he->h_addr_list[0], he->h_length);
 
-	ti = new_tcpident(0);	/* filled in later */
+	ti = new_tcpident(0); /* filled in later */
 	if (ti)
 	{
 		wait_tm = new_tcpmessage(nil);
@@ -735,7 +739,7 @@ void tcp_listen(struct Library *SocketBase, tcpmessage *tm, struct List *wait_li
 				result = bind(ti->fd, (struct sockaddr *)&sin, sizeof(sin));
 				if (result == 0)
 				{
-					result = listen(ti->fd, 5);	/* random msq queue length */
+					result = listen(ti->fd, 5); /* random msq queue length */
 					if (result == 0)
 					{
 						/*
@@ -759,7 +763,7 @@ void tcp_listen(struct Library *SocketBase, tcpmessage *tm, struct List *wait_li
 						wait_tm->ident = ti;
 
 						wait_tm->command = TCP_LISTEN;
-						wait_tm->port.w = sin.sin_port;  /* just for curiosity */
+						wait_tm->port.w = sin.sin_port; /* just for curiosity */
 
 						/* note the reply port so we can send future accepts
 							to the same place */
@@ -774,11 +778,13 @@ void tcp_listen(struct Library *SocketBase, tcpmessage *tm, struct List *wait_li
 						ReplyMsg(&tm->header);
 						return;
 					}
-					else {
+					else
+					{
 						tm->error = ERROR_ACCESS_DENIED;
 					}
 				}
-				else {
+				else
+				{
 					tm->error = ERROR_ACCESS_DENIED;
 				}
 				CloseSocket(ti->fd);
@@ -801,13 +807,13 @@ void tcp_listen(struct Library *SocketBase, tcpmessage *tm, struct List *wait_li
 #ifdef __amigaos4__
 void tcp_accept(struct Library *SocketBase, struct SocketIFace * ISocket, tcpmessage *tm, struct List *wait_list, struct MsgPort *replies)
 #else
-void tcp_accept(struct Library *SocketBase, tcpmessage *tm, struct List *wait_list, struct MsgPort *replies)
+void tcp_accept(struct Library* SocketBase, tcpmessage* tm, struct List* wait_list, struct MsgPort* replies)
 #endif
 {
 	tcpident *ti, *accept_ti;
-	tcpmessage  *accept_tm, *wait_tm;
+	tcpmessage *accept_tm, *wait_tm;
 	struct sockaddr_in sin;
-	signed long  	sin_len, result;
+	signed long sin_len, result;
 
 	truth(SocketBase != nil);
 #ifdef __amigaos4__
@@ -820,7 +826,7 @@ void tcp_accept(struct Library *SocketBase, tcpmessage *tm, struct List *wait_li
 
 	DS(kprintf("  TCP_ACCEPT\n"))
 
-		ti = tm->ident;
+	ti = tm->ident;
 	verify(ti, V_tcpident);
 
 	sin_len = sizeof(sin);
@@ -839,15 +845,18 @@ void tcp_accept(struct Library *SocketBase, tcpmessage *tm, struct List *wait_li
 #endif
 
 	accept_tm = new_tcpmessage(tm->header.mn_ReplyPort);
-	if (accept_tm) {
+	if (accept_tm)
+	{
 		wait_tm = new_tcpmessage(nil);
-		if (wait_tm) {
+		if (wait_tm)
+		{
 			accept_ti = new_tcpident(result);
-			if (accept_ti) {
+			if (accept_ti)
+			{
 				/* all systems go! */
 
 				/* tell the parent that we have a new connection ... */
-				accept_tm->command = TCP_ACCEPTED;
+				accept_tm->command = TCP_ACCEPTED ;
 				accept_tm->address.l = sin.sin_addr.s_addr;
 				accept_tm->port.w = sin.sin_port;
 
@@ -858,7 +867,7 @@ void tcp_accept(struct Library *SocketBase, tcpmessage *tm, struct List *wait_li
 				PutMsg(tm->header.mn_ReplyPort, &accept_tm->header);
 
 				/* keep a copy on our files for book keeping purposes */
-				wait_tm->command = TCP_CONNECTED;
+				wait_tm->command = TCP_CONNECTED ;
 				wait_tm->address.l = sin.sin_addr.s_addr;
 				wait_tm->port.w = sin.sin_port;
 
@@ -884,7 +893,7 @@ void tcp_accept(struct Library *SocketBase, tcpmessage *tm, struct List *wait_li
 #ifdef __amigaos4__
 void tcp_close(struct Library *SocketBase, struct SocketIFace * ISocket, tcpmessage *tm, struct List *wait_list, fd_set *reads, fd_set *writes, signed long *max_fd)
 #else
-void tcp_close(struct Library *SocketBase, tcpmessage *tm, struct List *wait_list, fd_set *reads, fd_set *writes, signed long *max_fd)
+void tcp_close(struct Library* SocketBase, tcpmessage* tm, struct List* wait_list, fd_set* reads, fd_set* writes, signed long* max_fd)
 #endif
 {
 	tcpident *ti, *iti;
@@ -903,7 +912,7 @@ void tcp_close(struct Library *SocketBase, tcpmessage *tm, struct List *wait_lis
 
 	DS(kprintf("  TCP_CLOSE\n"))
 
-		ti = tm->ident;
+	ti = tm->ident;
 	if (!ti || ti->connecting_port)
 	{
 		tm->result = false;
@@ -923,18 +932,20 @@ void tcp_close(struct Library *SocketBase, tcpmessage *tm, struct List *wait_lis
 	 */
 
 	for (itm = (tcpmessage *)wait_list->lh_Head;
-	nitm = (tcpmessage *)itm->header.mn_Node.ln_Succ;
-		itm = nitm) {
-
+	     nitm = (tcpmessage *)itm->header.mn_Node.ln_Succ;
+	     itm = nitm)
+	{
 		verify(itm, V_tcpmessage);
 
-		switch (itm->command) {
+		switch (itm->command)
+		{
 		case TCP_READ:
 		case TCP_WRITE:
 			iti = itm->ident;
 			verify(iti, V_tcpident);
 
-			if (iti == ti) {
+			if (iti == ti)
+			{
 				itm->error = ERROR_INTERRUPTED;
 				itm->ident = nil;
 
@@ -967,7 +978,7 @@ void tcp_close(struct Library *SocketBase, tcpmessage *tm, struct List *wait_lis
 		}
 	}
 
-	truth(ncons + nlis == 1);  /* one, and only one connection!!! */
+	truth(ncons + nlis == 1); /* one, and only one connection!!! */
 
 	if (ti->fd >= 0)
 		CloseSocket(ti->fd);
@@ -989,12 +1000,12 @@ void tcp_close(struct Library *SocketBase, tcpmessage *tm, struct List *wait_lis
 #ifdef __amigaos4__
 void do_connect(struct Library *SocketBase, struct SocketIFace * ISocket, tcpmessage *mess, struct MsgPort *pport, struct MsgPort *myport)
 #else
-void do_connect(struct Library *SocketBase, tcpmessage *mess, struct MsgPort *pport, struct MsgPort *myport)
+void do_connect(struct Library* SocketBase, tcpmessage* mess, struct MsgPort* pport, struct MsgPort* myport)
 #endif
 {
 	/* bits of the following inspired by the source to NcFTP ... thanks go to Mike Gleason */
 	struct sockaddr_in sin;
-	struct hostent *he;
+	struct hostent* he;
 	signed long result, s;
 
 	truth(SocketBase != nil);
@@ -1008,7 +1019,7 @@ void do_connect(struct Library *SocketBase, tcpmessage *mess, struct MsgPort *pp
 	memset((void *)&sin, 0, sizeof(&sin)); /* not sure this is necessary ... ncftp does this.  JIC */
 
 	sin.sin_port = mess->port.w;
-	sin.sin_family = AF_INET;
+	sin.sin_family = AF_INET ;
 
 	if (mess->data)
 	{ /* if they don't send a string, their address must be right */
@@ -1018,7 +1029,7 @@ void do_connect(struct Library *SocketBase, tcpmessage *mess, struct MsgPort *pp
 		{ /* not a direct dotted IP number */
 			he = gethostbyname(mess->data);
 			if (!he)
-			{  /* oh well ... */
+			{ /* oh well ... */
 				mess->result = 0;
 				mess->error = ERROR_UNKNOWN_HOST;
 
@@ -1040,7 +1051,7 @@ void do_connect(struct Library *SocketBase, tcpmessage *mess, struct MsgPort *pp
 
 	/* we have the address, now try the connect */
 
-	s = socket(sin.sin_family, SOCK_STREAM, 0);  /* 0 for protocol legal? ncftp does it */
+	s = socket(sin.sin_family, SOCK_STREAM, 0); /* 0 for protocol legal? ncftp does it */
 	if (s < 0)
 	{
 		mess->result = 0;
@@ -1094,7 +1105,8 @@ void do_connect(struct Library *SocketBase, tcpmessage *mess, struct MsgPort *pp
 
 		CloseSocket(s);
 	}
-	else {
+	else
+	{
 		mess->result = result;
 		mess->error = NO_ERROR;
 	}
@@ -1107,18 +1119,18 @@ void do_connect(struct Library *SocketBase, tcpmessage *mess, struct MsgPort *pp
 }
 
 
-#ifndef	__MORPHOS__
+#ifndef __MORPHOS__
 void SAVEDS ASM connect_child(REG(a0, unsigned char *parent_port))
 #else
 void connect_child(unsigned char *parent_port)
 #endif
 {
-	struct Library *SocketBase;
+	struct Library* SocketBase;
 #ifdef __amigaos4__
 	struct SocketIFace *ISocket;
 #endif
 	struct MsgPort *pport, *myport;
-	tcpmessage *mess;
+	tcpmessage* mess;
 
 	Forbid(); /* 2003-03-02 rri */
 	pport = FindPort(parent_port);
@@ -1150,14 +1162,14 @@ void connect_child(unsigned char *parent_port)
 			if (SocketBase)
 			{
 				/* tell them we are going */
-				mess->command = TCP_STARTUP;
+				mess->command = TCP_STARTUP ;
 				mess->result = true;
 				mess->error = NO_ERROR;
 				PutMsg(pport, &mess->header);
 				WaitPort(myport);
-				GetMsg(myport);		/* should be guaranteed to be mess back */
-				pport = mess->header.mn_ReplyPort;  /* may be a different port */
-				mess->command = TCP_CONNECTED;
+				GetMsg(myport); /* should be guaranteed to be mess back */
+				pport = mess->header.mn_ReplyPort; /* may be a different port */
+				mess->command = TCP_CONNECTED ;
 				mess->header.mn_ReplyPort = myport; /* GOT TO BE THE SAME !!! (for ident purposes) */
 #ifdef __amigaos4__
 				do_connect(SocketBase, ISocket, mess, pport, myport);
@@ -1170,7 +1182,7 @@ void connect_child(unsigned char *parent_port)
 			else
 			{
 				/* tell them we are NOT going */
-				mess->command = TCP_STARTUP;
+				mess->command = TCP_STARTUP ;
 				mess->result = false;
 				mess->error = ERROR_NO_CONNECTION;
 				PutMsg(pport, &mess->header);
@@ -1191,26 +1203,26 @@ void connect_child(unsigned char *parent_port)
 #ifdef __amigaos4__
 void tcp_connect(struct Library *SocketBase, struct SocketIFace * ISocket, tcpmessage *tm, struct List *wait_list, struct MsgPort *replies)
 #else
-void tcp_connect(struct Library *SocketBase, tcpmessage *tm, struct List *wait_list, struct MsgPort *replies)
+void tcp_connect(struct Library* SocketBase, tcpmessage* tm, struct List* wait_list, struct MsgPort* replies)
 #endif
 {
-	struct Process *child;
+	struct Process* child;
 	unsigned char buffer[30];
-	struct MsgPort *tmp_port;
-	tcpmessage *child_tm;
+	struct MsgPort* tmp_port;
+	tcpmessage* child_tm;
 
 	unique_name(FindTask(0), ": Evans TCP Handler", buffer);
 
 	DS(kprintf("  TCP_CONNECT %s:%ld\n", tm->data, (int)tm->port.w))
 
-		if (tm->ident)
-		{
-			tm->result = false;
-			tm->error = ERROR_ALREADY_CONNECTED;
+	if (tm->ident)
+	{
+		tm->result = false;
+		tm->error = ERROR_ALREADY_CONNECTED;
 
-			ReplyMsg(&tm->header);
-			return;
-		}
+		ReplyMsg(&tm->header);
+		return;
+	}
 
 	tm->ident = new_tcpident(-1);
 	if (!tm->ident)
@@ -1237,13 +1249,13 @@ void tcp_connect(struct Library *SocketBase, tcpmessage *tm, struct List *wait_l
 
 	/* start child */
 
-#ifndef	__MORPHOS__
+#ifndef __MORPHOS__
 	child = CreateNewProcTags(
 		NP_Entry, (ULONG)connect_child,
-		NP_Name, (ULONG)"TCP Connect Handler",
-		NP_Arguments, (ULONG)buffer,
-		TAG_END, 0
-		);
+		        NP_Name, (ULONG)"TCP Connect Handler",
+		        NP_Arguments, (ULONG)buffer,
+		        TAG_END, 0
+	);
 #else
 	child = CreateNewProcTags(
 		NP_CodeType, CODETYPE_PPC,
@@ -1274,7 +1286,7 @@ void tcp_connect(struct Library *SocketBase, tcpmessage *tm, struct List *wait_l
 
 	child_tm = (tcpmessage *)GetMsg(tmp_port);
 	if (!child_tm)
-	{  /* they had a problem, and failed */
+	{ /* they had a problem, and failed */
 		tm->result = false;
 		tm->error = ERROR_OOM;
 
@@ -1287,7 +1299,7 @@ void tcp_connect(struct Library *SocketBase, tcpmessage *tm, struct List *wait_l
 	}
 
 	if (!child_tm->result)
-	{   /* ditto */
+	{ /* ditto */
 		tm->error = child_tm->error;
 
 		ReplyMsg((struct Message *)child_tm);
@@ -1318,7 +1330,7 @@ void tcp_connect(struct Library *SocketBase, tcpmessage *tm, struct List *wait_l
 
 	/* that will come back when the child has resolved the connect */
 
-	((tcpident *)tm->ident)->connecting_port = tmp_port;  /* note: this is a special case for TCP_CONNECT ONLY */
+	((tcpident *)tm->ident)->connecting_port = tmp_port; /* note: this is a special case for TCP_CONNECT ONLY */
 
 	AddTail(wait_list, (struct Node *)tm);
 
@@ -1328,12 +1340,12 @@ void tcp_connect(struct Library *SocketBase, tcpmessage *tm, struct List *wait_l
 #ifdef __amigaos4__
 void tcp_connected(struct Library *SocketBase, struct SocketIFace * ISocket, tcpmessage *tm, struct List *wait_list)
 #else
-void tcp_connected(struct Library *SocketBase, tcpmessage *tm, struct List *wait_list)
+void tcp_connected(struct Library* SocketBase, tcpmessage* tm, struct List* wait_list)
 #endif
 {
-	tcpident *ti;
+	tcpident* ti;
 	tcpmessage *itm, *nitm, *wait_tm;
-	struct MsgPort *their_port;	/* to identify which child */
+	struct MsgPort* their_port; /* to identify which child */
 	signed long s;
 
 	truth(SocketBase != nil);
@@ -1345,13 +1357,14 @@ void tcp_connected(struct Library *SocketBase, tcpmessage *tm, struct List *wait
 
 	DS(kprintf("  TCP_CONNECTED\n"))
 
-		their_port = tm->header.mn_ReplyPort;
+	their_port = tm->header.mn_ReplyPort;
 
 	if (tm->error == NO_ERROR)
 	{
-		s = ObtainSocket(tm->result, AF_INET, SOCK_STREAM, 0);	/* shudder */
+		s = ObtainSocket(tm->result, AF_INET, SOCK_STREAM, 0); /* shudder */
 	}
-	else {
+	else
+	{
 		s = -1;
 	}
 
@@ -1360,8 +1373,8 @@ void tcp_connected(struct Library *SocketBase, tcpmessage *tm, struct List *wait
 	/* see which TCP_CONNECT in the wait list it corresponds to ... */
 
 	for (itm = (tcpmessage *)wait_list->lh_Head;
-	nitm = (tcpmessage *)itm->header.mn_Node.ln_Succ;
-		itm = nitm)
+	     nitm = (tcpmessage *)itm->header.mn_Node.ln_Succ;
+	     itm = nitm)
 	{
 		if (itm->command == TCP_CONNECT)
 		{
@@ -1380,7 +1393,7 @@ void tcp_connected(struct Library *SocketBase, tcpmessage *tm, struct List *wait
 						itm->error = tm->error;
 					}
 					else
-					{	 /* this case is our Obtain failing */
+					{ /* this case is our Obtain failing */
 						itm->result = false;
 						/* bizarre error for bizarre case */
 						itm->error = ERROR_LOST_CONNECTION;
@@ -1419,7 +1432,7 @@ void tcp_connected(struct Library *SocketBase, tcpmessage *tm, struct List *wait
 					ti->fd = s;
 
 					wait_tm->ident = ti;
-					wait_tm->command = TCP_CONNECTED;
+					wait_tm->command = TCP_CONNECTED ;
 
 					wait_tm->address = tm->address;
 					wait_tm->port = tm->port;
@@ -1481,22 +1494,20 @@ void tcp_connected(struct Library *SocketBase, tcpmessage *tm, struct List *wait
 }
 
 
-
-void tcp_interrupt(tcpmessage *tm, struct List *wait_list, fd_set *reads, fd_set *writes, signed long *max_fd)
+void tcp_interrupt(tcpmessage* tm, struct List* wait_list, fd_set* reads, fd_set* writes, signed long* max_fd)
 {
-	tcpident *ti;
+	tcpident* ti;
 	tcpmessage *itm, *nitm;
-	struct MsgPort *port;
+	struct MsgPort* port;
 
 	verify(tm, V_tcpmessage);
 
 	DS(kprintf("  TCP_INTERRUPT\n"))
 
-		for (itm = (tcpmessage *)wait_list->lh_Head;
-	nitm = (tcpmessage *)itm->header.mn_Node.ln_Succ;
-		itm = nitm)
+	for (itm = (tcpmessage *)wait_list->lh_Head;
+	     nitm = (tcpmessage *)itm->header.mn_Node.ln_Succ;
+	     itm = nitm)
 	{
-
 		verify(itm, V_tcpmessage);
 
 		if (itm == tm->interrupt)
@@ -1555,7 +1566,7 @@ void tcp_interrupt(tcpmessage *tm, struct List *wait_list, fd_set *reads, fd_set
 #ifdef __amigaos4__
 void tcp_peername(struct Library *SocketBase, struct SocketIFace * ISocket, tcpmessage *tm)
 #else
-void tcp_peername(struct Library *SocketBase, tcpmessage *tm)
+void tcp_peername(struct Library* SocketBase, tcpmessage* tm)
 #endif
 /*
  * this one is a strange one ... it may have the potential to block
@@ -1563,9 +1574,9 @@ void tcp_peername(struct Library *SocketBase, tcpmessage *tm)
  * this trivial bloody function
  */
 {
-	tcpident *ti;
+	tcpident* ti;
 	struct sockaddr_in sin;
-	struct hostent *he;
+	struct hostent* he;
 	signed long sin_len, len;
 
 	truth(SocketBase != nil);
@@ -1576,7 +1587,7 @@ void tcp_peername(struct Library *SocketBase, tcpmessage *tm)
 
 	DS(kprintf("  TCP_PEERNAME\n"))
 
-		ti = tm->ident;
+	ti = tm->ident;
 	if (!ti)
 	{
 		tm->result = false;
@@ -1596,7 +1607,8 @@ void tcp_peername(struct Library *SocketBase, tcpmessage *tm)
 		{
 			tm->error = ERROR_NO_CONNECTION;
 		}
-		else {
+		else
+		{
 			tm->error = ERROR_OOM;
 		}
 		tm->result = false;
@@ -1634,10 +1646,10 @@ void tcp_peername(struct Library *SocketBase, tcpmessage *tm)
 #ifdef __amigaos4__
 void tcp_service(struct Library *SocketBase, struct SocketIFace * ISocket, tcpmessage *tm)
 #else
-void tcp_service(struct Library *SocketBase, tcpmessage *tm)
+void tcp_service(struct Library* SocketBase, tcpmessage* tm)
 #endif
 {
-	struct servent *se;
+	struct servent* se;
 
 	truth(SocketBase != nil);
 #ifdef __amigaos4__
@@ -1661,27 +1673,26 @@ void tcp_service(struct Library *SocketBase, tcpmessage *tm)
 
 	DS(kprintf("  TCP_SERVICE %s -> %ld\n", tm->data, tm->port.w))
 
-		ReplyMsg(&tm->header);
+	ReplyMsg(&tm->header);
 	return;
 }
 
 
-
-struct MsgPort *running_running(tcpmessage *emergency, struct MsgPort *commands)
+struct MsgPort* running_running(tcpmessage* emergency, struct MsgPort* commands)
 {
-	unsigned long		tcp_signal, signal_tmp;
-	tcpmessage  *tm, *tm2;
-	tcpident 	*ti;
-	struct Library *SocketBase = nil;
+	unsigned long tcp_signal, signal_tmp;
+	tcpmessage *tm, *tm2;
+	tcpident* ti;
+	struct Library* SocketBase = nil;
 #ifdef __amigaos4__
 	struct SocketIFace * ISocket = nil;
 #endif
 	struct List waiting;
-	fd_set	read_set, write_set, read_tmp, write_tmp;
-	signed long  	max_fd, n;
-	struct MsgPort *death_port;
+	fd_set read_set, write_set, read_tmp, write_tmp;
+	signed long max_fd, n;
+	struct MsgPort* death_port;
 
-	NewList(&waiting);	/* list of waiting requests */
+	NewList(&waiting); /* list of waiting requests */
 
 	FD_ZERO(&read_set);
 	FD_ZERO(&write_set);
@@ -1727,7 +1738,7 @@ struct MsgPort *running_running(tcpmessage *emergency, struct MsgPort *commands)
 			{
 			case TCP_NOOP:
 				DS(kprintf("  TCP_NOOP\n"))
-					tm->result = true;
+				tm->result = true;
 				ReplyMsg(&tm->header);
 				break;
 
@@ -1795,7 +1806,7 @@ struct MsgPort *running_running(tcpmessage *emergency, struct MsgPort *commands)
 
 			case TCP_READ:
 				if (!SocketBase)
-				{   /* someone is frigging us around */
+				{ /* someone is frigging us around */
 					tm->result = 0;
 					tm->error = ERROR_NO_CONNECTION;
 
@@ -1811,7 +1822,7 @@ struct MsgPort *running_running(tcpmessage *emergency, struct MsgPort *commands)
 
 			case TCP_WRITE:
 				if (!SocketBase)
-				{   /* someone is frigging us around */
+				{ /* someone is frigging us around */
 					tm->result = 0;
 					tm->error = ERROR_NO_CONNECTION;
 
@@ -1827,7 +1838,7 @@ struct MsgPort *running_running(tcpmessage *emergency, struct MsgPort *commands)
 
 			case TCP_CLOSE:
 				if (!SocketBase)
-				{   /* someone is frigging us around */
+				{ /* someone is frigging us around */
 					tm->result = false;
 					tm->error = ERROR_NO_CONNECTION;
 
@@ -1857,7 +1868,7 @@ struct MsgPort *running_running(tcpmessage *emergency, struct MsgPort *commands)
 				/* ahhh, a child is reporting back! */
 
 				if (!SocketBase)
-				{   /* someone is frigging us around */
+				{ /* someone is frigging us around */
 					tm->result = false;
 					tm->error = ERROR_NO_CONNECTION;
 
@@ -1914,7 +1925,7 @@ struct MsgPort *running_running(tcpmessage *emergency, struct MsgPort *commands)
 			case TCP_DIE:
 				/* we have to assume they've done the right thing and
 					disposed of all messages (closing all connections) */
-					/* all we have to do is to free whatever is left over
+				/* all we have to do is to free whatever is left over
 						and exit */
 
 				death_port = tm->header.mn_ReplyPort;
@@ -1944,7 +1955,7 @@ struct MsgPort *running_running(tcpmessage *emergency, struct MsgPort *commands)
 
 			case TCP_PEERNAME:
 				if (!SocketBase)
-				{   /* someone is yankin' our chain */
+				{ /* someone is yankin' our chain */
 					tm->result = false;
 					tm->error = ERROR_NO_CONNECTION;
 
@@ -2009,7 +2020,7 @@ struct MsgPort *running_running(tcpmessage *emergency, struct MsgPort *commands)
 		} // while
 
 		if (n < 0)
-		{	/* hmmm ... this seems to happen when they close the library underneath us */
+		{ /* hmmm ... this seems to happen when they close the library underneath us */
 			/* should send back any waiting reads/writes/listens */
 #ifdef __amigaos4__
 			DropInterface((struct Interface*)ISocket);
@@ -2026,13 +2037,12 @@ struct MsgPort *running_running(tcpmessage *emergency, struct MsgPort *commands)
 #endif
 
 		if (n <= 0)
-			continue;	/* no fds are ready, so don't look through list */
+			continue; /* no fds are ready, so don't look through list */
 
 		for (tm = (tcpmessage *)waiting.lh_Head;
-		tm2 = (tcpmessage *)tm->header.mn_Node.ln_Succ;
-			tm = tm2)
+		     tm2 = (tcpmessage *)tm->header.mn_Node.ln_Succ;
+		     tm = tm2)
 		{
-
 			switch (tm->command)
 			{
 			case TCP_LISTEN:
@@ -2040,7 +2050,7 @@ struct MsgPort *running_running(tcpmessage *emergency, struct MsgPort *commands)
 				verify(ti, V_tcpident);
 
 				if (FD_ISSET(ti->fd, &read_tmp))
-				{  /* ready to accept */
+				{ /* ready to accept */
 #ifdef __amigaos4__
 					tcp_accept(SocketBase, ISocket, tm, &waiting, commands);
 #else
@@ -2054,7 +2064,7 @@ struct MsgPort *running_running(tcpmessage *emergency, struct MsgPort *commands)
 				verify(ti, V_tcpident);
 
 				if (FD_ISSET(ti->fd, &read_tmp))
-				{  /* ready to continue reading */
+				{ /* ready to continue reading */
 #ifdef __amigaos4__
 					tcp_read_more(SocketBase, ISocket, tm, &waiting, &read_set, &max_fd);
 #else
@@ -2082,7 +2092,7 @@ struct MsgPort *running_running(tcpmessage *emergency, struct MsgPort *commands)
 }
 
 
-#ifndef	__MORPHOS__
+#ifndef __MORPHOS__
 void SAVEDS ASM tcp_handler(REG(a0, unsigned char *parent_port))
 #else
 void tcp_handler(unsigned char *parent_port)
@@ -2093,7 +2103,7 @@ void tcp_handler(unsigned char *parent_port)
 
 	DS(kprintf("--- tcp_handler startup (parent port %s)\n", parent_port))
 
-		mem_tracking_on();
+	mem_tracking_on();
 
 	Forbid(); /* 2003-03-02 rri */
 	mp = FindPort(parent_port);
@@ -2102,14 +2112,14 @@ void tcp_handler(unsigned char *parent_port)
 	if (!mp)
 	{
 		Forbid(); /* 2003-03-02 rri */
-		truth(FindPort(parent_port) != nil);	/* will display an alert */
+		truth(FindPort(parent_port) != nil); /* will display an alert */
 		Permit(); /* 2003-03-02 rri */
-		return;  /* OOOPS - not overly much we can do here */
+		return; /* OOOPS - not overly much we can do here */
 	}
 
 	DS(kprintf("--- tcp_handler - parent port found\n")) /* 2003-03-09 rri */
 
-		tcp_commands = CreatePort(0, 0);
+	tcp_commands = CreatePort(0, 0);
 
 	if (!tcp_commands)
 	{
@@ -2146,16 +2156,16 @@ void tcp_handler(unsigned char *parent_port)
 	/* just a guess ... if they want something different, they'se gonna haveta do it themselves */
 	/* ok, we have enough to communicate ... tell them we started ok */
 
-	tm->command = TCP_STARTUP;
-	tm->data = tcp_commands;	/* this tells them where to send commands */
-	tm->result = true;			/* not necessary but wth */
+	tm->command = TCP_STARTUP ;
+	tm->data = tcp_commands; /* this tells them where to send commands */
+	tm->result = true; /* not necessary but wth */
 
 	PutMsg(mp, &tm->header);
 
 	/* wait for it to come back */
 
 	Wait(1 << tcp_commands->mp_SigBit);
-	GetMsg(tcp_commands);	/* should be guaranteed to be tm back ;) */
+	GetMsg(tcp_commands); /* should be guaranteed to be tm back ;) */
 
 	/* ok, time to carry on */
 	/* send them a message to bootstrap their message system */
@@ -2171,9 +2181,9 @@ void tcp_handler(unsigned char *parent_port)
 
 	check_memory();
 
-	Forbid();	/* once we are RemTask'd the Forbid will be lifted */
+	Forbid(); /* once we are RemTask'd the Forbid will be lifted */
 
-	Signal(mp->mp_SigTask, 1 << mp->mp_SigBit);  /* signal parent we are dead */
+	Signal(mp->mp_SigTask, 1 << mp->mp_SigBit); /* signal parent we are dead */
 
 	return;
 }

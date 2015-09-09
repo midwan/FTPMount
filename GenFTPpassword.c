@@ -52,14 +52,13 @@ V1.002   12.05.1998   Thies Wellpott
 typedef unsigned char UBYTE;
 
 
-const char *version = "\0$VER: GenFTPpassword 1.1 " __DATE__;
+const char* version = "\0$VER: GenFTPpassword 1.1 " __DATE__;
 
 #define ZEICHEN1(l)  ( (char)((l >> 4) & 0xf) * 4 + 42)
 #define ZEICHEN2(l)  ( (char)((l) & 0xf) * 3 + 47)
 
 
-
-int main(int argc, char *argv[])
+int main(int argc, char* argv[])
 {
 	short i;
 	long l, zufallszahl;
@@ -69,8 +68,8 @@ int main(int argc, char *argv[])
 		(strlen(argv[1]) >= sizeof(passwort)))
 	{
 		printf("%s - FreeWare (c) 1998 Thies Wellpott\n\nUsage: %s password/A  (max. %d chars)\n"
-			"\nPut resulting string (via copy & paste) into PASSWORDCRYPT\ntooltype of your ftp-sites icon.\n",
-			&version[7], argv[0], sizeof(passwort) - 1);
+		       "\nPut resulting string (via copy & paste) into PASSWORDCRYPT\ntooltype of your ftp-sites icon.\n",
+		       &version[7], argv[0], sizeof(passwort) - 1);
 		return 5;
 	} // if
 
@@ -109,23 +108,6 @@ int main(int argc, char *argv[])
 	} // for (i)
 
 	printf("Plain text password: \"%s\" (without quotes)\n   Encrypted password: %s\n", passwort, verschluesseltes);
-
-	/**
-	   {
-		  #include <proto/exec.h>
-
-		  UBYTE *decrypt_password(UBYTE *s);
-		  UBYTE *dp;
-
-		  dp = decrypt_password(verschluesseltes);
-		  if (dp)
-		  {
-			 printf("Decrypted: \"%s\" (without quotes)\n", dp);
-			 FreeVec(dp);      // FreeVec() ist korrekt, siehe verify.h
-		  } // if
-	   } // sub block
-	**/
-
 	return 0;
-} // main()
+}
 

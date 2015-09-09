@@ -228,6 +228,5 @@ unsigned char *strings[] = {
 	"PORT"
 };
 #else
-extern unsigned char *strings[NUM_MSGS];
+extern unsigned char* strings[NUM_MSGS];
 #endif
-

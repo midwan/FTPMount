@@ -1,7 +1,6 @@
+#include "FTPMount.h"
 
-#include "FTPMount.h" /* 03-03-08 rri */
-
-unsigned char *decrypt_password(unsigned char *s)
+unsigned char* decrypt_password(unsigned char* s)
 {
 	unsigned char *password, *pz;
 	long l, zufallszahl;

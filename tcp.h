@@ -6,55 +6,63 @@
  */
 
 
-typedef union {
-	struct {
+typedef union
+{
+	struct
+	{
 		unsigned char a;
 		unsigned char b;
 		unsigned char c;
 		unsigned char d;
 	} dot;
+
 	unsigned long l;
 } ipnum;
 
-typedef union {
-	struct {
+typedef union
+{
+	struct
+	{
 		unsigned char a;
 		unsigned char b;
 	} dot;
+
 	unsigned short w;
 } portnum;
 
 /* something like an iorequest ... probably a real exec device
    implementation would be good, but for now just DIY */
 
-typedef struct tcpm {
-	struct   Message header;
+typedef struct tcpm
+{
+	struct Message header;
 
 	magic_verify;
 
-	unsigned long   command;
-	void  *ident;     /* stores pointer to context information */
+	unsigned long command;
+	void* ident; /* stores pointer to context information */
 
 	ipnum address;
-	portnum  port;
+	portnum port;
 
-	void  *data;
-	struct   tcpm  *interrupt;
-	unsigned long   length;
+	void* data;
+	struct tcpm* interrupt;
+	unsigned long length;
 
-	unsigned long   result;
-	unsigned long   error;
-	unsigned long   flags;
-	unsigned long   userid;
-	void  *userdata;
+	unsigned long result;
+	unsigned long error;
+	unsigned long flags;
+	unsigned long userid;
+	void* userdata;
 } tcpmessage;
 
-typedef struct {
+typedef struct
+{
 	magic_verify;
 
-	signed long  fd;
-	void  *connecting_port;
-	boolean  eof;
+	signed long fd;
+	void* connecting_port;
+	boolean eof;
 } tcpident;
 
 #define V_tcpmessage 4159
@@ -104,10 +112,9 @@ typedef struct {
 /* flags */
 #define FLAG_READLINE      1
 
-#ifndef	__MORPHOS__
+#ifndef __MORPHOS__
 void SAVEDS ASM tcp_handler(REG(a0, unsigned char *parent_port));
 #else
 void tcp_handler(unsigned char *parent_port);
 #endif
-void unique_name(void *, unsigned char *, unsigned char *);
-
+void unique_name(void*, unsigned char*, unsigned char*);

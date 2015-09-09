@@ -8,7 +8,8 @@
 
 #include "FTPMount.h" /* 03-03-02 rri */
 
-#include <ctype.h>                     // for isdigit()  (RJF)
+#include <ctype.h> // for isdigit()  (RJF)
+
 #include "tcp.h"
 #include "site.h"
 #include "split.h"
@@ -19,9 +20,9 @@
 
 #define ERROR_GARBAGE_RECEIVED 15
 
-extern ftpinfo *get_info(site *, unsigned char *);
+extern ftpinfo* get_info(site*, unsigned char*);
 
-unsigned char *grow_info(unsigned char *a, unsigned char *b, int n)
+unsigned char* grow_info(unsigned char* a, unsigned char* b, int n)
 /*
  * concatenates a and b (not null terminated of length n) and returns
  * an allocated string with the result.  a is freed.
@@ -43,7 +44,7 @@ unsigned char *grow_info(unsigned char *a, unsigned char *b, int n)
 	if (!c)
 	{
 		if (a)
-			deallocate(a, V_cstr);
+		deallocate(a, V_cstr);
 		return nil;
 	}
 
@@ -58,7 +59,7 @@ unsigned char *grow_info(unsigned char *a, unsigned char *b, int n)
 	}
 
 	if (n)
-		memcpy(d, b, n);
+	memcpy(d, b, n);
 	d[n] = 0;
 
 	if (a)
@@ -69,7 +70,7 @@ unsigned char *grow_info(unsigned char *a, unsigned char *b, int n)
 	a = c;
 	while (*a)
 	{
-		if (*a == '\t') *a = ' ';  /* hmmm */
+		if (*a == '\t') *a = ' '; /* hmmm */
 		if (*a == '\r') *a = '\n';
 		a++;
 	}
@@ -77,7 +78,7 @@ unsigned char *grow_info(unsigned char *a, unsigned char *b, int n)
 	return c;
 }
 
-boolean substr(unsigned char *s, unsigned char *ss)
+boolean substr(unsigned char* s, unsigned char* ss)
 /*
  * returns true if s contains ss (non-case-sensitive)
  * s may be nil, in which case false is returned
@@ -89,7 +90,8 @@ boolean substr(unsigned char *s, unsigned char *ss)
 
 	len = strlen(ss);
 
-	while (*s) {
+	while (*s)
+	{
 		if (strncasecmp(s, ss, len) == 0) return true;
 		s++;
 	}
@@ -97,7 +99,7 @@ boolean substr(unsigned char *s, unsigned char *ss)
 	return false;
 }
 
-void inform(struct IntuitionBase *IntuitionBase, unsigned char *title, unsigned char *text, unsigned char *site, unsigned long errno)
+void inform(struct IntuitionBase* IntuitionBase, unsigned char* title, unsigned char* text, unsigned char* site, unsigned long errno)
 {
 	struct EasyStruct es;
 
@@ -110,13 +112,13 @@ void inform(struct IntuitionBase *IntuitionBase, unsigned char *title, unsigned 
 	EasyRequest(nil, &es, nil, site, errno);
 }
 
-tcpmessage *new_message(site *sp)
+tcpmessage* new_message(site* sp)
 /*
  * get a new tcpmessage
  */
 {
-	tcpmessage *intr;
-	struct MsgPort *sync;
+	tcpmessage* intr;
+	struct MsgPort* sync;
 
 	verify(sp, V_site);
 
@@ -130,18 +132,19 @@ tcpmessage *new_message(site *sp)
 	intr->header.mn_ReplyPort = sync;
 
 	PutMsg(tcp, &intr->header);
-	WaitPort(sync); GetMsg(sync); /* this _should_ never block */
+	WaitPort(sync);
+	GetMsg(sync); /* this _should_ never block */
 
 	return (tcpmessage *)intr->data;
 }
 
-void interrupt_message(site *sp, tcpmessage *tm)
+void interrupt_message(site* sp, tcpmessage* tm)
 /*
  * interrupt tm
  */
 {
-	tcpmessage *intr;
-	struct MsgPort *sync;
+	tcpmessage* intr;
+	struct MsgPort* sync;
 
 	verify(sp, V_site);
 	verify(tm, V_tcpmessage);
@@ -161,13 +164,15 @@ void interrupt_message(site *sp, tcpmessage *tm)
 	 * NB: I could probably assume tm->header.mn_ReplyPort == sync safely, but
 	 * this seems a bit more "correctly generic" (although potentially more buggy)
 	 */
-	WaitPort(tm->header.mn_ReplyPort); GetMsg(tm->header.mn_ReplyPort);  /* aborted tm coming back */
-	WaitPort(sync); GetMsg(sync); /* intr coming back successful */
+	WaitPort(tm->header.mn_ReplyPort);
+	GetMsg(tm->header.mn_ReplyPort); /* aborted tm coming back */
+	WaitPort(sync);
+	GetMsg(sync); /* intr coming back successful */
 
 	return;
 }
 
-unsigned long control_write(site *sp, unsigned char *command, unsigned long csig)
+unsigned long control_write(site* sp, unsigned char* command, unsigned long csig)
 /*
  * writes the string command to the control connection
  * Inputs:
@@ -178,8 +183,8 @@ unsigned long control_write(site *sp, unsigned char *command, unsigned long csig
  * returns the tcp error
  */
 {
-	tcpmessage *tm;
-	struct MsgPort *sync;
+	tcpmessage* tm;
+	struct MsgPort* sync;
 	unsigned long signals, rsigs;
 
 	verify(sp, V_site);
@@ -196,7 +201,7 @@ unsigned long control_write(site *sp, unsigned char *command, unsigned long csig
 	// Achtung: hier wird auch "PASS xx" ausgegeben!
 	DS(kprintf("TCP control_write (site %s) %s", sp->host, command))
 
-		tm->command = TCP_WRITE;
+	tm->command = TCP_WRITE;
 	tm->length = strlen(command);
 	tm->flags = 0;
 	tm->data = command;
@@ -220,12 +225,13 @@ unsigned long control_write(site *sp, unsigned char *command, unsigned long csig
 
 			return ERROR_INTERRUPTED;
 		}
-	} while (!GetMsg(sync));
+	}
+	while (!GetMsg(sync));
 
 	return tm->error;
 }
 
-unsigned long make_connection(site *sp, tcpmessage *tm, unsigned char *addr, unsigned short port, unsigned long csig)
+unsigned long make_connection(site* sp, tcpmessage* tm, unsigned char* addr, unsigned short port, unsigned long csig)
 /*
  * make a connection to a remote host
  * Inputs:
@@ -239,7 +245,7 @@ unsigned long make_connection(site *sp, tcpmessage *tm, unsigned char *addr, uns
  *    standard tcp error
  */
 {
-	struct MsgPort *sync;
+	struct MsgPort* sync;
 	unsigned long signals, rsigs, asigs;
 
 	verify(sp, V_site);
@@ -272,17 +278,18 @@ unsigned long make_connection(site *sp, tcpmessage *tm, unsigned char *addr, uns
 
 			return ERROR_INTERRUPTED;
 		}
-	} while (!GetMsg(sync));
+	}
+	while (!GetMsg(sync));
 
 	return tm->error;
 }
 
-void break_connection(site *sp, tcpmessage *tm)
+void break_connection(site* sp, tcpmessage* tm)
 /*
  * do a TCP_CLOSE on tm
  */
 {
-	struct MsgPort *sync;
+	struct MsgPort* sync;
 
 	verify(sp, V_site);
 	verify(tm, V_tcpmessage);
@@ -293,12 +300,13 @@ void break_connection(site *sp, tcpmessage *tm)
 	tm->header.mn_ReplyPort = sync;
 
 	PutMsg(tcp, &tm->header);
-	WaitPort(sync); GetMsg(sync);
+	WaitPort(sync);
+	GetMsg(sync);
 
 	return;
 }
 
-boolean passive_response(unsigned char *s, unsigned char *addr, unsigned short *portp)
+boolean passive_response(unsigned char* s, unsigned char* addr, unsigned short* portp)
 /*
  * parse the response to a PASV command
  * Inputs:
@@ -310,7 +318,7 @@ boolean passive_response(unsigned char *s, unsigned char *addr, unsigned short *
  * true if it was a valid PASV response
  */
 {
-	unsigned char *t;
+	unsigned char* t;
 	unsigned short ncommas, portn;
 
 	truth(s != nil);
@@ -320,7 +328,7 @@ boolean passive_response(unsigned char *s, unsigned char *addr, unsigned short *
 	// Antwortstring enthält \n
 	DS(kprintf("passive_response %s", s))
 
-		while (*s && *s != '(')
+	while (*s && *s != '(')
 		s++;
 	if (!*s)
 		return false;
@@ -336,7 +344,7 @@ boolean passive_response(unsigned char *s, unsigned char *addr, unsigned short *
 		t++;
 	}
 
-	portn = atoi(t) * 256;  /* possibly a more thorough check of whether these are legit numbers */
+	portn = atoi(t) * 256; /* possibly a more thorough check of whether these are legit numbers */
 	while (*t && *t != ',' && *t != ')')
 		t++;
 	if (*t == ',')
@@ -349,8 +357,8 @@ boolean passive_response(unsigned char *s, unsigned char *addr, unsigned short *
 
 	DS(t = addr)
 
-		ncommas = 0;
-	s++;     /* move s past the '(' */
+	ncommas = 0;
+	s++; /* move s past the '(' */
 	while (*s && ncommas < 4)
 	{
 		if (*s == ',')
@@ -372,10 +380,10 @@ boolean passive_response(unsigned char *s, unsigned char *addr, unsigned short *
 
 	DS(kprintf("  -> %s:%ld\n", t, (int)portn))
 
-		return true;
+	return true;
 }
 
-unsigned long response(site *sp, unsigned long csig, unsigned char **infop, unsigned char *code)
+unsigned long response(site* sp, unsigned long csig, unsigned char** infop, unsigned char* code)
 /*
  * reads response from remote server on sp->control
  * Inputs:
@@ -388,8 +396,8 @@ unsigned long response(site *sp, unsigned long csig, unsigned char **infop, unsi
  * standard tcp error code with the additional error ERROR_GARBAGE_RECEIVED
  */
 {
-	tcpmessage *tm;
-	struct MsgPort *sync;
+	tcpmessage* tm;
+	struct MsgPort* sync;
 	unsigned long signals, rsigs, asigs;
 	unsigned char *info, *z;
 
@@ -405,7 +413,7 @@ unsigned long response(site *sp, unsigned long csig, unsigned char **infop, unsi
 
 	verify(tm, V_tcpmessage);
 
-	asigs = csig | sp->disconnect_signals | sp->abort_signals;  /* abort signals */
+	asigs = csig | sp->disconnect_signals | sp->abort_signals; /* abort signals */
 	signals = asigs | (1 << sync->mp_SigBit);
 
 	tm->command = TCP_READ;
@@ -426,15 +434,18 @@ unsigned long response(site *sp, unsigned long csig, unsigned char **infop, unsi
 
 			/* cancelling the read of the response is guaranteed fatal anyway ... but ... */
 
-			if (rsigs & sp->disconnect_signals) {
+			if (rsigs & sp->disconnect_signals)
+			{
 				disconnect(sp);
 			}
 
 			return ERROR_INTERRUPTED;
 		}
-	} while (!GetMsg(sync));
+	}
+	while (!GetMsg(sync));
 
-	if (tm->error != NO_ERROR) {
+	if (tm->error != NO_ERROR)
+	{
 		show_int(tm->error);
 		return tm->error;
 	}
@@ -455,46 +466,56 @@ unsigned long response(site *sp, unsigned long csig, unsigned char **infop, unsi
 	code[2] = z[2];
 
 	info = grow_info(nil, &z[4], tm->result - 4);
-	if (z[3] == '-') {   /* we have a continuation message */
-		while (1) {
+	if (z[3] == '-')
+	{ /* we have a continuation message */
+		while (1)
+		{
 			PutMsg(tcp, &tm->header);
-			do {
+			do
+			{
 				rsigs = Wait(signals);
-				if (rsigs & asigs) {
+				if (rsigs & asigs)
+				{
 					state_change(sp, SS_ABORTING);
 
 					if (info)
-						deallocate(info, V_cstr);
+					deallocate(info, V_cstr);
 
 					interrupt_message(sp, tm);
 
-					if (rsigs & sp->disconnect_signals) {
+					if (rsigs & sp->disconnect_signals)
+					{
 						disconnect(sp);
 					}
 
 					return ERROR_INTERRUPTED;
 				}
-			} while (!GetMsg(sync));
+			}
+			while (!GetMsg(sync));
 
-			if (tm->error != NO_ERROR) {  /* tell them about the error */
+			if (tm->error != NO_ERROR)
+			{ /* tell them about the error */
 				if (info)
-					deallocate(info, V_cstr);
+				deallocate(info, V_cstr);
 
 				return tm->error;
 			}
 
-			if (tm->result < 4) {      /* not enough to even check if codes are equal */
+			if (tm->result < 4)
+			{ /* not enough to even check if codes are equal */
 				info = grow_info(info, z, tm->result);
 				continue;
 			}
 
 			if (z[0] == code[0] &&
 				z[1] == code[1] &&
-				z[2] == code[2]) {
+				z[2] == code[2])
+			{
 				info = grow_info(info, &z[4], tm->result - 4);
-				if (z[3] == ' ') break;    /* end of continuation */
+				if (z[3] == ' ') break; /* end of continuation */
 			}
-			else {
+			else
+			{
 				info = grow_info(info, z, tm->result);
 			}
 		}
@@ -503,20 +524,18 @@ unsigned long response(site *sp, unsigned long csig, unsigned char **infop, unsi
 	// Antwort enthält \n
 	DS(kprintf("response = %s", info))
 
-		*infop = info;
+	*infop = info;
 	return NO_ERROR;
 }
 
 
-
-unsigned short numeric_reply(unsigned char *s)
+unsigned short numeric_reply(unsigned char* s)
 {
 	return (unsigned short)((s[0] - '0') * 100 + (s[1] - '0') * 10 + (s[2] - '0'));
 }
 
 
-
-boolean retry_cancel(struct IntuitionBase *IntuitionBase, unsigned char *title, unsigned char *info)
+boolean retry_cancel(struct IntuitionBase* IntuitionBase, unsigned char* title, unsigned char* info)
 /*
  * paged information with retry/cancel buttons
  * returns true for retry
@@ -541,23 +560,27 @@ more:
 	s = z;
 	nlines = 0;
 
-	while (*z && nlines < MORE_LINES) {
+	while (*z && nlines < MORE_LINES)
+	{
 		if (*z == '\n') nlines++;
 		z++;
 	}
 
-	if (*z) {
+	if (*z)
+	{
 		es.es_GadgetFormat = strings[MSG_RETRY_MORE_CANCEL];
 	}
-	else {
+	else
+	{
 		es.es_GadgetFormat = strings[MSG_RETRY_CANCEL];
 	}
 
 	tmp = *z;
 	*z = 0;
 
-	switch (EasyRequest(nil, &es, nil, s)) {
-	case 0:  /* cancel */
+	switch (EasyRequest(nil, &es, nil, s))
+	{
+	case 0: /* cancel */
 		*z = tmp;
 		return false;
 	case 1: /* retry */
@@ -574,8 +597,7 @@ more:
 }
 
 
-
-void ok(struct IntuitionBase *IntuitionBase, unsigned char *title, unsigned char *info)
+void ok(struct IntuitionBase* IntuitionBase, unsigned char* title, unsigned char* info)
 /*
  * paged information with ok button
  *    info may be nil (sortof)
@@ -599,22 +621,26 @@ more:
 	s = z;
 
 	nlines = 0;
-	while (*z && nlines < MORE_LINES) {
+	while (*z && nlines < MORE_LINES)
+	{
 		if (*z == '\n') nlines++;
 		z++;
 	}
 
-	if (*z) {
+	if (*z)
+	{
 		es.es_GadgetFormat = strings[MSG_MORE_OK];
 	}
-	else {
+	else
+	{
 		es.es_GadgetFormat = strings[MSG_OK];
 	}
 
 	tmp = *z;
 	*z = 0;
 
-	if (EasyRequest(nil, &es, nil, s) && tmp) {
+	if (EasyRequest(nil, &es, nil, s) && tmp)
+	{
 		*z = tmp;
 		goto more;
 	}
@@ -624,14 +650,13 @@ more:
 }
 
 
-
-void disconnect(site *sp)
+void disconnect(site* sp)
 /*
  * rudely close control connection and clean up state information on site sp
  */
 {
-	tcpmessage *tm;
-	struct MsgPort *sync;
+	tcpmessage* tm;
+	struct MsgPort* sync;
 
 	verify(sp, V_site);
 
@@ -641,9 +666,9 @@ void disconnect(site *sp)
 
 	DS(kprintf("** disconnect site %s\n", sp->host))
 
-		state_change(sp, SS_DISCONNECTING);
+	state_change(sp, SS_DISCONNECTING);
 
-	tm = sp->cfile;      /* file open, have to close it */
+	tm = sp->cfile; /* file open, have to close it */
 	if (tm)
 	{
 		verify(tm, V_tcpmessage);
@@ -652,8 +677,9 @@ void disconnect(site *sp)
 		tm->command = TCP_CLOSE;
 		tm->header.mn_ReplyPort = sync;
 
-		PutMsg(tcp, &tm->header);  /* send CLOSE on file tm */
-		WaitPort(sync); GetMsg(sync);
+		PutMsg(tcp, &tm->header); /* send CLOSE on file tm */
+		WaitPort(sync);
+		GetMsg(sync);
 
 		tm->command = TCP_DISPOSE;
 		PutMsg(tcp, &tm->header);
@@ -670,7 +696,7 @@ void disconnect(site *sp)
 	tm->command = TCP_CLOSE;
 	tm->header.mn_ReplyPort = sync;
 
-	PutMsg(tcp, &tm->header);  /* send CLOSE */
+	PutMsg(tcp, &tm->header); /* send CLOSE */
 
 	sp->connected = false;
 
@@ -683,7 +709,8 @@ void disconnect(site *sp)
 	while (sp->infos)
 		free_info_header(sp->infos);
 
-	WaitPort(sync); GetMsg(sync); /* wait for CLOSE to come back */
+	WaitPort(sync);
+	GetMsg(sync); /* wait for CLOSE to come back */
 
 	/* it shouldn't really fail ... not sure if we can do anything if it has */
 
@@ -693,8 +720,7 @@ void disconnect(site *sp)
 }
 
 
-
-unsigned long read_file(site *sp, unsigned char *s, unsigned long *length)
+unsigned long read_file(site* sp, unsigned char* s, unsigned long* length)
 /*
  * read *length bytes from open file
  * Inputs:
@@ -706,8 +732,8 @@ unsigned long read_file(site *sp, unsigned char *s, unsigned long *length)
  * tcp error is returned, *length is modified to be actual length read
  */
 {
-	tcpmessage *tm;
-	struct MsgPort *sync;
+	tcpmessage* tm;
+	struct MsgPort* sync;
 	unsigned long signals, asigs, rsigs;
 
 	verify(sp, V_site);
@@ -738,17 +764,20 @@ unsigned long read_file(site *sp, unsigned char *s, unsigned long *length)
 
 			interrupt_message(sp, tm);
 
-			if (rsigs & sp->disconnect_signals) {
+			if (rsigs & sp->disconnect_signals)
+			{
 				disconnect(sp);
 			}
-			else {
+			else
+			{
 				close_file(sp, false);
 			}
 
 			*length = 0;
 			return ERROR_INTERRUPTED;
 		}
-	} while (!GetMsg(sync));
+	}
+	while (!GetMsg(sync));
 
 	if (tm->result > 0)
 	{
@@ -763,8 +792,7 @@ unsigned long read_file(site *sp, unsigned char *s, unsigned long *length)
 }
 
 
-
-unsigned long write_file(site *sp, unsigned char *s, unsigned long *length)
+unsigned long write_file(site* sp, unsigned char* s, unsigned long* length)
 /*
  * write *length bytes to an open file (almost identical copy to read_file above)
  * Inputs:
@@ -776,8 +804,8 @@ unsigned long write_file(site *sp, unsigned char *s, unsigned long *length)
  * tcp error is returned, *length is modified to be actual length written
  */
 {
-	tcpmessage *tm;
-	struct MsgPort *sync;
+	tcpmessage* tm;
+	struct MsgPort* sync;
 	unsigned long signals, asigs, rsigs;
 
 	verify(sp, V_site);
@@ -812,29 +840,31 @@ unsigned long write_file(site *sp, unsigned char *s, unsigned long *length)
 			{
 				disconnect(sp);
 			}
-			else {
+			else
+			{
 				close_file(sp, false);
 			}
 
 			*length = 0;
 			return ERROR_INTERRUPTED;
 		}
-	} while (!GetMsg(sync));
+	}
+	while (!GetMsg(sync));
 
 	if (tm->result > 0)
 	{
 		*length = tm->result;
 		return NO_ERROR;
 	}
-	else {
+	else
+	{
 		*length = 0;
 		return tm->error;
 	}
 }
 
 
-
-unsigned long open_file(site *sp, unsigned char *s, boolean writing, unsigned char *leaf_name)
+unsigned long open_file(site* sp, unsigned char* s, boolean writing, unsigned char* leaf_name)
 /*
  * open file with name in s
  * Inputs:
@@ -848,12 +878,12 @@ unsigned long open_file(site *sp, unsigned char *s, boolean writing, unsigned ch
  */
 {
 	tcpmessage *tm, *newtm;
-	struct MsgPort *sync;
+	struct MsgPort* sync;
 	unsigned char reply[4], *info;
-	unsigned char *leaf;
+	unsigned char* leaf;
 	unsigned long error;
 	unsigned short port_number;
-	file_info *fi;
+	file_info* fi;
 
 	verify(sp, V_site);
 	truth(s != nil);
@@ -888,7 +918,7 @@ unsigned long open_file(site *sp, unsigned char *s, boolean writing, unsigned ch
 
 	DS(kprintf("** open_file(\"%s\", %s) (site %s)\n", s, (writing ? "write" : "read"), sp->host))
 
-		state_change(sp, SS_OPENING);
+	state_change(sp, SS_OPENING);
 
 	newtm = new_message(sp);
 	if (newtm)
@@ -898,12 +928,14 @@ unsigned long open_file(site *sp, unsigned char *s, boolean writing, unsigned ch
 		{
 			strcpy(fi->fname, s);
 
-			if (control_write(sp, "PASV\r\n", 0) == NO_ERROR) {
+			if (control_write(sp, "PASV\r\n", 0) == NO_ERROR)
+			{
 				if (writing)
 				{ /* yes, I do this twice :( */
 					sprintf(sp->read_buffer, "STOR %s\r\n", leaf);
 				}
-				else {
+				else
+				{
 					sprintf(sp->read_buffer, "RETR %s\r\n", leaf);
 				}
 
@@ -925,7 +957,8 @@ unsigned long open_file(site *sp, unsigned char *s, boolean writing, unsigned ch
 										{ /* and again */
 											sprintf(sp->read_buffer, "STOR %s\r\n", leaf);
 										}
-										else {
+										else
+										{
 											sprintf(sp->read_buffer, "RETR %s\r\n", leaf);
 										}
 
@@ -977,7 +1010,8 @@ unsigned long open_file(site *sp, unsigned char *s, boolean writing, unsigned ch
 														{
 															error = ERROR_INVALID_COMPONENT_NAME;
 														}
-														else {
+														else
+														{
 															error = ERROR_OBJECT_NOT_FOUND;
 														}
 														break;
@@ -988,7 +1022,8 @@ unsigned long open_file(site *sp, unsigned char *s, boolean writing, unsigned ch
 														{
 															error = ERROR_WRITE_PROTECTED;
 														}
-														else {
+														else
+														{
 															error = ERROR_READ_PROTECTED;
 														}
 														break;
@@ -1001,7 +1036,8 @@ unsigned long open_file(site *sp, unsigned char *s, boolean writing, unsigned ch
 														{
 															error = ERROR_WRITE_PROTECTED;
 														}
-														else {
+														else
+														{
 															error = ERROR_INVALID_COMPONENT_NAME;
 														}
 														break;
@@ -1095,11 +1131,10 @@ unsigned long open_file(site *sp, unsigned char *s, boolean writing, unsigned ch
 }
 
 
-
 /* this is how large our flushing buffer is when attempting an abort */
 #define FLUSH_SIZE 100
 
-void close_file(site *sp, boolean normal_close)
+void close_file(site* sp, boolean normal_close)
 /*
  * close currently open file for site
  * Inputs:
@@ -1108,8 +1143,8 @@ void close_file(site *sp, boolean normal_close)
  */
 {
 	tcpmessage *tm, *filetm, *ret;
-	file_info *fi;
-	struct MsgPort *sync;
+	file_info* fi;
+	struct MsgPort* sync;
 	unsigned char *info, reply[4], flush[FLUSH_SIZE];
 	unsigned long signals, asigs, rsigs;
 
@@ -1132,7 +1167,7 @@ void close_file(site *sp, boolean normal_close)
 
 	DS(kprintf("** close_file (site %s)\n", sp->host))
 
-		state_change(sp, SS_CLOSING);
+	state_change(sp, SS_CLOSING);
 
 	sync = sp->sync;
 
@@ -1154,7 +1189,8 @@ void close_file(site *sp, boolean normal_close)
 		{
 			deallocate(fi, V_file_info);
 		}
-		else {
+		else
+		{
 			fi->eof = true;
 		}
 
@@ -1209,13 +1245,15 @@ void close_file(site *sp, boolean normal_close)
 			if (ret == tm)
 			{
 				/* wait for filetm */
-				WaitPort(sync); GetMsg(sync);
+				WaitPort(sync);
+				GetMsg(sync);
 				break;
 			}
 			if (ret->error != NO_ERROR)
 			{ /* filetm is done */
-			   /* wait for tm */
-				WaitPort(sync); GetMsg(sync);
+				/* wait for tm */
+				WaitPort(sync);
+				GetMsg(sync);
 				break;
 			}
 			PutMsg(tcp, &filetm->header);
@@ -1271,7 +1309,7 @@ void close_file(site *sp, boolean normal_close)
 #endif
 
 		if (info)
-			deallocate(info, V_cstr);
+		deallocate(info, V_cstr);
 
 		show_string("ABOR completed");
 		return;
@@ -1281,7 +1319,8 @@ void close_file(site *sp, boolean normal_close)
 	{
 		deallocate(fi, V_file_info);
 	}
-	else {
+	else
+	{
 		fi->eof = true;
 	}
 
@@ -1308,7 +1347,7 @@ void close_file(site *sp, boolean normal_close)
 	}
 
 	if (info)
-		deallocate(info, V_cstr);
+	deallocate(info, V_cstr);
 
 	/* we don't really care what they returned here */
 
@@ -1328,8 +1367,7 @@ void close_file(site *sp, boolean normal_close)
 }
 
 
-
-unsigned long delete_file(site *sp, unsigned char *s)
+unsigned long delete_file(site* sp, unsigned char* s)
 /*
  * delete file with name in s
  * Inputs:
@@ -1340,11 +1378,11 @@ unsigned long delete_file(site *sp, unsigned char *s)
  * standard file system errors
  */
 {
-	unsigned char *leaf;
+	unsigned char* leaf;
 	unsigned long error;
 	boolean perm;
 	unsigned char *info, reply[3];
-	ftpinfo *fi;
+	ftpinfo* fi;
 
 	verify(sp, V_site);
 	truth(s != nil);
@@ -1364,7 +1402,7 @@ unsigned long delete_file(site *sp, unsigned char *s)
 
 	DS(kprintf("** delete_file(\"%s\") (site %s)\n", s, sp->host))
 
-		state_change(sp, SS_DELETING);
+	state_change(sp, SS_DELETING);
 
 	fi = get_info(sp, s);
 	if (fi)
@@ -1384,7 +1422,7 @@ unsigned long delete_file(site *sp, unsigned char *s)
 			switch (reply[0])
 			{
 			case '2':
-				return 0;   /* success */
+				return 0; /* success */
 			case '4':
 				/* temp failure ... */
 				/* most likely reason */
@@ -1415,8 +1453,7 @@ unsigned long delete_file(site *sp, unsigned char *s)
 }
 
 
-
-unsigned long delete_directory(site *sp, unsigned char *s)
+unsigned long delete_directory(site* sp, unsigned char* s)
 /*
  * delete directory with name in s
  * Inputs:
@@ -1427,11 +1464,11 @@ unsigned long delete_directory(site *sp, unsigned char *s)
  * standard file system errors
  */
 {
-	unsigned char *leaf;
+	unsigned char* leaf;
 	unsigned long error;
 	boolean perm, no_such;
 	unsigned char *info, reply[3];
-	ftpinfo *fi;
+	ftpinfo* fi;
 
 	verify(sp, V_site);
 	truth(s != nil);
@@ -1451,7 +1488,7 @@ unsigned long delete_directory(site *sp, unsigned char *s)
 
 	DS(kprintf("** delete_dir(\"%s\") (site %s)\n", s, sp->host))
 
-		state_change(sp, SS_DELETING);
+	state_change(sp, SS_DELETING);
 
 	fi = get_info(sp, s);
 	if (fi)
@@ -1471,7 +1508,7 @@ unsigned long delete_directory(site *sp, unsigned char *s)
 			switch (reply[0])
 			{
 			case '2':
-				return 0;   /* success */
+				return 0; /* success */
 			case '4':
 				/* temp failure ... */
 				/* most likely reason */
@@ -1488,17 +1525,20 @@ unsigned long delete_directory(site *sp, unsigned char *s)
 				{
 					return ERROR_OBJECT_NOT_FOUND;
 				}
-				else {
+				else
+				{
 					return ERROR_DIRECTORY_NOT_EMPTY;
 				}
 			}
 		}
-		else {
+		else
+		{
 			disconnect(sp);
 			error = ERROR_OBJECT_NOT_FOUND;
 		}
 	}
-	else {
+	else
+	{
 		disconnect(sp);
 		error = ERROR_OBJECT_NOT_FOUND;
 	}
@@ -1507,8 +1547,7 @@ unsigned long delete_directory(site *sp, unsigned char *s)
 }
 
 
-
-unsigned long make_directory(site *sp, unsigned char *s)
+unsigned long make_directory(site* sp, unsigned char* s)
 /*
  * make directory with name in s
  * Inputs:
@@ -1519,7 +1558,7 @@ unsigned long make_directory(site *sp, unsigned char *s)
  * standard file system errors
  */
 {
-	unsigned char *leaf;
+	unsigned char* leaf;
 	unsigned long error;
 	boolean exists;
 	unsigned char *info, reply[3];
@@ -1527,20 +1566,22 @@ unsigned long make_directory(site *sp, unsigned char *s)
 	verify(sp, V_site);
 	truth(s != nil);
 
-	if (s[0] == 0) {
+	if (s[0] == 0)
+	{
 		/* trying to mkd root */
 		return ERROR_OBJECT_WRONG_TYPE;
 	}
 
 	leaf = cd_parent(sp, s);
-	if (!leaf) {
+	if (!leaf)
+	{
 		/* again, being lazy here */
 		return ERROR_DIR_NOT_FOUND;
 	}
 
 	DS(kprintf("** make_dir(\"%s\") (site %s)\n", s, sp->host))
 
-		state_change(sp, SS_MAKEDIR);
+	state_change(sp, SS_MAKEDIR);
 
 	sprintf(sp->read_buffer, "MKD %s\r\n", leaf);
 	if (control_write(sp, sp->read_buffer, 0) == NO_ERROR)
@@ -1550,12 +1591,12 @@ unsigned long make_directory(site *sp, unsigned char *s)
 			exists = substr(info, "exist");
 
 			if (info)
-				deallocate(info, V_cstr);
+			deallocate(info, V_cstr);
 
 			switch (reply[0])
 			{
 			case '2':
-				return 0;   /* success */
+				return 0; /* success */
 			case '4':
 				/* temp failure ... */
 				/* most likely reason */
@@ -1586,8 +1627,7 @@ unsigned long make_directory(site *sp, unsigned char *s)
 }
 
 
-
-unsigned long rename_object(site *sp, unsigned char *from, unsigned char *to)
+unsigned long rename_object(site* sp, unsigned char* from, unsigned char* to)
 /*
  * renames file 'from' to 'to'
  * Inputs:
@@ -1628,7 +1668,7 @@ unsigned long rename_object(site *sp, unsigned char *from, unsigned char *to)
 			*leaf2 = 0;
 
 		if (strcmp(to, sp->cwd) == 0)
-		{  /* they are in the same directory, we can do it */
+		{ /* they are in the same directory, we can do it */
 			if (leaf2 > to)
 				*leaf2 = '/';
 		}
@@ -1640,7 +1680,7 @@ unsigned long rename_object(site *sp, unsigned char *from, unsigned char *to)
 
 	DS(kprintf("** rename(\"%s\" to \"%s\") (site %s)\n", from, to, sp->host))
 
-		state_change(sp, SS_RENAMING);
+	state_change(sp, SS_RENAMING);
 
 	sprintf(sp->read_buffer, "RNFR %s\r\n", leaf1);
 	if (control_write(sp, sp->read_buffer, 0) != NO_ERROR)
@@ -1719,8 +1759,7 @@ unsigned long rename_object(site *sp, unsigned char *from, unsigned char *to)
 }
 
 
-
-boolean change_dir(site *sp, unsigned char *new_dir)
+boolean change_dir(site* sp, unsigned char* new_dir)
 /*
  * change directory to new_dir
  * Inputs:
@@ -1731,8 +1770,8 @@ boolean change_dir(site *sp, unsigned char *new_dir)
  * true if change_dir was successful
  */
 {
-	tcpmessage *tm;
-	struct MsgPort *sync;
+	tcpmessage* tm;
+	struct MsgPort* sync;
 	unsigned char *info, reply[4];
 	unsigned char *z, *s;
 
@@ -1754,12 +1793,13 @@ boolean change_dir(site *sp, unsigned char *new_dir)
 	/* have to explicitly change there */
 
 	if (sp->cfile)
-	{  /* can't do _anything_ while we have a file opened */
+	{ /* can't do _anything_ while we have a file opened */
 		if (sp->file_list->closed)
 		{
 			close_file(sp, true);
 		}
-		else {
+		else
+		{
 			return false;
 		}
 	}
@@ -1771,7 +1811,7 @@ boolean change_dir(site *sp, unsigned char *new_dir)
 
 	DS(kprintf("** change_dir(\"%s\") (site %s)\n", new_dir, sp->host))
 
-		state_change(sp, SS_CWD);
+	state_change(sp, SS_CWD);
 
 	if (sp->cwd)
 	{
@@ -1785,7 +1825,8 @@ boolean change_dir(site *sp, unsigned char *new_dir)
 	{
 		sprintf(sp->read_buffer, "CWD %s\r\n", sp->root);
 	}
-	else {
+	else
+	{
 		strcpy(sp->read_buffer, "CWD\r\n");
 	}
 
@@ -1810,7 +1851,7 @@ boolean change_dir(site *sp, unsigned char *new_dir)
 	}
 
 	if (info)
-		deallocate(info, V_cstr);
+	deallocate(info, V_cstr);
 
 	if (reply[0] != '2')
 	{
@@ -1905,7 +1946,7 @@ boolean change_dir(site *sp, unsigned char *new_dir)
 		}
 
 		if (info)
-			deallocate(info, V_cstr);
+		deallocate(info, V_cstr);
 
 		if (reply[0] != '2')
 		{
@@ -1933,7 +1974,8 @@ fail_to_root:
 	{
 		sprintf(sp->read_buffer, "CWD %s\r\n", sp->root);
 	}
-	else {
+	else
+	{
 		strcpy(sp->read_buffer, "CWD\r\n");
 	}
 
@@ -1956,7 +1998,7 @@ fail_to_root:
 	}
 
 	if (info)
-		deallocate(info, V_cstr);
+	deallocate(info, V_cstr);
 
 	if (reply[0] == '2')
 	{
@@ -1971,8 +2013,7 @@ fail_to_root:
 }
 
 
-
-unsigned char *cd_parent(site *sp, unsigned char *path)
+unsigned char* cd_parent(site* sp, unsigned char* path)
 /*
  * change to the parent dir of the object described by path
  * Inputs:
@@ -1984,7 +2025,7 @@ unsigned char *cd_parent(site *sp, unsigned char *path)
  * or nil ... generally indicates gross error or dir not found
  */
 {
-	unsigned char *leaf;
+	unsigned char* leaf;
 	boolean cd;
 
 	verify(sp, V_site);
@@ -2020,13 +2061,12 @@ unsigned char *cd_parent(site *sp, unsigned char *path)
 }
 
 
-
 // Großbuchstaben für einfachere Vergleiche
-static char *months[] = { "JAN ", "FEB ", "MAR ", "APR ", "MAY ", "JUN ",
-			   "JUL ", "AUG ", "SEP ", "OCT ", "NOV ", "DEC " };
+static char* months[] = {"JAN ", "FEB ", "MAR ", "APR ", "MAY ", "JUN ",
+	"JUL ", "AUG ", "SEP ", "OCT ", "NOV ", "DEC "};
 
 
-void convert_nt_entry(unsigned char *is)          // Input String from add_info()
+void convert_nt_entry(unsigned char* is) // Input String from add_info()
 /*
  *  if this is a WinNT entry, convert (in place) to a
  *  *nix style record. (Unix, Linux, Xenix...)
@@ -2037,15 +2077,15 @@ void convert_nt_entry(unsigned char *is)          // Input String from add_info(
  *  all rights reserved by him.
  */
 {
-	static unsigned char   *nt_buf = 0;
- /* jetzt global, da auch in add_info() benötigt wird
+	static unsigned char* nt_buf = 0;
+	/* jetzt global, da auch in add_info() benötigt wird
 	static char *months[] = {  "Jan ", "Feb ", "Mar ", "Apr ", "May ", "Jun ",
 				"Jul ", "Aug ", "Sep ", "Oct ", "Nov ", "Dec " };
  */
-	unsigned char    *c1, *c2, tbuf[32], c;
+	unsigned char *c1, *c2, tbuf[32], c;
 	short i;
 
-	if (!nt_buf)                        // if our conversion buf not alloc'd
+	if (!nt_buf) // if our conversion buf not alloc'd
 		nt_buf = (unsigned char*)allocate(READ_BUFFER_LENGTH, V_cstr);
 
 	// ***** verify inbuffer viable, MsDos-like, conversion buf alloc'd *****
@@ -2053,100 +2093,99 @@ void convert_nt_entry(unsigned char *is)          // Input String from add_info(
 	if ((!is) || (!nt_buf) || (!isdigit(*is)) || (strlen(is) < 41))
 		return;
 
-	*nt_buf = 0;                        // term NT->Unix conversion buffer
-	c1 = strchr(is, 0x0d);              // look for MsDos CR
+	*nt_buf = 0; // term NT->Unix conversion buffer
+	c1 = strchr(is, 0x0d); // look for MsDos CR
 	if (c1)
-		*c1 = 0;                         // then, remove CR
+		*c1 = 0; // then, remove CR
 
-	 // ***** avoid altering 'is' unless this really is an MsDos entry *****
+	// ***** avoid altering 'is' unless this really is an MsDos entry *****
 
 
-	strcpy(nt_buf, "-rwxrwxrwx 9 x x ");   // assume this is a file
-				   // plug dummy fields (ignored)
-				   // Note: execute flags set
+	strcpy(nt_buf, "-rwxrwxrwx 9 x x "); // assume this is a file
+	// plug dummy fields (ignored)
+	// Note: execute flags set
 
 	if ((strstr(is, "<DIR>")) || (strstr(is, "<dir>"))) // directory ?
 	{
-		*nt_buf = 'd';                   // force directory flag in return buf
-		strcat(nt_buf, "size ");         // dummy 'size' (ignored on dirs)
+		*nt_buf = 'd'; // force directory flag in return buf
+		strcat(nt_buf, "size "); // dummy 'size' (ignored on dirs)
 	}
 	else
 	{
 		// ***** extract filesize *****
 
-		c1 = is + 30;                     // start of length field
+		c1 = is + 30; // start of length field
 		c2 = nt_buf + strlen(nt_buf);
 
-		while (*c1 == ' ')               // skip leading spaces
+		while (*c1 == ' ') // skip leading spaces
 			c1++;
 
 		while (((c = *(c1++)) != 0) && (c <= '9') && (c > ' '))
 			if (c != ',')
-			*(c2++) = c;               // copy filesize digits (skip commas)
+				*(c2++) = c; // copy filesize digits (skip commas)
 
-		*(c2++) = ' ';                   // padd
-		*c2 = 0;                     // term
+		*(c2++) = ' '; // padd
+		*c2 = 0; // term
 	}
 
 	// ***** extract creation date *****
 
-	memcpy(tbuf, is, 2);                // month digits (01..12)
+	memcpy(tbuf, is, 2); // month digits (01..12)
 	tbuf[2] = 0;
 
-	i = atol(tbuf);                     // convert digits to 1..12 month index
+	i = atol(tbuf); // convert digits to 1..12 month index
 
-	if ((i) && (i < 13))              // valid month index ??
-		strcat(nt_buf, months[i - 1]);   // insert month string
-	memcpy(tbuf, is + 3, 2);            // day digits (01..31)
+	if ((i) && (i < 13)) // valid month index ??
+	strcat(nt_buf, months[i - 1]); // insert month string
+	memcpy(tbuf, is + 3, 2); // day digits (01..31)
 	tbuf[2] = 0;
 
-	if (*tbuf == '0')                   // leading space on 'day' ??
-		*tbuf = ' ';                     // need leading space, not zero
+	if (*tbuf == '0') // leading space on 'day' ??
+		*tbuf = ' '; // need leading space, not zero
 
-	strcat(nt_buf, tbuf);               // append day of month
+	strcat(nt_buf, tbuf); // append day of month
 	strcat(nt_buf, " ");
 
 	// ***** get creation time *****
 
-	c1 = strchr(is, ':');               // find creation time field
+	c1 = strchr(is, ':'); // find creation time field
 	if (!c1)
-		return;                          // abort, not an MsDos entry
+		return; // abort, not an MsDos entry
 
-	memcpy(tbuf, c1 - 2, 2);             // extract hour
-	tbuf[2] = 0;                        // term
+	memcpy(tbuf, c1 - 2, 2); // extract hour
+	tbuf[2] = 0; // term
 
-	i = atoi(tbuf);                     // month digits to index (01..12)
+	i = atoi(tbuf); // month digits to index (01..12)
 
-	if (toupper(*(c1 + 3)) == 'P')       // PM ???
+	if (toupper(*(c1 + 3)) == 'P') // PM ???
 		i += 12;
 
-	stci_d(tbuf, i);                    // itoa()
-	strcat(nt_buf, tbuf);               // hour
+	stci_d(tbuf, i); // itoa()
+	strcat(nt_buf, tbuf); // hour
 	strcat(nt_buf, ":");
 
-	memcpy(tbuf, c1 + 1, 2);             // minutes
+	memcpy(tbuf, c1 + 1, 2); // minutes
 	tbuf[2] = 0;
-	strcat(nt_buf, tbuf);               // minutes
-	strcat(nt_buf, " ");                // padd
+	strcat(nt_buf, tbuf); // minutes
+	strcat(nt_buf, " "); // padd
 
 	// **** extract directory/file name *****
 
-	c1 = is + 39;                        // start of fid (I hate hard offsets)
+	c1 = is + 39; // start of fid (I hate hard offsets)
 	c2 = nt_buf + strlen(nt_buf);
 
-	while ((c = *c1) > ' ')             // (might want to skip leading spaces)
-		*(c2++) = *(c1++);               // copy entire dir/filename
+	while ((c = *c1) > ' ') // (might want to skip leading spaces)
+		*(c2++) = *(c1++); // copy entire dir/filename
 
-	*c2 = 0;                            // term buffer
+	*c2 = 0; // term buffer
 
 	// ***** copy translated MsDos entry over orig Unix entry *****
 
-	strcpy(is, nt_buf);                 // if we get here, should be OK (?!*)
+	strcpy(is, nt_buf); // if we get here, should be OK (?!*)
 }
 
 
-
-void add_info(struct info_header *ih, unsigned char *s)
+void add_info(struct info_header* ih, unsigned char* s)
 /*
  * parses s and adds the information to header ih
  * Inputs:
@@ -2154,14 +2193,14 @@ void add_info(struct info_header *ih, unsigned char *s)
  * s  : line returned from LIST
  */
 {
-	unsigned long perm;   // permission bits
-	unsigned long size;   // file size
+	unsigned long perm; // permission bits
+	unsigned long size; // file size
 	unsigned char *ende, *linkname = nil, *user, *group;
 	int tag, monat, jahr;
 	unsigned char tempd[15], tempt[10];
 	struct DateTime dtime;
 
-	convert_nt_entry(s);          // if NT entry, convert to Unix format (RJF)
+	convert_nt_entry(s); // if NT entry, convert to Unix format (RJF)
 
 	// evt. Steuerzeichen (ASCII < 32) am Zeilenende löschen
 	ende = s + strlen(s) - 1;
@@ -2185,11 +2224,11 @@ void add_info(struct info_header *ih, unsigned char *s)
 
 	// erstes Zeichen gibt Typ an
 	if (*s == 'd')
-		perm |= MYFLAG_DIR;
+		perm |= MYFLAG_DIR ;
 	else if (*s == 'l')
 	{
-		perm |= MYFLAG_LINK;
-		perm |= MYFLAG_DIR;     /* assume its a directory ... it _may_ be a file ... */
+		perm |= MYFLAG_LINK ;
+		perm |= MYFLAG_DIR ; /* assume its a directory ... it _may_ be a file ... */
 		// links sind gekennzeichnet wie folgt: "name -> orig.name";
 		// Zeichen "->" von hinten suchen
 		linkname = ende - 2;
@@ -2273,7 +2312,7 @@ void add_info(struct info_header *ih, unsigned char *s)
 
 	// s steht jetzt (normalerweise!) auf dem user-Namen
 
- /*
+	/*
 	// jetzt von hinten anfangen und Dateilänge, Datum und Dateiname
 	// heraussuchen (es sind die 5 hintersten Felder)
 
@@ -2281,11 +2320,11 @@ void add_info(struct info_header *ih, unsigned char *s)
  */
 
 
- // jetzt kommt der user-Name
+	// jetzt kommt der user-Name
 	user = s;
 	while (*s > ' ')
 		s++;
-	*s = 0;     // user-Name abschließen
+	*s = 0; // user-Name abschließen
 	s++;
 
 	// skip blanks
@@ -2297,7 +2336,7 @@ void add_info(struct info_header *ih, unsigned char *s)
 	group = s;
 	while (*s > ' ')
 		s++;
-	*s = 0;     // group-Name abschließen
+	*s = 0; // group-Name abschließen
 	s++;
 
 	// skip blanks
@@ -2328,15 +2367,15 @@ void add_info(struct info_header *ih, unsigned char *s)
 		((s[2] & ~32) == months[monat][2])))
 		monat++;
 
-	monat++;    // Monat auf 1..12 bringen (falls oben keiner gefunden wurde,
-				// wird monat auf 13 gesetzt, was ein ungültiges Datum erzeugt
+	monat++; // Monat auf 1..12 bringen (falls oben keiner gefunden wurde,
+	// wird monat auf 13 gesetzt, was ein ungültiges Datum erzeugt
 
 	s += 3;
 	// skip blanks
 	while ((*s > 0) && (*s <= 32))
 		s++;
 
-	tag = atoi(s);      // Tag auslesen
+	tag = atoi(s); // Tag auslesen
 	while (*s > ' ')
 		s++;
 	// skip blanks
@@ -2344,7 +2383,7 @@ void add_info(struct info_header *ih, unsigned char *s)
 		s++;
 
 	if ((s[1] == ':') || (s[2] == ':'))
-	{  // Uhrzeit und kein Jahr angegeben
+	{ // Uhrzeit und kein Jahr angegeben
 		jahr = year;
 		memset(tempt, 0, sizeof(tempt));
 		strncpy(tempt, s, 5);
@@ -2353,12 +2392,12 @@ void add_info(struct info_header *ih, unsigned char *s)
 		strcat(tempt, ":00");
 	}
 	else
-	{  // Jahr und keine Uhrzeit angegeben
+	{ // Jahr und keine Uhrzeit angegeben
 		jahr = atoi(s);
 		strcpy(tempt, "12:00:00");
 	} // else
 
-	dtime.dat_Format = FORMAT_USA;   // "mm-dd-yy"
+	dtime.dat_Format = FORMAT_USA ; // "mm-dd-yy"
 	dtime.dat_Flags = 0;
 	dtime.dat_StrDay = nil;
 	dtime.dat_StrDate = tempd;
@@ -2424,9 +2463,7 @@ void add_info(struct info_header *ih, unsigned char *s)
 } // add_info()
 
 
-
-
-boolean get_list(site *sp, struct info_header *ih)
+boolean get_list(site* sp, struct info_header* ih)
 /*
  * gets LIST in cwd and puts it in ih
  * Inputs:
@@ -2438,7 +2475,7 @@ boolean get_list(site *sp, struct info_header *ih)
  */
 {
 	tcpmessage *tm, *listm;
-	struct MsgPort *sync;
+	struct MsgPort* sync;
 	unsigned char reply[3], *info;
 	unsigned short portn;
 	unsigned long signals, asigs, rsigs;
@@ -2451,7 +2488,7 @@ boolean get_list(site *sp, struct info_header *ih)
 
 	DS(kprintf("** get_list (site %s)\n", sp->host))
 
-		state_change(sp, SS_LISTING);
+	state_change(sp, SS_LISTING);
 
 	tm = sp->control;
 	verify(tm, V_tcpmessage);
@@ -2499,13 +2536,13 @@ boolean get_list(site *sp, struct info_header *ih)
 					else
 					{
 						if (info)
-							deallocate(info, V_cstr);
+						deallocate(info, V_cstr);
 					}
 				}
 				else
 				{
 					if (info)
-						deallocate(info, V_cstr);
+					deallocate(info, V_cstr);
 				}
 			}
 		}
@@ -2557,7 +2594,8 @@ read_list:
 			sp->read_buffer[listm->result] = 0;
 			add_info(ih, sp->read_buffer);
 		}
-	} while (listm->error == NO_ERROR);
+	}
+	while (listm->error == NO_ERROR);
 
 	break_connection(sp, listm);
 
@@ -2574,7 +2612,7 @@ read_list:
 	}
 
 	if (info)
-		deallocate(info, V_cstr);
+	deallocate(info, V_cstr);
 
 #ifdef VERIFY
 	if (reply[0] != '2')
@@ -2586,8 +2624,7 @@ read_list:
 }
 
 
-
-boolean prelim(site *sp, struct Window *w)
+boolean prelim(site* sp, struct Window* w)
 /*
  * once logged in, does preliminary setup stuff ... for now
  * sets TYPE I and figures out where the root of the fs is
@@ -2605,7 +2642,7 @@ boolean prelim(site *sp, struct Window *w)
 
 	DS(kprintf("** preliminary setup stuff (site %s)\n", sp->host))
 
-		csig = (1 << w->UserPort->mp_SigBit);
+	csig = (1 << w->UserPort->mp_SigBit);
 
 	if (control_write(sp, "TYPE I\r\n", csig) == NO_ERROR)
 	{
@@ -2614,7 +2651,8 @@ boolean prelim(site *sp, struct Window *w)
 		{
 			sprintf(sp->read_buffer, "CWD %s\r\n", sp->root);
 		}
-		else {
+		else
+		{
 			strcpy(sp->read_buffer, "PWD\r\n");
 		}
 
@@ -2625,13 +2663,14 @@ boolean prelim(site *sp, struct Window *w)
 			{
 				/* we don't really care what they replied */
 				if (info)
-					deallocate(info, V_cstr);
+				deallocate(info, V_cstr);
 
 				if (sp->root)
 				{
 					sprintf(sp->read_buffer, "CWD %s\r\n", sp->root);
 				}
-				else {
+				else
+				{
 					strcpy(sp->read_buffer, "PWD\r\n");
 				}
 
@@ -2646,7 +2685,7 @@ boolean prelim(site *sp, struct Window *w)
 							{
 								/* was the CWD ... was successful */
 								if (info)
-									deallocate(info, V_cstr);
+								deallocate(info, V_cstr);
 
 								return true;
 							}
@@ -2668,7 +2707,7 @@ boolean prelim(site *sp, struct Window *w)
 										if (sp->root)
 										{
 											if (z != s)
-												memcpy(sp->root, s, z - s);
+											memcpy(sp->root, s, z - s);
 
 											sp->root[z - s] = 0;
 
@@ -2691,7 +2730,8 @@ boolean prelim(site *sp, struct Window *w)
 									inform(sp->IBase, strings[MSG_OPERATIONAL_ERROR], strings[MSG_FAILED_PWD], nil, 0);
 							}
 						}
-						else {
+						else
+						{
 							if (sp->error_messages)
 								ok(sp->IBase, strings[MSG_OPERATIONAL_ERROR], info);
 							if (info) deallocate(info, V_cstr);
@@ -2716,7 +2756,7 @@ boolean prelim(site *sp, struct Window *w)
 }
 
 
-void login(site *sp, struct Window *w)
+void login(site* sp, struct Window* w)
 /*
  * goes through the login sequence once a successful connection has been established
  * Inputs:
@@ -2724,8 +2764,8 @@ void login(site *sp, struct Window *w)
  * w  : the connection cancel window
  */
 {
-	tcpmessage *tm;
-	struct MsgPort *sync;
+	tcpmessage* tm;
+	struct MsgPort* sync;
 	unsigned char reply[4], *info;
 	unsigned long csig;
 	boolean early_success = false;
@@ -2735,7 +2775,7 @@ void login(site *sp, struct Window *w)
 
 	DS(kprintf("** login (site %s)\n", sp->host))
 
-		state_change(sp, SS_LOGIN);
+	state_change(sp, SS_LOGIN);
 
 	csig = 1 << w->UserPort->mp_SigBit;
 
@@ -2747,7 +2787,8 @@ retry_login:
 		{
 			tm->command = TCP_CLOSE;
 			PutMsg(tcp, &tm->header);
-			WaitPort(sync); GetMsg(sync);
+			WaitPort(sync);
+			GetMsg(sync);
 
 			close_req(sp, w);
 
@@ -2760,7 +2801,8 @@ retry_login:
 	{
 		sprintf(sp->read_buffer, "USER %s\r\n", sp->user);
 	}
-	else {
+	else
+	{
 		strcpy(sp->read_buffer, "USER ftp\r\n");
 	}
 
@@ -2770,7 +2812,8 @@ retry_login:
 		{
 			sprintf(sp->read_buffer, "PASS %s\r\n", sp->password);
 		}
-		else {
+		else
+		{
 			sprintf(sp->read_buffer, "PASS %s\r\n", anon_login);
 		}
 
@@ -2798,7 +2841,7 @@ retry_login:
 				case '3':
 					/* ignore the banner here ... usually its just "Anonymous login ok, send ident ..." */
 					if (info)
-						deallocate(info, V_cstr);
+					deallocate(info, V_cstr);
 
 					/* now read pass response */
 					switch (response(sp, csig, &info, reply))
@@ -2823,7 +2866,7 @@ retry_login:
 								if (sp->error_messages)
 									inform(sp->IBase, strings[MSG_LOGIN_FAILED], strings[MSG_ACCT_REQUESTED], nil, 0);
 								if (info)
-									deallocate(info, V_cstr);
+								deallocate(info, V_cstr);
 								break;
 							}
 							else
@@ -2834,30 +2877,30 @@ retry_login:
 									if (sp->error_messages && retry_cancel(sp->IBase, strings[MSG_LOGIN_INCORRECT], info))
 									{
 										if (info)
-											deallocate(info, V_cstr);
+										deallocate(info, V_cstr);
 										// Site erfordert also Passwort; dies merken und evt.
 										// aktuelles wegschmeissen, da es falsch ist
 										sp->needs_password = true;
 										if (sp->password)
-											deallocate(sp->password, V_cstr);
+										deallocate(sp->password, V_cstr);
 										sp->password = nil;
 										goto retry_login;
 									}
 									if (info)
-										deallocate(info, V_cstr);
+									deallocate(info, V_cstr);
 									break;
 								}
 
 								if (sp->error_messages)
 									ok(sp->IBase, strings[MSG_LOGIN_FAILED_PASS], info);
 								if (info)
-									deallocate(info, V_cstr);
+								deallocate(info, V_cstr);
 								break;
 							}
 						}
 
 						if (info)
-							deallocate(info, V_cstr);
+						deallocate(info, V_cstr);
 
 						if (prelim(sp, w))
 						{
@@ -2891,17 +2934,17 @@ retry_login:
 					if (sp->error_messages && retry_cancel(sp->IBase, strings[MSG_TEMP_LOGIN_FAILURE_USER], info))
 					{
 						if (info)
-							deallocate(info, V_cstr);
+						deallocate(info, V_cstr);
 						goto retry_login;
 					}
 					if (info)
-						deallocate(info, V_cstr);
+					deallocate(info, V_cstr);
 					break;
 				default:
 					if (sp->error_messages)
 						ok(sp->IBase, strings[MSG_LOGIN_FAILED_USER], info);
 					if (info)
-						deallocate(info, V_cstr);
+					deallocate(info, V_cstr);
 					break;
 				}
 				break;
@@ -2931,7 +2974,8 @@ retry_login:
 
 	tm->command = TCP_CLOSE;
 	PutMsg(tcp, &tm->header);
-	WaitPort(sync); GetMsg(sync);
+	WaitPort(sync);
+	GetMsg(sync);
 
 	close_req(sp, w);
 
@@ -2941,13 +2985,12 @@ retry_login:
 }
 
 
-
-void init_connect(site *sp)
+void init_connect(site* sp)
 {
-	struct Window *w;
-	unsigned char *z;
+	struct Window* w;
+	unsigned char* z;
 	tcpmessage *tm, *intr;
-	struct MsgPort *sync;
+	struct MsgPort* sync;
 	unsigned char reply[3], *info;
 	unsigned long signals, csig;
 
@@ -2967,7 +3010,7 @@ void init_connect(site *sp)
 
 	DS(kprintf("** init_connect (site %s)\n", sp->host))
 
-		state_change(sp, SS_CONNECTING);
+	state_change(sp, SS_CONNECTING);
 
 	tm = sp->control;
 	sync = sp->sync;
@@ -2984,7 +3027,8 @@ void init_connect(site *sp)
 		tm->header.mn_ReplyPort = sync;
 
 		PutMsg(tcp, &tm->header);
-		WaitPort(sync); GetMsg(sync);
+		WaitPort(sync);
+		GetMsg(sync);
 
 		if (tm->result)
 		{
@@ -3021,14 +3065,17 @@ void init_connect(site *sp)
 		{
 			intr->interrupt = tm;
 			PutMsg(tcp, &intr->header);
-			WaitPort(sync); GetMsg(sync);
-			WaitPort(sync); GetMsg(sync);
+			WaitPort(sync);
+			GetMsg(sync);
+			WaitPort(sync);
+			GetMsg(sync);
 
 			if (tm->result)
-			{  /* it succeeded in connecting */
+			{ /* it succeeded in connecting */
 				tm->command = TCP_CLOSE;
 				PutMsg(tcp, &tm->header);
-				WaitPort(sync); GetMsg(sync);
+				WaitPort(sync);
+				GetMsg(sync);
 			}
 
 			close_req(sp, w);
@@ -3037,10 +3084,11 @@ void init_connect(site *sp)
 
 			return;
 		}
-	} while (!GetMsg(sync));
+	}
+	while (!GetMsg(sync));
 
 	if (!tm->result)
-	{   /* the connect failed ... tell the user why */
+	{ /* the connect failed ... tell the user why */
 		close_req(sp, w);
 
 		switch (tm->error)
@@ -3110,7 +3158,7 @@ retry_intro:
 		}
 		close_req(sp, w);
 		if (info)
-			deallocate(info, V_cstr);
+		deallocate(info, V_cstr);
 
 		goto close_and_exit;
 	case '2':
@@ -3124,7 +3172,7 @@ retry_intro:
 		 */
 
 		if (info)
-			deallocate(info, V_cstr);
+		deallocate(info, V_cstr);
 
 		login(sp, w);
 		return;
@@ -3135,7 +3183,7 @@ retry_intro:
 		}
 		close_req(sp, w);
 		if (info)
-			deallocate(info, V_cstr);
+		deallocate(info, V_cstr);
 
 		goto close_and_exit;
 	case '5':
@@ -3146,7 +3194,7 @@ retry_intro:
 			ok(sp->IBase, strings[MSG_CONN_FAILED], info);
 
 		if (info)
-			deallocate(info, V_cstr);
+		deallocate(info, V_cstr);
 
 		break;
 	}
@@ -3154,10 +3202,10 @@ retry_intro:
 close_and_exit:
 	tm->command = TCP_CLOSE;
 	PutMsg(tcp, &tm->header);
-	WaitPort(sync); GetMsg(sync);
+	WaitPort(sync);
+	GetMsg(sync);
 
 	state_change(sp, SS_DISCONNECTED);
 
 	return;
 }
-

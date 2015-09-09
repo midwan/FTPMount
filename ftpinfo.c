@@ -13,14 +13,14 @@
 #include "ftpinfo.h"
 #include "connect.h"
 
- /*
+/*
   * ftpinfo routines
   */
 
-void add_ftpinfo(struct info_header *ih, unsigned char *name, unsigned char *comment, struct DateStamp ds,
-	unsigned long size, unsigned long blocks, unsigned long flags)
+void add_ftpinfo(struct info_header* ih, unsigned char* name, unsigned char* comment, struct DateStamp ds,
+                 unsigned long size, unsigned long blocks, unsigned long flags)
 {
-	ftpinfo *fi;
+	ftpinfo* fi;
 
 	verify(ih, V_info_header);
 
@@ -50,14 +50,15 @@ void add_ftpinfo(struct info_header *ih, unsigned char *name, unsigned char *com
 	return;
 }
 
-void free_info_header(struct info_header *ih)
+void free_info_header(struct info_header* ih)
 {
 	ftpinfo *fi, *fin;
 
 	verify(ih, V_info_header);
 
 	fi = ih->infos;
-	while (fi) {
+	while (fi)
+	{
 		verify(fi, V_ftpinfo);
 		fin = fi->next;
 
@@ -75,9 +76,9 @@ void free_info_header(struct info_header *ih)
 	return;
 }
 
-struct info_header *new_info_header(site *sp, unsigned char *name)
+struct info_header* new_info_header(site* sp, unsigned char* name)
 {
-	struct info_header *ih;
+	struct info_header* ih;
 
 	verify(sp, V_site);
 
@@ -101,22 +102,26 @@ struct info_header *new_info_header(site *sp, unsigned char *name)
 	return ih;
 }
 
-struct info_header *find_info_header(site *sp, unsigned char *name)
+struct info_header* find_info_header(site* sp, unsigned char* name)
 {
-	struct info_header *ih;
+	struct info_header* ih;
 
 	verify(sp, V_site);
 
 	ih = sp->infos;
 
-	if (sp->case_sensitive) {
-		while (ih) {
+	if (sp->case_sensitive)
+	{
+		while (ih)
+		{
 			if (strcmp(ih->name, name) == 0) return ih;
 			ih = ih->next;
 		}
 	}
-	else {
-		while (ih) {
+	else
+	{
+		while (ih)
+		{
 			if (strcasecmp(ih->name, name) == 0) return ih;
 			ih = ih->next;
 		}
@@ -125,15 +130,17 @@ struct info_header *find_info_header(site *sp, unsigned char *name)
 	return nil;
 }
 
-ftpinfo *find_info(struct info_header *ih, unsigned char *name)
+ftpinfo* find_info(struct info_header* ih, unsigned char* name)
 {
 	ftpinfo *fi, *found;
 
 	found = nil;
 	fi = ih->infos;
 
-	if (ih->case_sensitive) {
-		while (fi) {
+	if (ih->case_sensitive)
+	{
+		while (fi)
+		{
 			if (strcmp(fi->name, name) == 0 && !(fi->flags & MYFLAG_DELETED))
 			{
 				found = fi;
@@ -142,10 +149,12 @@ ftpinfo *find_info(struct info_header *ih, unsigned char *name)
 			fi = fi->next;
 		}
 	}
-	else {
+	else
+	{
 		found = nil;
 
-		while (fi) {
+		while (fi)
+		{
 			if (!(fi->flags & MYFLAG_DELETED))
 			{
 				if (strcasecmp(fi->name, name) == 0)
@@ -164,4 +173,3 @@ ftpinfo *find_info(struct info_header *ih, unsigned char *name)
 
 	return found;
 }
-

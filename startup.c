@@ -15,13 +15,13 @@
 #include "request.h"
 #include "strings.h"
 
- /* [ABA, 23/05/2005 : add support for debug checking] */
+/* [ABA, 23/05/2005 : add support for debug checking] */
 #if defined(VERIFY) || defined(MINI_VERIFY)
 #include "verify_code.h"
 #endif
 /* [END ABA, 23/05/2005 : add support for debug checking] */
 
-struct DosPacket *fh_listen(void);
+struct DosPacket* fh_listen(void);
 void fh_ignore(void);
 
 boolean launch_tcp_handler(void);
@@ -35,7 +35,7 @@ void close_libraries(void);
 boolean make_gims(void);
 void free_gims(void);
 
-void startup_error(unsigned char *s);
+void startup_error(unsigned char* s);
 
 boolean get_anon_login(void);
 
@@ -49,12 +49,12 @@ void setup_strings(void);
 void cleanup_strings(void);
 
 /*void SAVEDS start(void) */
-int main (void)
+int main(void)
 {
-	struct Process *me;
-	struct Message *msg;
-	struct DosPacket *dp;
-	struct MsgPort *reply;
+	struct Process* me;
+	struct Message* msg;
+	struct DosPacket* dp;
+	struct MsgPort* reply;
 	struct DateTime dtime;
 	unsigned char temp[15];
 
@@ -68,7 +68,7 @@ int main (void)
 
 	ftp_port = &me->pr_MsgPort;
 
-	WaitPort(ftp_port);  /* wait for startup packet */
+	WaitPort(ftp_port); /* wait for startup packet */
 	msg = GetMsg(ftp_port);
 
 	dp = (struct DosPacket *)msg->mn_Node.ln_Name;
@@ -101,7 +101,7 @@ int main (void)
 			dtime.dat_StrDay = nil;
 			dtime.dat_StrTime = nil;
 			dtime.dat_Flags = 0;
-			dtime.dat_Format = FORMAT_INT;
+			dtime.dat_Format = FORMAT_INT ;
 
 			DateToStr(&dtime);
 			year = atoi(temp);
@@ -154,7 +154,7 @@ int main (void)
 											PutMsg(reply, dp->dp_Link);
 										}
 
-										fh_ignore();	/* never comes back */
+										fh_ignore(); /* never comes back */
 									}
 									else dp->dp_Res2 = ERROR_NO_FREE_STORE;
 									shutdown_status();
@@ -190,13 +190,13 @@ int main (void)
 	else dp->dp_Res2 = ERROR_INVALID_RESIDENT_LIBRARY;
 	ftp_device->dol_Task = 0;
 	dp->dp_Res1 = DOSFALSE;
-	Forbid();	/* this is so they can't unloadseg us until we have finished */
+	Forbid(); /* this is so they can't unloadseg us until we have finished */
 	PutMsg(reply, dp->dp_Link);
 	return 0;
 }
 
 
-void startup_error(unsigned char *s)
+void startup_error(unsigned char* s)
 {
 	struct EasyStruct es;
 
@@ -212,8 +212,8 @@ void startup_error(unsigned char *s)
 
 boolean launch_tcp_handler(void)
 {
-	struct Process *child;
-	tcpmessage *tm;
+	struct Process* child;
+	tcpmessage* tm;
 
 	unique_name(FindTask(0), ": FTPMount", unique_buffer);
 
@@ -230,15 +230,15 @@ boolean launch_tcp_handler(void)
 
 	if (startup_sync)
 	{
-#ifndef	__MORPHOS__
+#ifndef __MORPHOS__
 		child = CreateNewProcTags
 			(
 				NP_Entry, (ULONG)tcp_handler,
-				NP_Arguments, (ULONG)unique_buffer,
-				NP_Name, (ULONG)strings[MSG_TCP_HANDLER],
-				NP_StackSize, 6000,
-				TAG_END, 0
-				);
+				        NP_Arguments, (ULONG)unique_buffer,
+				        NP_Name, (ULONG)strings[MSG_TCP_HANDLER],
+				        NP_StackSize, 6000,
+				        TAG_END, 0
+			);
 #else
 		child = CreateNewProcTags
 			(
@@ -270,7 +270,8 @@ boolean launch_tcp_handler(void)
 					prime->data = "ftp";
 
 					PutMsg(tcp, &prime->header);
-					WaitPort(startup_sync); GetMsg(startup_sync);
+					WaitPort(startup_sync);
+					GetMsg(startup_sync);
 
 					if (prime->result)
 					{
@@ -310,8 +311,8 @@ void shutdown_tcp_handler(void)
 
 boolean launch_local(void)
 {
-	struct StandardPacket *sp;
-	struct Process *child;
+	struct StandardPacket* sp;
+	struct Process* child;
 
 	sp = (struct StandardPacket *) AllocVec(sizeof(*sp), MEMF_PUBLIC); /* 2003-03-09 rri */
 	if (!sp) return false;
@@ -320,14 +321,14 @@ boolean launch_local(void)
 	local_msg->mn_Node.ln_Name = (char *)&sp->sp_Pkt;
 	sp->sp_Pkt.dp_Link = local_msg;
 	sp->sp_Pkt.dp_Type = ACTION_DIE; /* for startup it should ignore this :) */
-	sp->sp_Pkt.dp_Port = startup_sync;  /* this is bad programming ... increases linkage */
+	sp->sp_Pkt.dp_Port = startup_sync; /* this is bad programming ... increases linkage */
 
-#ifndef	__MORPHOS__
+#ifndef __MORPHOS__
 	child = CreateNewProcTags(NP_Entry, (ULONG)local_handler,
-		NP_Name, (ULONG)strings[MSG_LOCAL_HANDLER],
-		NP_StackSize, 6000,
-		TAG_END, 0
-		);
+	                                  NP_Name, (ULONG)strings[MSG_LOCAL_HANDLER],
+	                                  NP_StackSize, 6000,
+	                                  TAG_END, 0
+	);
 #else
 	child = CreateNewProcTags(NP_Entry, (ULONG)local_handler,
 		NP_CodeType, CODETYPE_PPC,
@@ -340,7 +341,8 @@ boolean launch_local(void)
 	{
 		local_port = &child->pr_MsgPort;
 		PutMsg(local_port, local_msg);
-		WaitPort(startup_sync); GetMsg(startup_sync);
+		WaitPort(startup_sync);
+		GetMsg(startup_sync);
 		if (sp->sp_Pkt.dp_Res1) return true;
 	}
 	FreeVec(sp); /* 2003-03-09 rri */
@@ -351,12 +353,13 @@ boolean launch_local(void)
 
 void shutdown_local(void)
 {
-	struct StandardPacket *sp;
+	struct StandardPacket* sp;
 
 	sp = (struct StandardPacket *)local_msg;
 	sp->sp_Pkt.dp_Port = startup_sync;
 	PutMsg(local_port, local_msg);
-	WaitPort(startup_sync); GetMsg(startup_sync);
+	WaitPort(startup_sync);
+	GetMsg(startup_sync);
 	FreeVec(sp); /* 2003-03-09 rri */
 	return;
 }
@@ -372,26 +375,26 @@ boolean open_libraries(void)
 		if (IIntuition)
 		{
 #endif
-			DOSBase = (struct DosLibrary *)OpenLibrary("dos.library", 36);
-			if (DOSBase)
-			{
+		DOSBase = (struct DosLibrary *)OpenLibrary("dos.library", 36);
+		if (DOSBase)
+		{
 #ifdef __amigaos4__
 				IDOS = (struct DOSIFace *) GetInterface((struct Library*)DOSBase, "main", 1L, 0);
 				if (IDOS)
 				{
 #endif
-					GfxBase = (struct GfxBase *)OpenLibrary("graphics.library", 0);
-					if (GfxBase)
-					{
+			GfxBase = (struct GfxBase *)OpenLibrary("graphics.library", 0);
+			if (GfxBase)
+			{
 #ifdef __amigaos4__
 						IGraphics = (struct GraphicsIFace*) GetInterface((struct Library*)GfxBase, "main", 1L, 0);
 						if (IGraphics)
 						{
 #endif
-							/* don't care since it works without these, too */
-							IconBase = OpenLibrary("icon.library", 0);
+				/* don't care since it works without these, too */
+				IconBase = OpenLibrary("icon.library", 0);
 #if !defined(__MORPHOS__) && !defined(__amigaos4__)
-							LocaleBase = (struct LocaleBase *) OpenLibrary("locale.library", 0); /* 03-03-02 rri */
+				LocaleBase = (struct LocaleBase *) OpenLibrary("locale.library", 0); /* 03-03-02 rri */
 #else
 							LocaleBase = OpenLibrary("locale.library", 0); /* 12-04-04 itix */
 #endif
@@ -401,21 +404,21 @@ boolean open_libraries(void)
 							if (LocaleBase)
 								ILocale = (struct LocaleIFace*)GetInterface((struct Library*)LocaleBase, "main", 1L, 0);
 #endif
-							return true;
+				return true;
 #ifdef __amigaos4__
 						}
 						else startup_error("FTPMount cannot get graphics.library interface");
 #endif
-					}
-					else startup_error("FTPMount cannot open graphics.library");
+			}
+			else startup_error("FTPMount cannot open graphics.library");
 #ifdef __amigaos4__
 					DropInterface((struct Interface*)IDOS);
 				}
 				else startup_error("FTPMount cannot get dos.library interface");
 #endif
-				CloseLibrary((struct Library *)DOSBase);
-			}
-			else startup_error("FTPMount requires V36 dos.library");
+			CloseLibrary((struct Library *)DOSBase);
+		}
+		else startup_error("FTPMount requires V36 dos.library");
 #ifdef __amigaos4__
 			DropInterface((struct Interface*)IIntuition);
 		}
@@ -451,8 +454,8 @@ void close_libraries(void)
 
 boolean make_gims(void)
 {
-	struct Screen *s;
-	struct DrawInfo *drawinfo;
+	struct Screen* s;
+	struct DrawInfo* drawinfo;
 
 	s = LockPubScreen(nil);
 	if (!s) return false;
@@ -655,7 +658,7 @@ boolean create_volume(void)
 		ftp_volume->dol_Lock = 0;
 		DateStamp(&ftp_volume->dol_misc.dol_volume.dol_VolumeDate);
 		ftp_volume->dol_misc.dol_volume.dol_LockList = 0;
-		ftp_volume->dol_misc.dol_volume.dol_DiskType = ID_DOS_DISK;
+		ftp_volume->dol_misc.dol_volume.dol_DiskType = ID_DOS_DISK ;
 
 		vlen = strlen("FTPMount");
 		volume_name = (unsigned char *)AllocVec(vlen + 2, MEMF_PUBLIC); /* 2003-03-09 rri */
@@ -691,25 +694,25 @@ void destroy_volume(void)
 
 boolean launch_status(void)
 {
-	struct Process *child;
+	struct Process* child;
 
 	status_mess = (status_message *)AllocVec(sizeof(*status_mess), 0); /* 2003-03-09 rri */
 	if (!status_mess) return false;
 
 	status_mess->header.mn_Length = sizeof(*status_mess);
 	status_mess->header.mn_Node.ln_Name = "status startup message";
-	status_mess->header.mn_Node.ln_Type = NT_MESSAGE;
+	status_mess->header.mn_Node.ln_Type = NT_MESSAGE ;
 	status_mess->header.mn_Node.ln_Pri = 0;
 
 	status_control = CreatePort(0, 0);
 	if (status_control)
 	{
-#ifndef	__MORPHOS__
+#ifndef __MORPHOS__
 		child = CreateNewProcTags(NP_Entry, (ULONG)status_handler,
-			NP_Name, (ULONG)strings[MSG_STATUS_HANDLER],
-			NP_StackSize, 6000,
-			TAG_END, 0
-			);
+		                                  NP_Name, (ULONG)strings[MSG_STATUS_HANDLER],
+		                                  NP_StackSize, 6000,
+		                                  TAG_END, 0
+		);
 #else
 		child = CreateNewProcTags(NP_Entry, (ULONG)status_handler,
 			NP_CodeType, CODETYPE_PPC,
@@ -723,7 +726,8 @@ boolean launch_status(void)
 			status_port = &child->pr_MsgPort;
 			status_mess->header.mn_ReplyPort = startup_sync;
 			PutMsg(status_port, &status_mess->header);
-			WaitPort(startup_sync); GetMsg(startup_sync);
+			WaitPort(startup_sync);
+			GetMsg(startup_sync);
 			if (status_mess->command != SM_KILL) return true;
 		}
 		DeletePort(status_control);
@@ -737,7 +741,7 @@ boolean launch_status(void)
 
 void shutdown_status(void)
 {
-	status_message *sm;
+	status_message* sm;
 
 	status_mess->command = SM_KILL;
 	status_mess->header.mn_ReplyPort = startup_sync;
@@ -775,9 +779,9 @@ void setup_strings(void)
 		if (my_locale)
 		{
 			cat = OpenCatalog(my_locale, "FTPMount.catalog",
-				OC_BuiltInLanguage, (ULONG)"english",
-				TAG_END
-				);
+			                  OC_BuiltInLanguage, (ULONG)"english",
+			                  TAG_END
+			);
 		}
 	}
 
@@ -804,7 +808,7 @@ void _start(void)
 }
 #endif
 
-#ifdef	__MORPHOS__
+#ifdef __MORPHOS__
 const ULONG __abox__ = 1;
 
 int atoi(const char *string)

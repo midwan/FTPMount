@@ -68,7 +68,7 @@ void SAVEDS verify_alert(char *file, int line, char *a, char *b)
 	i = make_char(i, 0);
 	i = make_char(i, 0);
 
-	//	sprintf(verify_buffer, "%c%c%cVerify alert in %s line %d: %s is not a %s%c%c", 0, 10, 15, file, line, a, b, 0, 0);
+//	sprintf(verify_buffer, "%c%c%cVerify alert in %s line %d: %s is not a %s%c%c", 0, 10, 15, file, line, a, b, 0, 0);
 	DisplayAlert(RECOVERY_ALERT, (CONST_STRPTR)verify_buffer, 40);
 	Permit();
 }
@@ -93,7 +93,7 @@ void SAVEDS truth_alert(char *file, int line, char *a)
 	i = make_char(i, 0);
 	i = make_char(i, 0);
 
-	//	sprintf(verify_buffer, "%c%c%c%s line %d: %s is not TRUE%c%c", 0, 10, 15, file, line, a, 0, 0);
+//	sprintf(verify_buffer, "%c%c%c%s line %d: %s is not TRUE%c%c", 0, 10, 15, file, line, a, 0, 0);
 	DisplayAlert(RECOVERY_ALERT, (CONST_STRPTR)verify_buffer, 40);
 	Permit();
 }
@@ -118,7 +118,7 @@ void SAVEDS false_alert(char *file, int line, char *a)
 	i = make_char(i, 0);
 	i = make_char(i, 0);
 
-	//	sprintf(verify_buffer, "%c%c%c%s line %d: %s is not FALSE%c%c", 0, 10, 15, file, line, a, 0, 0);
+//	sprintf(verify_buffer, "%c%c%c%s line %d: %s is not FALSE%c%c", 0, 10, 15, file, line, a, 0, 0);
 	DisplayAlert(RECOVERY_ALERT, (CONST_STRPTR)verify_buffer, 40);
 	Permit();
 }
@@ -143,7 +143,7 @@ void SAVEDS int_alert(char *file, int line, char *a, int b)
 	i = make_char(i, 0);
 	i = make_char(i, 0);
 
-	//	sprintf(verify_buffer, "%c%c%c%s line %d: %s=%d%c%c", 0, 10, 15, file, line, a, b, 0, 0);
+//	sprintf(verify_buffer, "%c%c%c%s line %d: %s=%d%c%c", 0, 10, 15, file, line, a, b, 0, 0);
 	DisplayAlert(RECOVERY_ALERT, (CONST_STRPTR)verify_buffer, 40);
 	Permit();
 }
@@ -169,7 +169,7 @@ void SAVEDS string_alert(char *file, int line, char *a, char *b)
 	i = make_char(i, 0);
 	i = make_char(i, 0);
 
-	//	sprintf(verify_buffer, "%c%c%c%s line %d: %s=%s%c%c", 0, 10, 15, file, line, a, b, 0, 0);
+//	sprintf(verify_buffer, "%c%c%c%s line %d: %s=%s%c%c", 0, 10, 15, file, line, a, b, 0, 0);
 	DisplayAlert(RECOVERY_ALERT, (CONST_STRPTR)verify_buffer, 40);
 	Permit();
 }
@@ -212,7 +212,7 @@ void * SAVEDS track_malloc(int size, unsigned long type, unsigned long flags, ch
 		i = make_char(i, 0);
 		i = make_char(i, 0);
 
-		//		sprintf(verify_buffer, "%c%c%cIllegal malloc size of %d in %s line %d: allocating %s to be %s%c%c", 0, 10, 15, size, file, line, a, b, 0, 0);
+//		sprintf(verify_buffer, "%c%c%cIllegal malloc size of %d in %s line %d: allocating %s to be %s%c%c", 0, 10, 15, size, file, line, a, b, 0, 0);
 		DisplayAlert(RECOVERY_ALERT, (CONST_STRPTR)verify_buffer, 40);
 		Permit();
 		return 0;
@@ -240,7 +240,7 @@ void * SAVEDS track_malloc(int size, unsigned long type, unsigned long flags, ch
 		i = make_char(i, 0);
 		i = make_char(i, 0);
 
-		//		sprintf(verify_buffer, "%c%c%cMalloc failure in %s line %d: allocating %s to be %s%c%c", 0, 10, 15, file, line, a, b, 0, 0);
+//		sprintf(verify_buffer, "%c%c%cMalloc failure in %s line %d: allocating %s to be %s%c%c", 0, 10, 15, file, line, a, b, 0, 0);
 		DisplayAlert(RECOVERY_ALERT, (CONST_STRPTR)verify_buffer, 40);
 		Permit();
 		return 0;
@@ -302,7 +302,7 @@ void SAVEDS track_free(void *block, unsigned long type, char *file, int line, ch
 		i = make_char(i, 0);
 		i = make_char(i, 0);
 
-		/*		sprintf(verify_buffer, "%c%c%cIllegal FREE in %s line %d:%c%c"
+/*		sprintf(verify_buffer, "%c%c%cIllegal FREE in %s line %d:%c%c"
 					 "%c%c%cfreeing %s which should be %s%c%c"
 					 "%c%c%cAllocated in %s line %d%c%c",
 					  0, 10, 15, file, line, 0, 1,
@@ -454,14 +454,14 @@ void SAVEDS track_check(void)
 		i = make_char(i, 0);
 		i = make_char(i, 0);
 
-		/*		sprintf(verify_buffer, "%c%c%c(%s) Unfreed block of type %s%c%c"
+/*		sprintf(verify_buffer, "%c%c%c(%s) Unfreed block of type %s%c%c"
 					 "%c%c%cAllocated in %s line %d%c%c",
 					  0, 10, 15, FindTask(0)->tc_Node.ln_Name, a->typename, 0, 1,
 					  0, 10, 25, a->file, a->line, 0, 0); */
 		DisplayAlert(RECOVERY_ALERT, (CONST_STRPTR)verify_buffer, 45);
 		a->type = ~0;
 		Permit();
-		/*		FreeMem(a, a->size); */
+/*		FreeMem(a, a->size); */
 	}
 
 	FindTask(0)->tc_UserData = 0;

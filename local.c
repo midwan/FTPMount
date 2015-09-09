@@ -12,16 +12,16 @@
 #include "local.h"
 
 #define DOSBase _local_DOSBase
-struct DosLibrary *DOSBase;
+struct DosLibrary*DOSBase;
 
 #if !defined(__amigaos4__)
 #define IDOS _local_IDOS
-struct DOSIFace *IDOS;
+struct DOSIFace*IDOS;
 #endif
 
-BSTR ctobstr(unsigned char *s)
+BSTR ctobstr(unsigned char* s)
 {
-	unsigned char *z;
+	unsigned char* z;
 	int len;
 
 	len = strlen((char*)s);
@@ -31,7 +31,8 @@ BSTR ctobstr(unsigned char *s)
 
 	z[0] = len;
 
-	if (len > 0) {
+	if (len > 0)
+	{
 		memcpy(&z[1], s, len);
 	}
 
@@ -43,9 +44,9 @@ void free_bstr(BSTR b)
 	deallocate((void *)(b << 2), V_bstr);
 }
 
-void lock_message(BPTR l, struct DosPacket *dp)
+void lock_message(BPTR l, struct DosPacket* dp)
 {
-	struct FileLock *fl;
+	struct FileLock* fl;
 
 	fl = (struct FileLock *)(l << 2);
 
@@ -54,18 +55,18 @@ void lock_message(BPTR l, struct DosPacket *dp)
 
 void SAVEDS local_handler(void)
 {
-	struct Process *me;
-	struct Message *msg;
-	struct DosPacket *dp;
+	struct Process* me;
+	struct Message* msg;
+	struct DosPacket* dp;
 	struct MsgPort *local, *reply, *sync;
 	unsigned long signals;
 	split sd, sd2;
 	lock *locks, **slock, *new_lock, *nlock;
-	unsigned long rfsl;   /* real file system lock */
-	struct FileInfoBlock *fib;
-	struct FileHandle *fh;
-	file_info *fi;
-	unsigned long o1, o2, o3, o4;     /* stores for original dp->dp_Arg1 etc */
+	unsigned long rfsl; /* real file system lock */
+	struct FileInfoBlock* fib;
+	struct FileHandle* fh;
+	file_info* fi;
+	unsigned long o1, o2, o3, o4; /* stores for original dp->dp_Arg1 etc */
 	BSTR b, b2;
 
 	locks = 0;
@@ -84,7 +85,8 @@ void SAVEDS local_handler(void)
 	dp->dp_Port = local;
 
 	sync = CreatePort(0, 0);
-	if (!sync) {
+	if (!sync)
+	{
 		dp->dp_Res1 = DOSFALSE;
 		dp->dp_Res2 = ERROR_NO_FREE_STORE;
 
@@ -96,7 +98,8 @@ void SAVEDS local_handler(void)
 	/* do I really need DOSBase open now that I'm packeting? */
 
 	DOSBase = (struct DosLibrary *)OpenLibrary("dos.library", 36);
-	if (!DOSBase) {
+	if (!DOSBase)
+	{
 		DeletePort(sync);
 
 		dp->dp_Res1 = DOSFALSE;
@@ -106,7 +109,8 @@ void SAVEDS local_handler(void)
 
 		return;
 	}
-	else {
+	else
+	{
 #ifdef __amigaos4__
 		IDOS = (struct DOSIFace*)GetInterface((struct Library*)DOSBase, "main", 1L, 0);
 		if (!IDOS) {
@@ -128,20 +132,24 @@ void SAVEDS local_handler(void)
 
 	signals = (1 << local->mp_SigBit);
 
-	while (1) {
+	while (1)
+	{
 		Wait(signals);
 
-		while (msg = GetMsg(local)) {
+		while (msg = GetMsg(local))
+		{
 			dp = (struct DosPacket *)msg->mn_Node.ln_Name;
 			reply = dp->dp_Port;
 
 			truth(dp->dp_Link == msg);
 
-			switch (dp->dp_Type) {
+			switch (dp->dp_Type)
+			{
 			case ACTION_DIE:
 				/* close all locks */
 				nlock = locks;
-				while (nlock) {
+				while (nlock)
+				{
 					new_lock = nlock->next;
 
 					if (nlock->rfsl != ftphosts_lock)
@@ -159,7 +167,7 @@ void SAVEDS local_handler(void)
 
 				Forbid();
 				dp->dp_Res1 = DOSTRUE;
-				dp->dp_Res2 = (unsigned long)locks;  /* so they can adopt them */
+				dp->dp_Res2 = (unsigned long)locks; /* so they can adopt them */
 
 				PutMsg(reply, dp->dp_Link);
 
@@ -168,14 +176,16 @@ void SAVEDS local_handler(void)
 				return;
 			case ACTION_LOCATE_OBJECT:
 				if (!split_data((lock *)(dp->dp_Arg1 << 2),
-					(unsigned char *)(dp->dp_Arg2 << 2), &sd)) {
+				                (unsigned char *)(dp->dp_Arg2 << 2), &sd))
+				{
 					dp->dp_Res1 = 0;
 					dp->dp_Res2 = ERROR_NO_FREE_STORE;
 					break;
 				}
 
 				new_lock = (lock *)allocate(sizeof(*new_lock), V_lock);
-				if (!new_lock) {
+				if (!new_lock)
+				{
 					show_string("XX2");
 					dp->dp_Res1 = 0;
 					dp->dp_Res2 = ERROR_NO_FREE_STORE;
@@ -184,8 +194,10 @@ void SAVEDS local_handler(void)
 					break;
 				}
 
-				if (!sd.path) {   /* they want the root */
-					if (dp->dp_Arg3 == EXCLUSIVE_LOCK) {
+				if (!sd.path)
+				{ /* they want the root */
+					if (dp->dp_Arg3 == EXCLUSIVE_LOCK)
+					{
 						deallocate(new_lock, V_lock);
 
 						end_split(&sd);
@@ -197,13 +209,15 @@ void SAVEDS local_handler(void)
 
 					rfsl = ftphosts_lock;
 				}
-				else {
+				else
+				{
 					o1 = dp->dp_Arg1;
 					o2 = dp->dp_Arg2;
 
 					dp->dp_Arg1 = ftphosts_lock;
 					b = ctobstr(sd.path);
-					if (!b) {
+					if (!b)
+					{
 						deallocate(new_lock, V_lock);
 
 						end_split(&sd);
@@ -217,7 +231,8 @@ void SAVEDS local_handler(void)
 					dp->dp_Port = sync;
 
 					lock_message(ftphosts_lock, dp);
-					WaitPort(sync); GetMsg(sync);
+					WaitPort(sync);
+					GetMsg(sync);
 
 					dp->dp_Arg1 = o1;
 					dp->dp_Arg2 = o2;
@@ -227,7 +242,8 @@ void SAVEDS local_handler(void)
 					rfsl = dp->dp_Res1;
 				}
 
-				if (!rfsl) {
+				if (!rfsl)
+				{
 					deallocate(new_lock, V_lock);
 
 					end_split(&sd);
@@ -257,10 +273,12 @@ void SAVEDS local_handler(void)
 
 				new_lock = (lock *)(dp->dp_Arg1 << 2);
 
-				while (*slock && *slock != new_lock) {
+				while (*slock && *slock != new_lock)
+				{
 					slock = &(*slock)->next;
 				}
-				if (!*slock) {
+				if (!*slock)
+				{
 					show_string("Free lock failed");
 					dp->dp_Res1 = DOSFALSE;
 					dp->dp_Res2 = ERROR_INVALID_LOCK;
@@ -271,14 +289,16 @@ void SAVEDS local_handler(void)
 
 				*slock = new_lock->next;
 
-				if (new_lock->rfsl != ftphosts_lock) {
+				if (new_lock->rfsl != ftphosts_lock)
+				{
 					dp->dp_Port = sync;
 
 					o1 = dp->dp_Arg1;
 					dp->dp_Arg1 = new_lock->rfsl;
 
 					lock_message(new_lock->rfsl, dp);
-					WaitPort(sync); GetMsg(sync);
+					WaitPort(sync);
+					GetMsg(sync);
 
 					dp->dp_Arg1 = o1;
 				}
@@ -291,7 +311,8 @@ void SAVEDS local_handler(void)
 				break;
 			case ACTION_DELETE_OBJECT:
 				if (!split_data((lock *)(dp->dp_Arg1 << 2),
-					(unsigned char *)(dp->dp_Arg2 << 2), &sd)) {
+				                (unsigned char *)(dp->dp_Arg2 << 2), &sd))
+				{
 					dp->dp_Res1 = DOSFALSE;
 					dp->dp_Res2 = ERROR_NO_FREE_STORE;
 					break;
@@ -302,7 +323,8 @@ void SAVEDS local_handler(void)
 
 				dp->dp_Arg1 = ftphosts_lock;
 				b = ctobstr(sd.path);
-				if (!b) {
+				if (!b)
+				{
 					end_split(&sd);
 					dp->dp_Res1 = DOSFALSE;
 					dp->dp_Res2 = ERROR_NO_FREE_STORE;
@@ -313,7 +335,8 @@ void SAVEDS local_handler(void)
 				dp->dp_Port = sync;
 
 				lock_message(ftphosts_lock, dp);
-				WaitPort(sync); GetMsg(sync);
+				WaitPort(sync);
+				GetMsg(sync);
 
 				dp->dp_Arg1 = o1;
 				dp->dp_Arg2 = o2;
@@ -325,14 +348,16 @@ void SAVEDS local_handler(void)
 				break;
 			case ACTION_RENAME_OBJECT:
 				if (!split_data((lock *)(dp->dp_Arg1 << 2),
-					(unsigned char *)(dp->dp_Arg2 << 2), &sd)) {
+				                (unsigned char *)(dp->dp_Arg2 << 2), &sd))
+				{
 					dp->dp_Res1 = DOSFALSE;
 					dp->dp_Res2 = ERROR_NO_FREE_STORE;
 					break;
 				}
 
 				if (!split_data((lock *)(dp->dp_Arg3 << 2),
-					(unsigned char *)(dp->dp_Arg4 << 2), &sd2)) {
+				                (unsigned char *)(dp->dp_Arg4 << 2), &sd2))
+				{
 					end_split(&sd);
 					dp->dp_Res1 = DOSFALSE;
 					dp->dp_Res2 = ERROR_NO_FREE_STORE;
@@ -344,10 +369,12 @@ void SAVEDS local_handler(void)
 				o3 = dp->dp_Arg3;
 				o4 = dp->dp_Arg4;
 
-				if (!sd2.path) {  /* this is rename Unnamed1 to "ucc.gu.uwa..." */
+				if (!sd2.path)
+				{ /* this is rename Unnamed1 to "ucc.gu.uwa..." */
 					if (sd2.work) deallocate(sd2.work, V_cstr);
 					sd2.work = (unsigned char *)allocate(strlen(sd2.port->mp_Node.ln_Name) + 1, V_cstr);
-					if (!sd2.work) {
+					if (!sd2.work)
+					{
 						dp->dp_Res1 = DOSFALSE;
 						dp->dp_Res2 = ERROR_NO_FREE_STORE;
 
@@ -362,7 +389,8 @@ void SAVEDS local_handler(void)
 				b = ctobstr(sd.path);
 				b2 = ctobstr(sd2.path);
 
-				if (!b || !b2) {
+				if (!b || !b2)
+				{
 					if (b) free_bstr(b);
 					if (b2) free_bstr(b2);
 
@@ -383,7 +411,8 @@ void SAVEDS local_handler(void)
 				dp->dp_Port = sync;
 
 				lock_message(ftphosts_lock, dp);
-				WaitPort(sync); GetMsg(sync);
+				WaitPort(sync);
+				GetMsg(sync);
 
 				dp->dp_Arg1 = o1;
 				dp->dp_Arg2 = o2;
@@ -404,27 +433,31 @@ void SAVEDS local_handler(void)
 				rfsl = new_lock->rfsl;
 
 				new_lock = (lock *)allocate(sizeof(*new_lock), V_lock);
-				if (!new_lock) {
+				if (!new_lock)
+				{
 					dp->dp_Res1 = DOSFALSE;
 					dp->dp_Res2 = ERROR_NO_FREE_STORE;
 					show_string("DupLock failed 1");
 					break;
 				}
 
-				if (rfsl != ftphosts_lock) {
+				if (rfsl != ftphosts_lock)
+				{
 					o1 = dp->dp_Arg1;
 					dp->dp_Arg1 = rfsl;
 
 					dp->dp_Port = sync;
 
 					lock_message(rfsl, dp);
-					WaitPort(sync); GetMsg(sync);
+					WaitPort(sync);
+					GetMsg(sync);
 
 					rfsl = dp->dp_Res1;
 					dp->dp_Arg1 = o1;
 				}
 
-				if (!rfsl) {
+				if (!rfsl)
+				{
 					deallocate(new_lock, V_lock);
 					show_string("DupLock failed 2");
 					break;
@@ -437,7 +470,7 @@ void SAVEDS local_handler(void)
 				locks = new_lock;
 
 				new_lock->rfsl = rfsl;
-				new_lock->fl.fl_Access = SHARED_LOCK;
+				new_lock->fl.fl_Access = SHARED_LOCK ;
 				new_lock->fl.fl_Task = ftp_port;
 				new_lock->fl.fl_Volume = (unsigned long)ftp_volume >> 2;
 
@@ -447,7 +480,8 @@ void SAVEDS local_handler(void)
 				break;
 			case ACTION_SET_PROTECT:
 				if (!split_data((lock *)(dp->dp_Arg2 << 2),
-					(unsigned char *)(dp->dp_Arg3 << 2), &sd)) {
+				                (unsigned char *)(dp->dp_Arg3 << 2), &sd))
+				{
 					dp->dp_Res1 = DOSFALSE;
 					dp->dp_Res2 = ERROR_NO_FREE_STORE;
 					break;
@@ -458,7 +492,8 @@ void SAVEDS local_handler(void)
 
 				dp->dp_Arg2 = ftphosts_lock;
 				b = ctobstr(sd.path);
-				if (!b) {
+				if (!b)
+				{
 					end_split(&sd);
 
 					dp->dp_Res1 = DOSFALSE;
@@ -470,7 +505,8 @@ void SAVEDS local_handler(void)
 				dp->dp_Port = sync;
 
 				lock_message(ftphosts_lock, dp);
-				WaitPort(sync); GetMsg(sync);
+				WaitPort(sync);
+				GetMsg(sync);
 
 				dp->dp_Arg2 = o2;
 				dp->dp_Arg3 = o3;
@@ -482,7 +518,8 @@ void SAVEDS local_handler(void)
 				break;
 			case ACTION_CREATE_DIR:
 				if (!split_data((lock *)(dp->dp_Arg1 << 2),
-					(unsigned char *)(dp->dp_Arg2 << 2), &sd)) {
+				                (unsigned char *)(dp->dp_Arg2 << 2), &sd))
+				{
 					dp->dp_Res1 = DOSFALSE;
 					dp->dp_Res2 = ERROR_NO_FREE_STORE;
 					break;
@@ -493,7 +530,8 @@ void SAVEDS local_handler(void)
 
 				dp->dp_Arg1 = ftphosts_lock;
 				b = ctobstr(sd.path);
-				if (!b) {
+				if (!b)
+				{
 					end_split(&sd);
 
 					dp->dp_Res1 = DOSFALSE;
@@ -506,7 +544,8 @@ void SAVEDS local_handler(void)
 				dp->dp_Port = sync;
 
 				lock_message(ftphosts_lock, dp);
-				WaitPort(sync); GetMsg(sync);
+				WaitPort(sync);
+				GetMsg(sync);
 
 				dp->dp_Arg1 = o1;
 				dp->dp_Arg2 = o2;
@@ -528,13 +567,15 @@ void SAVEDS local_handler(void)
 				dp->dp_Port = sync;
 
 				lock_message(new_lock->rfsl, dp);
-				WaitPort(sync); GetMsg(sync);
+				WaitPort(sync);
+				GetMsg(sync);
 
 				dp->dp_Arg1 = o1;
 
 				if (!dp->dp_Res1) break;
 
-				if (new_lock->rfsl == ftphosts_lock) {
+				if (new_lock->rfsl == ftphosts_lock)
+				{
 					strcpy(fib->fib_FileName, (char*)volume_name);
 				}
 
@@ -551,14 +592,16 @@ void SAVEDS local_handler(void)
 				dp->dp_Port = sync;
 
 				lock_message(new_lock->rfsl, dp);
-				WaitPort(sync); GetMsg(sync);
+				WaitPort(sync);
+				GetMsg(sync);
 
 				dp->dp_Arg1 = o1;
 
 				break;
 			case ACTION_SET_COMMENT:
 				if (!split_data((lock *)(dp->dp_Arg2 << 2),
-					(unsigned char *)(dp->dp_Arg3 << 2), &sd)) {
+				                (unsigned char *)(dp->dp_Arg3 << 2), &sd))
+				{
 					dp->dp_Res1 = DOSFALSE;
 					dp->dp_Res2 = ERROR_NO_FREE_STORE;
 					break;
@@ -569,7 +612,8 @@ void SAVEDS local_handler(void)
 
 				dp->dp_Arg2 = ftphosts_lock;
 				b = ctobstr(sd.path);
-				if (!b) {
+				if (!b)
+				{
 					end_split(&sd);
 
 					dp->dp_Res1 = DOSFALSE;
@@ -581,7 +625,8 @@ void SAVEDS local_handler(void)
 				dp->dp_Port = sync;
 
 				lock_message(ftphosts_lock, dp);
-				WaitPort(sync); GetMsg(sync);
+				WaitPort(sync);
+				GetMsg(sync);
 
 				dp->dp_Arg2 = o2;
 				dp->dp_Arg3 = o3;
@@ -596,7 +641,8 @@ void SAVEDS local_handler(void)
 
 				verify(new_lock, V_lock);
 
-				if (new_lock->rfsl == ftphosts_lock) {
+				if (new_lock->rfsl == ftphosts_lock)
+				{
 					dp->dp_Res1 = 0;
 					dp->dp_Res2 = 0;
 					break;
@@ -604,7 +650,8 @@ void SAVEDS local_handler(void)
 				/* fall through */
 			case ACTION_PARENT_FH:
 				new_lock = (lock *)allocate(sizeof(*new_lock), V_lock);
-				if (!new_lock) {
+				if (!new_lock)
+				{
 					dp->dp_Res1 = 0;
 					dp->dp_Res2 = ERROR_NO_FREE_STORE;
 
@@ -619,7 +666,7 @@ void SAVEDS local_handler(void)
 				locks = new_lock;
 
 				new_lock->rfsl = ftphosts_lock;
-				new_lock->fl.fl_Access = SHARED_LOCK;
+				new_lock->fl.fl_Access = SHARED_LOCK ;
 				new_lock->fl.fl_Task = ftp_port;
 				new_lock->fl.fl_Volume = (unsigned long)ftp_volume >> 2;
 
@@ -637,7 +684,8 @@ void SAVEDS local_handler(void)
 
 				dp->dp_Port = sync;
 				lock_message(new_lock->rfsl, dp);
-				WaitPort(sync); GetMsg(sync);
+				WaitPort(sync);
+				GetMsg(sync);
 
 				dp->dp_Arg1 = o1;
 
@@ -647,15 +695,18 @@ void SAVEDS local_handler(void)
 
 				verify(new_lock, V_lock);
 
-				if (new_lock->rfsl == ftphosts_lock) {
+				if (new_lock->rfsl == ftphosts_lock)
+				{
 					new_lock = (lock *)(dp->dp_Arg2 << 2);
 
 					verify(new_lock, V_lock);
 
-					if (new_lock->rfsl == ftphosts_lock) {
+					if (new_lock->rfsl == ftphosts_lock)
+					{
 						dp->dp_Res1 = DOSTRUE;
 					}
-					else {
+					else
+					{
 						dp->dp_Res1 = DOSFALSE;
 					}
 					dp->dp_Res2 = 0;
@@ -676,7 +727,8 @@ void SAVEDS local_handler(void)
 
 				dp->dp_Port = sync;
 				lock_message(rfsl, dp);
-				WaitPort(sync); GetMsg(sync);
+				WaitPort(sync);
+				GetMsg(sync);
 
 				dp->dp_Arg1 = o1;
 				dp->dp_Arg2 = o2;
@@ -692,7 +744,8 @@ void SAVEDS local_handler(void)
 				dp->dp_Port = sync;
 
 				lock_message(ftphosts_lock, dp);
-				WaitPort(sync); GetMsg(sync);
+				WaitPort(sync);
+				GetMsg(sync);
 
 				dp->dp_Arg1 = o1;
 
@@ -701,14 +754,16 @@ void SAVEDS local_handler(void)
 			case ACTION_FINDINPUT:
 			case ACTION_FINDOUTPUT:
 				if (!split_data((lock *)(dp->dp_Arg2 << 2),
-					(unsigned char *)(dp->dp_Arg3 << 2), &sd)) {
+				                (unsigned char *)(dp->dp_Arg3 << 2), &sd))
+				{
 					dp->dp_Res1 = DOSFALSE;
 					dp->dp_Res2 = ERROR_NO_FREE_STORE;
 					break;
 				}
 
 				fi = (file_info *)allocate(sizeof(*fi), V_file_info);
-				if (!fi) {
+				if (!fi)
+				{
 					end_split(&sd);
 
 					dp->dp_Res1 = DOSFALSE;
@@ -727,7 +782,8 @@ void SAVEDS local_handler(void)
 
 				dp->dp_Arg2 = ftphosts_lock;
 				b = ctobstr(sd.path);
-				if (!b) {
+				if (!b)
+				{
 					deallocate(fi, V_file_info);
 					end_split(&sd);
 
@@ -740,21 +796,24 @@ void SAVEDS local_handler(void)
 				dp->dp_Port = sync;
 
 				lock_message(ftphosts_lock, dp);
-				WaitPort(sync); GetMsg(sync);
+				WaitPort(sync);
+				GetMsg(sync);
 
 				dp->dp_Arg2 = o2;
 				dp->dp_Arg3 = o3;
 
 				free_bstr(b);
 
-				if (dp->dp_Res1) {
+				if (dp->dp_Res1)
+				{
 					fh->fh_Type = ftp_port;
 					fi->rfarg = fh->fh_Args;
 					fh->fh_Args = (unsigned long)fi;
 					fi->port = local;
 					fi->type = dp->dp_Type;
 				}
-				else {
+				else
+				{
 					deallocate(fi, V_file_info);
 				}
 
@@ -771,7 +830,8 @@ void SAVEDS local_handler(void)
 
 				dp->dp_Port = sync;
 				lock_message(ftphosts_lock, dp);
-				WaitPort(sync); GetMsg(sync);
+				WaitPort(sync);
+				GetMsg(sync);
 
 				dp->dp_Arg1 = o1;
 
@@ -789,7 +849,8 @@ void SAVEDS local_handler(void)
 
 				dp->dp_Port = sync;
 				lock_message(ftphosts_lock, dp);
-				WaitPort(sync); GetMsg(sync);
+				WaitPort(sync);
+				GetMsg(sync);
 
 				dp->dp_Arg1 = o1;
 
@@ -802,7 +863,8 @@ void SAVEDS local_handler(void)
 				truth(fh != nil);
 
 				fi = (file_info *)allocate(sizeof(*fi), V_file_info);
-				if (!fi) {
+				if (!fi)
+				{
 					dp->dp_Res1 = DOSFALSE;
 					dp->dp_Res2 = ERROR_NO_FREE_STORE;
 					break;
@@ -816,18 +878,21 @@ void SAVEDS local_handler(void)
 
 				dp->dp_Port = sync;
 				lock_message(ftphosts_lock, dp);
-				WaitPort(sync); GetMsg(sync);
+				WaitPort(sync);
+				GetMsg(sync);
 
 				dp->dp_Arg2 = o2;
 
-				if (dp->dp_Res1) {
+				if (dp->dp_Res1)
+				{
 					fh->fh_Type = ftp_port;
 					fi->rfarg = fh->fh_Args;
 					fh->fh_Args = (unsigned long)fi;
 					fi->port = local;
 					fi->type = dp->dp_Type;
 				}
-				else {
+				else
+				{
 					deallocate(fi, V_file_info);
 				}
 
@@ -837,7 +902,8 @@ void SAVEDS local_handler(void)
 				fi = (file_info *)fh->fh_Args;
 
 				new_lock = (lock *)allocate(sizeof(*new_lock), V_lock);
-				if (!new_lock) {
+				if (!new_lock)
+				{
 					dp->dp_Res1 = 0;
 					dp->dp_Res2 = ERROR_NO_FREE_STORE;
 
@@ -848,7 +914,7 @@ void SAVEDS local_handler(void)
 
 				new_lock->port = local;
 
-				new_lock->fl.fl_Access = SHARED_LOCK;
+				new_lock->fl.fl_Access = SHARED_LOCK ;
 				new_lock->fl.fl_Task = ftp_port;
 				new_lock->fl.fl_Volume = (unsigned long)ftp_volume >> 2;
 
@@ -858,11 +924,13 @@ void SAVEDS local_handler(void)
 
 				dp->dp_Port = sync;
 				lock_message(ftphosts_lock, dp);
-				WaitPort(sync); GetMsg(sync);
+				WaitPort(sync);
+				GetMsg(sync);
 
 				fh->fh_Args = (unsigned long)fi;
 
-				if (dp->dp_Res1) {
+				if (dp->dp_Res1)
+				{
 					new_lock->rfsl = dp->dp_Res1;
 
 					new_lock->next = locks;
@@ -871,7 +939,8 @@ void SAVEDS local_handler(void)
 					dp->dp_Res1 = (unsigned long)new_lock >> 2;
 					dp->dp_Res2 = 0;
 				}
-				else {
+				else
+				{
 					deallocate(new_lock, V_lock);
 				}
 
@@ -887,7 +956,8 @@ void SAVEDS local_handler(void)
 
 				dp->dp_Port = sync;
 				lock_message(ftphosts_lock, dp);
-				WaitPort(sync); GetMsg(sync);
+				WaitPort(sync);
+				GetMsg(sync);
 
 				fh->fh_Args = (unsigned long)fi;
 

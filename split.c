@@ -10,7 +10,7 @@
 #include "site.h"
 #include "split.h"
 
-boolean collapse(unsigned char *s)
+boolean collapse(unsigned char* s)
 {
 	unsigned char *t, *u;
 
@@ -18,51 +18,60 @@ boolean collapse(unsigned char *s)
 	u = s;
 
 	/* . & .. are illegal */
-	if (u[0] == '.') {
+	if (u[0] == '.')
+	{
 		if (u[1] == 0) return false;
 		if (u[1] == '/') return false;
-		if (u[1] == '.') {
+		if (u[1] == '.')
+		{
 			if (u[2] == 0) return false;
 			if (u[2] == '/') return false;
 		}
 	}
 
-	while (*u) {
-		if (t == s && u[0] == '/') {
+	while (*u)
+	{
+		if (t == s && u[0] == '/')
+		{
 			// return false; // used to do this, but people didn't want it to error
-			u++;  /* ignore it */
+			u++; /* ignore it */
 			continue;
 		}
 
-		if (u[0] == '/' && u[1] == '.') {
+		if (u[0] == '/' && u[1] == '.')
+		{
 			if (u[2] == 0) return false;
 			if (u[2] == '/') return false;
-			if (u[2] == '.') {
+			if (u[2] == '.')
+			{
 				if (u[3] == 0) return false;
 				if (u[3] == '/') return false;
 			}
 		}
 
-		if (u[0] == '/' && u[1] == '/') {
-			while (--t > s) {
+		if (u[0] == '/' && u[1] == '/')
+		{
+			while (--t > s)
+			{
 				if (*t == '/') break;
 			}
 			u++;
 			if (t == s) u++;
 		}
-		else {
+		else
+		{
 			*t++ = *u++;
 		}
 	}
 
-	if (t > s && t[-1] == '/') t[-1] = 0;  /* cull the trailing '/' */
+	if (t > s && t[-1] == '/') t[-1] = 0; /* cull the trailing '/' */
 
 	*t = 0;
 
 	return true;
 }
 
-boolean split_data(lock *l, unsigned char *z, split *sd)
+boolean split_data(lock* l, unsigned char* z, split* sd)
 {
 	unsigned char *s, *t;
 	int len1, len2, len3;
@@ -70,12 +79,12 @@ boolean split_data(lock *l, unsigned char *z, split *sd)
 	 * sigh ... all that work to separate the libs to processes ... just
 	 * given up and used the global DosBase here
 	 */
-	struct DevProc *dp;
+	struct DevProc* dp;
 
 	truth(z != nil);
 
-	if (!l && z[0] == 0) {
-
+	if (!l && z[0] == 0)
+	{
 		sd->port = local_port;
 		sd->path = nil;
 
@@ -85,28 +94,33 @@ boolean split_data(lock *l, unsigned char *z, split *sd)
 	}
 
 	s = (unsigned char *)allocate(z[0] + 1, V_cstr);
-	if (!s) {
+	if (!s)
+	{
 		sd->work = nil;
 		return false;
 	}
 
 	if (z[0])
-		memcpy(s, &z[1], z[0]);
+	memcpy(s, &z[1], z[0]);
 
 	s[z[0]] = 0;
 
 	sd->work = s;
 
-	for (;; s++) {
-		if (!*s) {
+	for (;; s++)
+	{
+		if (!*s)
+		{
 			z = sd->work;
 			break;
 		}
 
-		if (*s == ':') {
+		if (*s == ':')
+		{
 			s++;
 			dp = GetDeviceProc(sd->work, nil);
-			if (!dp) {
+			if (!dp)
+			{
 				deallocate(sd->work, V_cstr);
 				sd->work = nil;
 				return false;
@@ -124,14 +138,16 @@ boolean split_data(lock *l, unsigned char *z, split *sd)
 
 	/* have to look at lock to see where we are relative to */
 
-	if (!l || (l->port == local_port && l->rfsl == ftphosts_lock)) {
+	if (!l || (l->port == local_port && l->rfsl == ftphosts_lock))
+	{
 		s = z;
 		goto resolve;
 	}
 
 	verify(l, V_lock);
 
-	if (l->port == local_port) {  /* most handlers might allow this, but there's no point */
+	if (l->port == local_port)
+	{ /* most handlers might allow this, but there's no point */
 		show_string("Split Fail B");
 		deallocate(sd->work, V_cstr);
 		sd->work = nil;
@@ -140,12 +156,14 @@ boolean split_data(lock *l, unsigned char *z, split *sd)
 
 	/* construct a full path name so we can collapse it sensibly */
 
-	if (l->fname[0] == 0) {
+	if (l->fname[0] == 0)
+	{
 		len1 = strlen(l->port->mp_Node.ln_Name);
 		len2 = strlen(z);
 
 		s = (unsigned char *)allocate(len1 + len2 + 2, V_cstr);
-		if (!s) {
+		if (!s)
+		{
 			deallocate(sd->work, V_cstr);
 			sd->work = nil;
 			return false;
@@ -153,24 +171,28 @@ boolean split_data(lock *l, unsigned char *z, split *sd)
 
 		strcpy(s, l->port->mp_Node.ln_Name);
 
-		if (sd->work[0]) {
+		if (sd->work[0])
+		{
 			s[len1] = '/';
 			strcpy(&s[len1 + 1], z);
 		}
-		else {
+		else
+		{
 			s[len1] = 0;
 		}
 
 		deallocate(sd->work, V_cstr);
 		sd->work = s;
 	}
-	else {
+	else
+	{
 		len1 = strlen(l->port->mp_Node.ln_Name);
 		len2 = strlen(l->fname);
 		len3 = strlen(z);
 
 		s = (unsigned char *)allocate(len1 + len2 + len3 + 3, V_cstr);
-		if (!s) {
+		if (!s)
+		{
 			deallocate(sd->work, V_cstr);
 			sd->work = nil;
 			return false;
@@ -179,11 +201,13 @@ boolean split_data(lock *l, unsigned char *z, split *sd)
 		strcpy(s, l->port->mp_Node.ln_Name);
 		s[len1] = '/';
 		strcpy(&s[len1 + 1], l->fname);
-		if (sd->work[0]) {
+		if (sd->work[0])
+		{
 			s[len1 + len2 + 1] = '/';
 			strcpy(&s[len1 + len2 + 2], z);
 		}
-		else {
+		else
+		{
 			s[len1 + len2 + 1] = 0;
 		}
 		deallocate(sd->work, V_cstr);
@@ -191,17 +215,21 @@ boolean split_data(lock *l, unsigned char *z, split *sd)
 	}
 
 resolve:
-	if (!collapse(s)) {
+	if (!collapse(s))
+	{
 		deallocate(sd->work, V_cstr);
 		sd->work = nil;
 		return false;
 	}
 
-	for (t = s; *t; t++) {
-		if (*t == '/') {
+	for (t = s; *t; t++)
+	{
+		if (*t == '/')
+		{
 			*t++ = 0;
 			sd->port = get_site(s);
-			if (!sd->port) {
+			if (!sd->port)
+			{
 				deallocate(sd->work, V_cstr);
 				sd->work = nil;
 				return false;
@@ -214,7 +242,8 @@ resolve:
 		}
 	}
 
-	if (s[0] == 0) {
+	if (s[0] == 0)
+	{
 		deallocate(sd->work, V_cstr);
 		sd->work = nil;
 		sd->path = nil;
@@ -228,7 +257,8 @@ resolve:
 		strcasecmp(s, "Unnamed", 7) == 0 ||
 		strcasecmp(s, ".backdrop") == 0 ||
 		strcasecmp(s, "Default") == 0 ||
-		strcasecmp(&s[strlen(s) - 5], ".info") == 0) {
+		strcasecmp(&s[strlen(s) - 5], ".info") == 0)
+	{
 		sd->port = local_port;
 		sd->path = s;
 		return true;
@@ -243,9 +273,10 @@ resolve:
 	return true;
 }
 
-void end_split(split *sd)
+void end_split(split* sd)
 {
-	if (sd->work) {
+	if (sd->work)
+	{
 		deallocate(sd->work, V_cstr);
 		sd->work = nil;
 	}

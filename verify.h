@@ -6,7 +6,7 @@
  */
 
 #if defined(VERIFY) || defined(MINI_VERIFY)
- /* #include <exec/lists.h>
+/* #include <exec/lists.h>
 	#include <exec/nodes.h> */
 
 #define magic_verify	unsigned long	magic

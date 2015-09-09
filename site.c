@@ -16,16 +16,16 @@
 #include "strings.h"
 
 
-struct MsgPort *get_site(unsigned char *s)
-	// ftp-site mit Namen s zurückgeben; entweder schon aktive nehmen
-	// oder neue erstellen (inkl. Icon auslesen, Process erstellen, etc.)
+struct MsgPort* get_site(unsigned char* s)
+// ftp-site mit Namen s zurückgeben; entweder schon aktive nehmen
+// oder neue erstellen (inkl. Icon auslesen, Process erstellen, etc.)
 {
-	site *sp;
-	struct Process *child;
-	struct StandardPacket *std_pkt;
-	struct DiskObject *dobj;
+	site* sp;
+	struct Process* child;
+	struct StandardPacket* std_pkt;
+	struct DiskObject* dobj;
 	BPTR ocd;
-	unsigned char *tmp;
+	unsigned char* tmp;
 
 
 	// falls die site noch im RAM: ist, diese nehmen und zurückgeben
@@ -74,7 +74,7 @@ struct MsgPort *get_site(unsigned char *s)
 	if ((*tmp == ',') && isdigit(tmp[1]))
 	{
 		sp->port_number = atoi(tmp + 1);
-		*tmp = 0;               // Hostname geht nur bis Zeichen vor ','
+		*tmp = 0; // Hostname geht nur bis Zeichen vor ','
 	} // if (',')
 
 
@@ -88,7 +88,7 @@ struct MsgPort *get_site(unsigned char *s)
 	{
 		sp->host = (unsigned char *)allocate(strlen(tmp + 1) + 1, V_cstr);
 		if (sp->host)
-			strcpy(sp->host, tmp + 1);
+		strcpy(sp->host, tmp + 1);
 
 		// erstmal kein user-Name angegeben, nur Angabe, daß nach einem
 		// gefragt werden soll
@@ -111,7 +111,7 @@ struct MsgPort *get_site(unsigned char *s)
 	{
 		sp->host = (unsigned char *)allocate(strlen(s) + 1, V_cstr);
 		if (sp->host)
-			strcpy(sp->host, s);
+		strcpy(sp->host, s);
 	} // else
 
 
@@ -162,7 +162,7 @@ struct MsgPort *get_site(unsigned char *s)
 		if (tmp)
 		{
 			// Passwort dekodieren
-			unsigned char *decrypt_password(unsigned char *s);
+			unsigned char*decrypt_password(unsigned char* s);
 			sp->password = decrypt_password(tmp);
 			if (sp->password)
 			{
@@ -201,7 +201,8 @@ struct MsgPort *get_site(unsigned char *s)
 			{
 				sp->quick = false;
 			}
-			else {
+			else
+			{
 				sp->quick = true;
 			}
 		}
@@ -214,13 +215,15 @@ struct MsgPort *get_site(unsigned char *s)
 			{
 				sp->quick = false;
 			}
-			else {
+			else
+			{
 				sp->quick = true;
 			}
 		}
 
 		tmp = FindToolType(dobj->do_ToolTypes, "CASE");
-		if (tmp) {
+		if (tmp)
+		{
 			if (strcasecmp(tmp, strings[MSG_OFF]) != 0 &&
 				strcasecmp(tmp, strings[MSG_FALSE]) != 0)
 			{
@@ -232,7 +235,7 @@ struct MsgPort *get_site(unsigned char *s)
 		if (tmp)
 		{
 			if (sp->host)
-				deallocate(sp->host, V_cstr);
+			deallocate(sp->host, V_cstr);
 			sp->host = allocate(strlen(tmp) + 1, V_cstr);
 			if (sp->host)
 			{
@@ -282,7 +285,6 @@ struct MsgPort *get_site(unsigned char *s)
 		} // if
 
 
-
 		sp->comment = false;
 		tmp = FindToolType(dobj->do_ToolTypes, "COMMENT");
 		if (tmp)
@@ -294,10 +296,10 @@ struct MsgPort *get_site(unsigned char *s)
 		tmp = FindToolType(dobj->do_ToolTypes, "TIMEOUT");
 		if (tmp)
 		{
-			sp->no_lock_conn_idle = atoi(tmp) / IDLE_INTERVAL;
+			sp->no_lock_conn_idle = atoi(tmp) / IDLE_INTERVAL ;
 		}
 		else
-			sp->no_lock_conn_idle = NO_LOCK_CONN_IDLE;   // default values
+			sp->no_lock_conn_idle = NO_LOCK_CONN_IDLE ; // default values
 
 		FreeDiskObject(dobj);
 	} // if (dobj)
@@ -311,11 +313,11 @@ struct MsgPort *get_site(unsigned char *s)
 	if (!sp->host)
 	{
 		if (sp->user)
-			deallocate(sp->user, V_cstr);
+		deallocate(sp->user, V_cstr);
 		if (sp->password)
-			deallocate(sp->password, V_cstr);
+		deallocate(sp->password, V_cstr);
 		if (sp->root)
-			deallocate(sp->root, V_cstr);
+		deallocate(sp->root, V_cstr);
 
 		deallocate(sp, V_site);
 
@@ -339,7 +341,7 @@ struct MsgPort *get_site(unsigned char *s)
 	std_pkt->sp_Msg.mn_Node.ln_Name = (void *)&std_pkt->sp_Pkt;
 	std_pkt->sp_Pkt.dp_Link = &std_pkt->sp_Msg;
 
-	std_pkt->sp_Pkt.dp_Type = ACTION_DIE;  /* ignored when used at startup */
+	std_pkt->sp_Pkt.dp_Type = ACTION_DIE; /* ignored when used at startup */
 	std_pkt->sp_Pkt.dp_Arg1 = (unsigned long)sp;
 	std_pkt->sp_Pkt.dp_Port = startup_sync;
 
@@ -367,14 +369,14 @@ struct MsgPort *get_site(unsigned char *s)
 
 	sp->status_window = nil;
 
-#ifndef	__MORPHOS__
+#ifndef __MORPHOS__
 	child = CreateNewProcTags(
 		NP_Entry, site_handler,
-		NP_Name, sp->name,
-		NP_StackSize, 6000,
-		NP_Priority, 0,
-		TAG_END, 0
-		);
+		        NP_Name, sp->name,
+		        NP_StackSize, 6000,
+		        NP_Priority, 0,
+		        TAG_END, 0
+	);
 #else
 	child = CreateNewProcTags(
 		NP_CodeType, CODETYPE_PPC,
@@ -390,11 +392,11 @@ struct MsgPort *get_site(unsigned char *s)
 		deallocate(sp->host, V_cstr);
 
 		if (sp->user)
-			deallocate(sp->user, V_cstr);
+		deallocate(sp->user, V_cstr);
 		if (sp->password)
-			deallocate(sp->password, V_cstr);
+		deallocate(sp->password, V_cstr);
 		if (sp->root)
-			deallocate(sp->root, V_cstr);
+		deallocate(sp->root, V_cstr);
 
 		deallocate(std_pkt, V_StandardPacket);
 		deallocate(sp, V_site);
@@ -404,7 +406,8 @@ struct MsgPort *get_site(unsigned char *s)
 	sp->port = &child->pr_MsgPort;
 
 	PutMsg(sp->port, &std_pkt->sp_Msg);
-	WaitPort(startup_sync); GetMsg(startup_sync);
+	WaitPort(startup_sync);
+	GetMsg(startup_sync);
 
 	if (std_pkt->sp_Pkt.dp_Res1)
 	{
@@ -420,11 +423,11 @@ struct MsgPort *get_site(unsigned char *s)
 		deallocate(sp->host, V_cstr);
 
 		if (sp->user)
-			deallocate(sp->user, V_cstr);
+		deallocate(sp->user, V_cstr);
 		if (sp->password)
-			deallocate(sp->password, V_cstr);
+		deallocate(sp->password, V_cstr);
 		if (sp->root)
-			deallocate(sp->root, V_cstr);
+		deallocate(sp->root, V_cstr);
 
 		deallocate(std_pkt, V_StandardPacket);
 		deallocate(sp, V_site);
@@ -434,10 +437,9 @@ struct MsgPort *get_site(unsigned char *s)
 }
 
 
-
-void remove_site(site *sp)
+void remove_site(site* sp)
 {
-	site **sps;
+	site** sps;
 
 	verify(sp, V_site);
 
@@ -462,12 +464,11 @@ void remove_site(site *sp)
 }
 
 
-
 void shutdown_sites(void)
 {
 	site *sp, *spn;
-	struct DosPacket *dp;
-	lock *l;
+	struct DosPacket* dp;
+	lock* l;
 
 	sp = sites;
 	while (sp)
@@ -481,7 +482,8 @@ void shutdown_sites(void)
 		dp->dp_Port = startup_sync;
 
 		PutMsg(sp->port, dp->dp_Link);
-		WaitPort(startup_sync); GetMsg(startup_sync);
+		WaitPort(startup_sync);
+		GetMsg(startup_sync);
 
 		l = (lock *)dp->dp_Res2;
 		while (l)
@@ -502,11 +504,10 @@ void shutdown_sites(void)
 }
 
 
-
 void suspend_sites(void)
 {
-	site *sp;
-	struct DosPacket *dp;
+	site* sp;
+	struct DosPacket* dp;
 
 	sp = sites;
 	while (sp)
@@ -518,18 +519,18 @@ void suspend_sites(void)
 		dp->dp_Port = startup_sync;
 
 		PutMsg(sp->port, dp->dp_Link);
-		WaitPort(startup_sync); GetMsg(startup_sync);
+		WaitPort(startup_sync);
+		GetMsg(startup_sync);
 
 		sp = sp->next;
 	}
 }
 
 
-
-struct info_header *get_dir(site *sp, unsigned char *name)
-	// übergebenes Verzeichnis auslesen
+struct info_header* get_dir(site* sp, unsigned char* name)
+// übergebenes Verzeichnis auslesen
 {
-	struct info_header *ih;
+	struct info_header* ih;
 
 	verify(sp, V_site);
 	truth(name != nil);
@@ -549,7 +550,8 @@ struct info_header *get_dir(site *sp, unsigned char *name)
 		{
 			close_file(sp, true);
 		}
-		else {
+		else
+		{
 			return nil;
 		}
 	}
@@ -567,11 +569,10 @@ struct info_header *get_dir(site *sp, unsigned char *name)
 }
 
 
-
-ftpinfo *get_info(site *ftp_site, unsigned char *name)
+ftpinfo* get_info(site* ftp_site, unsigned char* name)
 {
-	unsigned char *s;
-	struct info_header *ih;
+	unsigned char* s;
+	struct info_header* ih;
 
 	verify(ftp_site, V_site);
 	truth(name != nil);
@@ -601,11 +602,10 @@ ftpinfo *get_info(site *ftp_site, unsigned char *name)
 }
 
 
-
-void flush_info(site *ftp_site, unsigned char *name)
+void flush_info(site* ftp_site, unsigned char* name)
 {
-	unsigned char *s;
-	struct info_header *ih;
+	unsigned char* s;
+	struct info_header* ih;
 
 	verify(ftp_site, V_site);
 	truth(name != nil);
@@ -622,7 +622,8 @@ void flush_info(site *ftp_site, unsigned char *name)
 		ih = find_info_header(ftp_site, name);
 		*s++ = '/';
 	}
-	else {
+	else
+	{
 		s = name;
 		ih = find_info_header(ftp_site, "");
 	}
@@ -634,11 +635,10 @@ void flush_info(site *ftp_site, unsigned char *name)
 }
 
 
-
-status_message *get_sm(site *sp)
+status_message* get_sm(site* sp)
 // "sm" = "status message"
 {
-	status_message *sm;
+	status_message* sm;
 
 	verify(sp, V_site);
 
@@ -655,7 +655,7 @@ status_message *get_sm(site *sp)
 
 	sm->header.mn_ReplyPort = sp->rank;
 	sm->header.mn_Length = sizeof(*sm);
-	sm->header.mn_Node.ln_Type = NT_MESSAGE;
+	sm->header.mn_Node.ln_Type = NT_MESSAGE ;
 	sm->header.mn_Node.ln_Name = "site status message";
 	sm->header.mn_Node.ln_Pri = 0;
 
@@ -665,10 +665,9 @@ status_message *get_sm(site *sp)
 }
 
 
-
-void state_change(site *sp, unsigned short state)
+void state_change(site* sp, unsigned short state)
 {
-	status_message *sm;
+	status_message* sm;
 
 	verify(sp, V_site);
 
@@ -686,16 +685,16 @@ void state_change(site *sp, unsigned short state)
 }
 
 
-
-static void fill_fib(site *site, struct FileInfoBlock *fib, ftpinfo *fi)
+static void fill_fib(site* site, struct FileInfoBlock* fib, ftpinfo* fi)
 // FileInfoBlock mit Daten aus ftpinfo füllen
 {
 	if (fi->flags & MYFLAG_DIR)
 	{
 		fib->fib_DirEntryType = ST_USERDIR;
 	}
-	else {
-		fib->fib_DirEntryType = ST_FILE;
+	else
+	{
+		fib->fib_DirEntryType = ST_FILE ;
 	}
 
 	fib->fib_EntryType = fib->fib_DirEntryType;
@@ -722,24 +721,24 @@ static void fill_fib(site *site, struct FileInfoBlock *fib, ftpinfo *fi)
 
 void SAVEDS site_handler(void)
 {
-	struct Process *me;
-	struct Message *msg;
-	struct DosPacket *dp;
+	struct Process* me;
+	struct Message* msg;
+	struct DosPacket* dp;
 	struct MsgPort *local, *reply, *sync, *timeport, *rank;
-	struct StandardPacket *idle_packet;
-	struct timerequest *timer;
+	struct StandardPacket* idle_packet;
+	struct timerequest* timer;
 	status_message *sm, *tsm;
 	lock *new_lock, *slock, **locks;
-	site *ftp_site;
+	site* ftp_site;
 	unsigned long signals;
 	int idlecount, n;
 	split sd, sd2;
-	unsigned char *s;
-	struct info_header *ih;
-	ftpinfo *fi;
-	file_info *fip;
-	struct FileHandle *fh;
-	struct FileInfoBlock *fib;
+	unsigned char* s;
+	struct info_header* ih;
+	ftpinfo* fi;
+	file_info* fip;
+	struct FileHandle* fh;
+	struct FileInfoBlock* fib;
 	unsigned long o1 = 0, o2, o3; /* 2003-03-08 rri */
 
 	me = (struct Process *)FindTask(0);
@@ -773,106 +772,108 @@ void SAVEDS site_handler(void)
 		{
 #endif
 
-			ftp_site->GTBase = OpenLibrary("gadtools.library", 0);
-			if (ftp_site->GTBase)
-			{
+		ftp_site->GTBase = OpenLibrary("gadtools.library", 0);
+		if (ftp_site->GTBase)
+		{
 #ifdef __amigaos4__
 				ftp_site->pIGadTools = (struct GadToolsIFace*)GetInterface((struct Library*)ftp_site->GTBase, "main", 1L, 0);
 				if (ftp_site->pIGadTools)
 				{
 #endif
-					ftp_site->GBase = (struct GfxBase *)OpenLibrary("graphics.library", 36);
-					if (ftp_site->GBase)
-					{
+			ftp_site->GBase = (struct GfxBase *)OpenLibrary("graphics.library", 36);
+			if (ftp_site->GBase)
+			{
 #ifdef __amigaos4__
 						ftp_site->pIGraphics = (struct GraphicsIFace*)GetInterface((struct Library*)ftp_site->GBase, "main", 1L, 0);
 						if (ftp_site->pIGraphics)
 						{
 #endif
-							sync = CreatePort(0, 0);
-							if (sync)
+				sync = CreatePort(0, 0);
+				if (sync)
+				{
+					ftp_site->sync = sync;
+
+					timeport = CreatePort(0, 0);
+					if (timeport)
+					{
+						timer = (struct timerequest *)CreateExtIO(timeport, sizeof(*timer));
+						if (timer)
+						{
+							idle_packet = (struct StandardPacket *)allocate(sizeof(*idle_packet), V_StandardPacket);
+							if (idle_packet)
 							{
-								ftp_site->sync = sync;
+								idle_packet->sp_Msg.mn_Node.ln_Name =
+									(void *)&idle_packet->sp_Pkt;
+								idle_packet->sp_Pkt.dp_Link = &idle_packet->sp_Msg;
+								idle_packet->sp_Pkt.dp_Type = action_IDLE;
+								idle_packet->sp_Pkt.dp_Arg1 = (unsigned long)ftp_site;
 
-								timeport = CreatePort(0, 0);
-								if (timeport)
+								prime->header.mn_ReplyPort = sync;
+								prime->command = TCP_NEWMESSAGE;
+								PutMsg(tcp, &prime->header);
+								WaitPort(sync);
+								GetMsg(sync);
+								if (prime->result)
 								{
-									timer = (struct timerequest *)CreateExtIO(timeport, sizeof(*timer));
-									if (timer)
+									ftp_site->control = prime->data;
+
+									PutMsg(tcp, &prime->header);
+									WaitPort(sync);
+									GetMsg(sync);
+									if (prime->result)
 									{
-										idle_packet = (struct StandardPacket *)allocate(sizeof(*idle_packet), V_StandardPacket);
-										if (idle_packet)
+										ftp_site->intr = prime->data;
+										ftp_site->intr->interrupt = ftp_site->control;
+										ftp_site->intr->header.mn_ReplyPort = sync;
+										ftp_site->intr->command = TCP_INTERRUPT;
+
+										if (OpenDevice("timer.device", UNIT_VBLANK, (struct IORequest *)timer, 0) == 0)
 										{
-											idle_packet->sp_Msg.mn_Node.ln_Name =
-												(void *)&idle_packet->sp_Pkt;
-											idle_packet->sp_Pkt.dp_Link = &idle_packet->sp_Msg;
-											idle_packet->sp_Pkt.dp_Type = action_IDLE;
-											idle_packet->sp_Pkt.dp_Arg1 = (unsigned long)ftp_site;
-
-											prime->header.mn_ReplyPort = sync;
-											prime->command = TCP_NEWMESSAGE;
-											PutMsg(tcp, &prime->header);
-											WaitPort(sync); GetMsg(sync);
-											if (prime->result)
+											sm = (status_message *)allocate(sizeof(*sm), V_status_message);
+											if (sm)
 											{
-												ftp_site->control = prime->data;
-
-												PutMsg(tcp, &prime->header);
-												WaitPort(sync); GetMsg(sync);
-												if (prime->result)
+												rank = CreatePort(0, 0);
+												if (rank)
 												{
-													ftp_site->intr = prime->data;
-													ftp_site->intr->interrupt = ftp_site->control;
-													ftp_site->intr->header.mn_ReplyPort = sync;
-													ftp_site->intr->command = TCP_INTERRUPT;
-
-													if (OpenDevice("timer.device", UNIT_VBLANK, (struct IORequest *)timer, 0) == 0)
-													{
-														sm = (status_message *)allocate(sizeof(*sm), V_status_message);
-														if (sm)
-														{
-															rank = CreatePort(0, 0);
-															if (rank)
-															{
-																ftp_site->rank = rank;
-																goto begin;
-															}
-															else
-																dp->dp_Res2 = ERROR_NO_FREE_STORE;
-															deallocate(sm, V_status_message);
-														}
-														else
-															dp->dp_Res2 = ERROR_NO_FREE_STORE;
-														CloseDevice((struct IORequest *)timer);
-													}
-													else
-														dp->dp_Res2 = ERROR_DEVICE_NOT_MOUNTED;
-													ftp_site->intr->command = TCP_DISPOSE;
-													PutMsg(tcp, &ftp_site->intr->header);
+													ftp_site->rank = rank;
+													goto begin;
 												}
 												else
 													dp->dp_Res2 = ERROR_NO_FREE_STORE;
-												ftp_site->control->command = TCP_DISPOSE;
-												PutMsg(tcp, &ftp_site->control->header);
+												deallocate(sm, V_status_message);
 											}
 											else
 												dp->dp_Res2 = ERROR_NO_FREE_STORE;
-											deallocate(idle_packet, V_StandardPacket);
+											CloseDevice((struct IORequest *)timer);
 										}
 										else
-											dp->dp_Res2 = ERROR_NO_FREE_STORE;
-										DeleteExtIO((struct IORequest *)timer);
+											dp->dp_Res2 = ERROR_DEVICE_NOT_MOUNTED;
+										ftp_site->intr->command = TCP_DISPOSE;
+										PutMsg(tcp, &ftp_site->intr->header);
 									}
 									else
 										dp->dp_Res2 = ERROR_NO_FREE_STORE;
-									DeletePort(timeport);
+									ftp_site->control->command = TCP_DISPOSE;
+									PutMsg(tcp, &ftp_site->control->header);
 								}
 								else
 									dp->dp_Res2 = ERROR_NO_FREE_STORE;
-								DeletePort(sync);
+								deallocate(idle_packet, V_StandardPacket);
 							}
 							else
 								dp->dp_Res2 = ERROR_NO_FREE_STORE;
+							DeleteExtIO((struct IORequest *)timer);
+						}
+						else
+							dp->dp_Res2 = ERROR_NO_FREE_STORE;
+						DeletePort(timeport);
+					}
+					else
+						dp->dp_Res2 = ERROR_NO_FREE_STORE;
+					DeletePort(sync);
+				}
+				else
+					dp->dp_Res2 = ERROR_NO_FREE_STORE;
 #ifdef __amigaos4__
 						}
 						else
@@ -880,10 +881,10 @@ void SAVEDS site_handler(void)
 
 						DropInterface((struct Interface*)ftp_site->pIGraphics);
 #endif
-						CloseLibrary((struct Library *)ftp_site->GBase);
-					}
-					else
-						dp->dp_Res2 = ERROR_INVALID_RESIDENT_LIBRARY;
+				CloseLibrary((struct Library *)ftp_site->GBase);
+			}
+			else
+				dp->dp_Res2 = ERROR_INVALID_RESIDENT_LIBRARY;
 #ifdef __amigaos4__
 				}
 				else
@@ -891,10 +892,10 @@ void SAVEDS site_handler(void)
 
 				DropInterface((struct Interface*)ftp_site->pIGadTools);
 #endif
-				CloseLibrary(ftp_site->GTBase);
-			}
-			else
-				dp->dp_Res2 = ERROR_INVALID_RESIDENT_LIBRARY;
+			CloseLibrary(ftp_site->GTBase);
+		}
+		else
+			dp->dp_Res2 = ERROR_INVALID_RESIDENT_LIBRARY;
 #ifdef __amigaos4__
 		}
 		else
@@ -917,7 +918,7 @@ void SAVEDS site_handler(void)
 
 begin:
 	timer->tr_node.io_Command = TR_ADDREQUEST;
-	timer->tr_time.tv_secs = IDLE_INTERVAL;
+	timer->tr_time.tv_secs = IDLE_INTERVAL ;
 	timer->tr_time.tv_micro = 0;
 	SendIO((struct IORequest *)timer);
 
@@ -925,7 +926,7 @@ begin:
 
 	sm->header.mn_ReplyPort = sync;
 	sm->header.mn_Length = sizeof(*sm);
-	sm->header.mn_Node.ln_Type = NT_MESSAGE;
+	sm->header.mn_Node.ln_Type = NT_MESSAGE ;
 	sm->header.mn_Node.ln_Pri = 0;
 	sm->header.mn_Node.ln_Name = "site status message";
 
@@ -934,7 +935,8 @@ begin:
 	sm->this_site = ftp_site;
 
 	PutMsg(status_port, &sm->header);
-	WaitPort(sync); GetMsg(sync);
+	WaitPort(sync);
+	GetMsg(sync);
 
 	ftp_site->abort_signals = (1 << AllocSignal(-1));
 	ftp_site->disconnect_signals = (1 << AllocSignal(-1));
@@ -942,7 +944,7 @@ begin:
 	dp->dp_Res1 = DOSTRUE;
 	dp->dp_Res2 = 0;
 
-	PutMsg(reply, dp->dp_Link);   /* send it back to signal we are away */
+	PutMsg(reply, dp->dp_Link); /* send it back to signal we are away */
 
 	signals = (1 << local->mp_SigBit) | (1 << timeport->mp_SigBit) | (ftp_site->disconnect_signals);
 
@@ -955,7 +957,8 @@ begin:
 				state_change(ftp_site, SS_IDLE);
 			}
 		}
-		else {
+		else
+		{
 			state_change(ftp_site, SS_DISCONNECTED);
 		}
 
@@ -967,7 +970,7 @@ begin:
 		if (GetMsg(timeport))
 		{
 			timer->tr_node.io_Command = TR_ADDREQUEST;
-			timer->tr_time.tv_secs = IDLE_INTERVAL;
+			timer->tr_time.tv_secs = IDLE_INTERVAL ;
 			timer->tr_time.tv_micro = 0;
 
 			idlecount++;
@@ -978,11 +981,12 @@ begin:
 			{
 				if (ftp_site->connected)
 				{
-					if (idlecount > ftp_site->no_lock_conn_idle)    // war NO_LOCK_CONN_IDLE
+					if (idlecount > ftp_site->no_lock_conn_idle) // war NO_LOCK_CONN_IDLE
 					{
 						idle_packet->sp_Pkt.dp_Port = sync;
 						PutMsg(ftp_port, &idle_packet->sp_Msg);
-						WaitPort(sync); GetMsg(sync);
+						WaitPort(sync);
+						GetMsg(sync);
 					}
 				}
 				else if (!ftp_site->connected)
@@ -991,7 +995,8 @@ begin:
 					{
 						idle_packet->sp_Pkt.dp_Port = sync;
 						PutMsg(ftp_port, &idle_packet->sp_Msg);
-						WaitPort(sync); GetMsg(sync);
+						WaitPort(sync);
+						GetMsg(sync);
 					}
 				}
 			} // if
@@ -1010,10 +1015,10 @@ begin:
 			case action_IDLE_DEATH:
 				DS(kprintf("ACTION_IDLE_DEATH"))
 
-					if (ftp_site->file_list && ftp_site->file_list->closed)
-					{
-						close_file(ftp_site, true);
-					}
+				if (ftp_site->file_list && ftp_site->file_list->closed)
+				{
+					close_file(ftp_site, true);
+				}
 				if (ftp_site->lock_list || ftp_site->file_list)
 				{
 					dp->dp_Res1 = DOSFALSE;
@@ -1024,7 +1029,7 @@ begin:
 				/* fall through to DIE */
 			case ACTION_DIE:
 				DS(kprintf("ACTION_DIE"))
-					state_change(ftp_site, SS_DISCONNECTING);
+				state_change(ftp_site, SS_DISCONNECTING);
 
 				slock = ftp_site->lock_list;
 				while (slock)
@@ -1037,7 +1042,8 @@ begin:
 				deallocate(idle_packet, V_StandardPacket);
 
 				AbortIO((struct IORequest *)timer);
-				WaitPort(timeport); GetMsg(timeport);
+				WaitPort(timeport);
+				GetMsg(timeport);
 
 				CloseDevice((struct IORequest *)timer);
 
@@ -1045,7 +1051,8 @@ begin:
 				{
 					ftp_site->control->command = TCP_CLOSE;
 					PutMsg(tcp, &ftp_site->control->header);
-					WaitPort(sync); GetMsg(sync);
+					WaitPort(sync);
+					GetMsg(sync);
 
 					ftp_site->connected = false;
 				}
@@ -1059,7 +1066,8 @@ begin:
 				sm->command = SM_DEAD_SITE;
 
 				PutMsg(status_port, &sm->header);
-				WaitPort(sync); GetMsg(sync);
+				WaitPort(sync);
+				GetMsg(sync);
 
 				while (tsm = (status_message *)GetMsg(rank))
 				{
@@ -1087,7 +1095,7 @@ begin:
 					free_info_header(ftp_site->infos);
 
 				if (ftp_site->cwd)
-					deallocate(ftp_site->cwd, V_cstr);
+				deallocate(ftp_site->cwd, V_cstr);
 				if (ftp_site->root)
 				{
 					/* this one might have been allocated from main task ... but */
@@ -1099,9 +1107,9 @@ begin:
 				   the site task ... too complicated to work it out ... this works for now */
 
 				if (ftp_site->user)
-					deallocate(ftp_site->user, V_cstr);
+				deallocate(ftp_site->user, V_cstr);
 				if (ftp_site->password)
-					deallocate(ftp_site->password, V_cstr);
+				deallocate(ftp_site->password, V_cstr);
 
 				dp->dp_Res1 = DOSTRUE;
 				dp->dp_Res2 = (unsigned long)(ftp_site->lock_list); /* so they can adopt the locks */
@@ -1115,13 +1123,13 @@ begin:
 			case ACTION_LOCATE_OBJECT:
 				DS(kprintf("ACTION_LOCATE_OBJECT %s mode %ld", (dp->dp_Arg2 << 2) + 1, dp->dp_Arg3))
 
-					if (!split_data((lock *)(dp->dp_Arg1 << 2), (unsigned char *)(dp->dp_Arg2 << 2), &sd))
-					{
-						dp->dp_Res1 = 0;
-						dp->dp_Res2 = ERROR_NO_FREE_STORE;
+				if (!split_data((lock *)(dp->dp_Arg1 << 2), (unsigned char *)(dp->dp_Arg2 << 2), &sd))
+				{
+					dp->dp_Res1 = 0;
+					dp->dp_Res2 = ERROR_NO_FREE_STORE;
 
-						break;
-					}
+					break;
+				}
 
 				if (!ftp_site->connected)
 				{
@@ -1169,7 +1177,7 @@ begin:
 
 					new_lock->fl.fl_Link = 0;
 					new_lock->fl.fl_Key = 0;
-					new_lock->fl.fl_Access = SHARED_LOCK;
+					new_lock->fl.fl_Access = SHARED_LOCK ;
 					new_lock->fl.fl_Task = ftp_port;
 					new_lock->fl.fl_Volume = (unsigned long)ftp_volume >> 2;
 
@@ -1196,7 +1204,7 @@ begin:
 
 					new_lock->fl.fl_Link = 0;
 					new_lock->fl.fl_Key = 0;
-					new_lock->fl.fl_Access = SHARED_LOCK;
+					new_lock->fl.fl_Access = SHARED_LOCK ;
 					new_lock->fl.fl_Task = ftp_port;
 					new_lock->fl.fl_Volume = (unsigned long)ftp_volume >> 2;
 
@@ -1265,7 +1273,7 @@ begin:
 			case ACTION_FREE_LOCK:
 				DS(kprintf("ACTION_FREE_LOCK $%08lx", dp->dp_Arg1 << 2))
 
-					slock = (lock *)(dp->dp_Arg1 << 2);
+				slock = (lock *)(dp->dp_Arg1 << 2);
 
 				if (!slock)
 				{
@@ -1301,13 +1309,13 @@ begin:
 			case ACTION_DELETE_OBJECT:
 				DS(kprintf("ACTION_DELETE_OBJECT %s", (dp->dp_Arg2 << 2) + 1))
 
-					if (!split_data((lock *)(dp->dp_Arg1 << 2), (unsigned char *)(dp->dp_Arg2 << 2), &sd))
-					{
-						dp->dp_Res1 = DOSFALSE;
-						dp->dp_Res2 = ERROR_NO_FREE_STORE;
+				if (!split_data((lock *)(dp->dp_Arg1 << 2), (unsigned char *)(dp->dp_Arg2 << 2), &sd))
+				{
+					dp->dp_Res1 = DOSFALSE;
+					dp->dp_Res2 = ERROR_NO_FREE_STORE;
 
-						break;
-					}
+					break;
+				}
 
 				if (ftp_site->file_list)
 				{
@@ -1348,7 +1356,8 @@ begin:
 				{
 					dp->dp_Res2 = delete_directory(ftp_site, sd.path);
 				}
-				else {
+				else
+				{
 					dp->dp_Res2 = delete_file(ftp_site, sd.path);
 				}
 
@@ -1370,13 +1379,13 @@ begin:
 			case ACTION_RENAME_OBJECT:
 				DS(kprintf("ACTION_RENAME_OBJECT %s to %s", (dp->dp_Arg2 << 2) + 1, (dp->dp_Arg4 << 2) + 1))
 
-					if (!split_data((lock *)(dp->dp_Arg1 << 2), (unsigned char *)(dp->dp_Arg2 << 2), &sd))
-					{
-						dp->dp_Res1 = DOSFALSE;
-						dp->dp_Res2 = ERROR_NO_FREE_STORE;
+				if (!split_data((lock *)(dp->dp_Arg1 << 2), (unsigned char *)(dp->dp_Arg2 << 2), &sd))
+				{
+					dp->dp_Res1 = DOSFALSE;
+					dp->dp_Res2 = ERROR_NO_FREE_STORE;
 
-						break;
-					}
+					break;
+				}
 
 				if (!split_data((lock *)(dp->dp_Arg3 << 2), (unsigned char *)(dp->dp_Arg4 << 2), &sd2))
 				{
@@ -1412,7 +1421,7 @@ begin:
 			case ACTION_COPY_DIR:
 				DS(kprintf("ACTION_COPY_DIR (DupLock) $%08lx", dp->dp_Arg1 << 2))
 
-					slock = (lock *)(dp->dp_Arg1 << 2);
+				slock = (lock *)(dp->dp_Arg1 << 2);
 				if (!slock)
 				{
 					dp->dp_Res1 = 0;
@@ -1450,13 +1459,13 @@ begin:
 			case ACTION_CREATE_DIR:
 				DS(kprintf("ACTION_CREATE_DIR %s", (dp->dp_Arg2 << 2) + 1))
 
-					if (!split_data((lock *)(dp->dp_Arg1 << 2), (unsigned char *)(dp->dp_Arg2 << 2), &sd))
-					{
-						dp->dp_Res1 = 0;
-						dp->dp_Res2 = ERROR_NO_FREE_STORE;
+				if (!split_data((lock *)(dp->dp_Arg1 << 2), (unsigned char *)(dp->dp_Arg2 << 2), &sd))
+				{
+					dp->dp_Res1 = 0;
+					dp->dp_Res2 = ERROR_NO_FREE_STORE;
 
-						break;
-					}
+					break;
+				}
 
 				if (ftp_site->file_list)
 				{
@@ -1512,7 +1521,7 @@ begin:
 
 					new_lock->fl.fl_Link = 0;
 					new_lock->fl.fl_Key = 0;
-					new_lock->fl.fl_Access = SHARED_LOCK;
+					new_lock->fl.fl_Access = SHARED_LOCK ;
 					new_lock->fl.fl_Task = ftp_port;
 					new_lock->fl.fl_Volume = (unsigned long)ftp_volume >> 2;
 				}
@@ -1524,7 +1533,7 @@ begin:
 			case ACTION_EXAMINE_OBJECT:
 				DS(kprintf("ACTION_EXAMINE_OBJECT obj $%08lx", dp->dp_Arg1 << 2))
 
-					slock = (lock *)(dp->dp_Arg1 << 2);
+				slock = (lock *)(dp->dp_Arg1 << 2);
 				fib = (struct FileInfoBlock *)(dp->dp_Arg2 << 2);
 
 				verify(slock, V_lock);
@@ -1559,13 +1568,15 @@ begin:
 				{
 					ih = get_dir(ftp_site, "");
 				}
-				else {
+				else
+				{
 					*s = 0;
 					ih = get_dir(ftp_site, slock->fname);
 					*s++ = '/';
 				}
 
-				if (!ih) {
+				if (!ih)
+				{
 					dp->dp_Res1 = DOSFALSE;
 					if (ftp_site->cfile)
 						dp->dp_Res2 = ERROR_OBJECT_IN_USE;
@@ -1576,7 +1587,8 @@ begin:
 				}
 
 				fi = find_info(ih, s);
-				if (!fi) {
+				if (!fi)
+				{
 					dp->dp_Res1 = DOSFALSE;
 					dp->dp_Res2 = ERROR_OBJECT_NOT_FOUND;
 					break;
@@ -1593,14 +1605,15 @@ begin:
 			case ACTION_EXAMINE_NEXT:
 				DS(kprintf("ACTION_EXAMINE_NEXT dir $%08lx", dp->dp_Arg1 << 2))
 
-					slock = (lock *)(dp->dp_Arg1 << 2);
+				slock = (lock *)(dp->dp_Arg1 << 2);
 				fib = (struct FileInfoBlock *)(dp->dp_Arg2 << 2);
 
 				verify(slock, V_lock);
 				truth(fib != nil);
 
 				ih = get_dir(ftp_site, slock->fname);
-				if (!ih) {
+				if (!ih)
+				{
 					dp->dp_Res1 = DOSFALSE;
 					if (ftp_site->cfile)
 						dp->dp_Res2 = ERROR_OBJECT_IN_USE;
@@ -1615,19 +1628,22 @@ begin:
 				slock->lastkey++;
 
 				fi = ih->infos;
-				while (fi && n) {
+				while (fi && n)
+				{
 					fi = fi->next;
 					n--;
 				}
 
-				while (fi && fi->flags & MYFLAG_DELETED) {
+				while (fi && fi->flags & MYFLAG_DELETED)
+				{
 					fi = fi->next;
 					slock->lastkey++;
 				}
 
 				fib->fib_DiskKey = slock->lastkey;
 
-				if (!fi) {
+				if (!fi)
+				{
 					slock->lastkey = 0;
 					fib->fib_DiskKey = 0;
 					dp->dp_Res1 = DOSFALSE;
@@ -1647,14 +1663,16 @@ begin:
 			case ACTION_PARENT:
 				DS(kprintf("ACTION_PARENT of $%08lx", dp->dp_Arg1 << 2))
 
-					slock = (lock *)(dp->dp_Arg1 << 2);
-				if (!slock) {
+				slock = (lock *)(dp->dp_Arg1 << 2);
+				if (!slock)
+				{
 					dp->dp_Res1 = 0;
 					dp->dp_Res2 = 0;
 					break;
 				}
 
-				if (slock->fname[0] == 0) {
+				if (slock->fname[0] == 0)
+				{
 					/* need root of FTP: (the slimy way) */
 					dp->dp_Port = ftp_site->sync;
 					dp->dp_Type = ACTION_LOCATE_OBJECT;
@@ -1664,10 +1682,11 @@ begin:
 					o3 = dp->dp_Arg3;
 					dp->dp_Arg1 = 0;
 					dp->dp_Arg2 = (unsigned long)(&("\0\0\0\0"[3])) >> 2;
-					dp->dp_Arg3 = SHARED_LOCK;
+					dp->dp_Arg3 = SHARED_LOCK ;
 
 					PutMsg(local_port, dp->dp_Link);
-					WaitPort(ftp_site->sync); GetMsg(ftp_site->sync);
+					WaitPort(ftp_site->sync);
+					GetMsg(ftp_site->sync);
 
 					dp->dp_Arg1 = o1;
 					dp->dp_Arg2 = o2;
@@ -1679,9 +1698,11 @@ begin:
 				s = slock->fname + strlen(slock->fname) - 1;
 				while (s > slock->fname && *s != '/') s--;
 
-				if (s == slock->fname) {
+				if (s == slock->fname)
+				{
 					new_lock = (lock *)allocate(sizeof(*new_lock) + 1, V_lock);
-					if (!new_lock) {
+					if (!new_lock)
+					{
 						dp->dp_Res1 = 0;
 						dp->dp_Res2 = ERROR_NO_FREE_STORE;
 
@@ -1699,18 +1720,20 @@ begin:
 
 					new_lock->fl.fl_Link = 0;
 					new_lock->fl.fl_Key = 0;
-					new_lock->fl.fl_Access = SHARED_LOCK;
+					new_lock->fl.fl_Access = SHARED_LOCK ;
 					new_lock->fl.fl_Task = ftp_port;
 					new_lock->fl.fl_Volume = (unsigned long)ftp_volume >> 2;
 
 					dp->dp_Res1 = (unsigned long)new_lock >> 2;
 					dp->dp_Res2 = 0;
 				}
-				else {
+				else
+				{
 					*s = 0;
 
 					new_lock = (lock *)allocate(sizeof(*new_lock) + strlen(slock->fname) + 1, V_lock);
-					if (!new_lock) {
+					if (!new_lock)
+					{
 						*s = '/';
 
 						dp->dp_Res1 = 0;
@@ -1729,16 +1752,19 @@ begin:
 
 					new_lock->fl.fl_Link = 0;
 					new_lock->fl.fl_Key = 0;
-					new_lock->fl.fl_Access = SHARED_LOCK;
+					new_lock->fl.fl_Access = SHARED_LOCK ;
 					new_lock->fl.fl_Task = ftp_port;
 					new_lock->fl.fl_Volume = (unsigned long)ftp_volume >> 2;
 
 					/* search for a conflicting lock */
 
 					slock = ftp_site->lock_list;
-					while (slock) {
-						if (strcmp(new_lock->fname, slock->fname) == 0) {
-							if (slock->fl.fl_Access == EXCLUSIVE_LOCK) {
+					while (slock)
+					{
+						if (strcmp(new_lock->fname, slock->fname) == 0)
+						{
+							if (slock->fl.fl_Access == EXCLUSIVE_LOCK)
+							{
 								dp->dp_Res1 = 0;
 								dp->dp_Res2 = ERROR_OBJECT_IN_USE;
 
@@ -1772,17 +1798,19 @@ begin:
 			case ACTION_SAME_LOCK:
 				DS(kprintf("ACTION_SAME_LOCK $%08lx and $%08lx", dp->dp_Arg1 << 2, dp->dp_Arg2 << 2))
 
-					slock = (lock *)(dp->dp_Arg1 << 2);
+				slock = (lock *)(dp->dp_Arg1 << 2);
 				new_lock = (lock *)(dp->dp_Arg2 << 2);
 
 				verify(slock, V_lock);
 				verify(new_lock, V_lock);
 
-				if (strcmp(slock->fname, new_lock->fname) == 0) {
+				if (strcmp(slock->fname, new_lock->fname) == 0)
+				{
 					dp->dp_Res1 = DOSTRUE;
 					dp->dp_Res2 = 0;
 				}
-				else {
+				else
+				{
 					dp->dp_Res1 = DOSFALSE;
 					dp->dp_Res2 = 0;
 				}
@@ -1791,22 +1819,25 @@ begin:
 			case ACTION_READ:
 				DS(kprintf("ACTION_READ fhd $%08lx, %ld bytes", dp->dp_Arg1, dp->dp_Arg3))
 
-					fip = (file_info *)dp->dp_Arg1;
+				fip = (file_info *)dp->dp_Arg1;
 				verify(fip, V_file_info);
 
-				if (!ftp_site->connected || ftp_site->cfile == nil) {
+				if (!ftp_site->connected || ftp_site->cfile == nil)
+				{
 					dp->dp_Res1 = 0;
 					dp->dp_Res2 = ERROR_OBJECT_NOT_FOUND;
 					break;
 				}
 
-				if (ftp_site->cfile_type != ACTION_FINDINPUT) {
+				if (ftp_site->cfile_type != ACTION_FINDINPUT)
+				{
 					dp->dp_Res1 = 0;
 					dp->dp_Res2 = ERROR_READ_PROTECTED;
 					break;
 				}
 
-				if (fip->seek_end) { /* artificially at end */
+				if (fip->seek_end)
+				{ /* artificially at end */
 					dp->dp_Res1 = 0;
 					dp->dp_Res2 = 0;
 					break;
@@ -1841,7 +1872,8 @@ begin:
 
 						break;
 					}
-					else {
+					else
+					{
 						s += o2;
 						o1 -= o2;
 					}
@@ -1861,7 +1893,8 @@ begin:
 						o2 = MAX_READ_SIZE;
 						o1 -= o2;
 					}
-					else {
+					else
+					{
 						o2 = o1;
 						o1 = 0;
 					}
@@ -1900,7 +1933,7 @@ begin:
 			case ACTION_WRITE:
 				DS(kprintf("ACTION_WRITE fhd $%08lx, %ld bytes", dp->dp_Arg1, dp->dp_Arg3))
 
-					fip = (file_info *)dp->dp_Arg1;
+				fip = (file_info *)dp->dp_Arg1;
 				verify(fip, V_file_info);
 
 				if (!ftp_site->connected || ftp_site->cfile == nil)
@@ -1943,7 +1976,8 @@ begin:
 						o2 = MAX_READ_SIZE;
 						o1 -= o2;
 					}
-					else {
+					else
+					{
 						o2 = o1;
 						o1 = 0;
 					}
@@ -1983,18 +2017,19 @@ begin:
 			case ACTION_FINDOUTPUT:
 				DS(kprintf("ACTION_FINDIN/OUTPUT dir $%08lx, %s", dp->dp_Arg2 << 2, (dp->dp_Arg3 << 2) + 1))
 
-					if (!split_data((lock *)(dp->dp_Arg2 << 2),
-						(unsigned char *)(dp->dp_Arg3 << 2), &sd))
-					{
-						dp->dp_Res1 = DOSFALSE;
-						dp->dp_Res2 = ERROR_NO_FREE_STORE;
-						break;
-					}
+				if (!split_data((lock *)(dp->dp_Arg2 << 2),
+				                (unsigned char *)(dp->dp_Arg3 << 2), &sd))
+				{
+					dp->dp_Res1 = DOSFALSE;
+					dp->dp_Res2 = ERROR_NO_FREE_STORE;
+					break;
+				}
 
 				if (!ftp_site->connected)
 					init_connect(ftp_site);
 
-				if (!ftp_site->connected) {
+				if (!ftp_site->connected)
+				{
 					dp->dp_Res1 = DOSFALSE;
 					dp->dp_Res2 = ERROR_OBJECT_NOT_FOUND;
 
@@ -2002,13 +2037,16 @@ begin:
 					break;
 				}
 
-				if (ftp_site->cfile) {
+				if (ftp_site->cfile)
+				{
 					fip = ftp_site->file_list;
 					verify(fip, V_file_info);
 
-					if (fip->closed) {
+					if (fip->closed)
+					{
 						if (strcmp(sd.path, fip->fname) == 0 &&
-							dp->dp_Type == ACTION_FINDINPUT) {
+							dp->dp_Type == ACTION_FINDINPUT)
+						{
 							/* "reopen" this file */
 							fh = (struct FileHandle *)(dp->dp_Arg1 << 2);
 
@@ -2030,7 +2068,8 @@ begin:
 
 						close_file(ftp_site, true);
 					}
-					else {
+					else
+					{
 						/* only one file at a time!  :( */
 						dp->dp_Res1 = DOSFALSE;
 						dp->dp_Res2 = ERROR_OBJECT_IN_USE;
@@ -2043,9 +2082,12 @@ begin:
 				/* search for a conflicting lock */
 
 				slock = ftp_site->lock_list;
-				while (slock) {
-					if (strcmp(sd.path, slock->fname) == 0) {
-						if (dp->dp_Type == ACTION_FINDOUTPUT || slock->fl.fl_Access == EXCLUSIVE_LOCK) {
+				while (slock)
+				{
+					if (strcmp(sd.path, slock->fname) == 0)
+					{
+						if (dp->dp_Type == ACTION_FINDOUTPUT || slock->fl.fl_Access == EXCLUSIVE_LOCK)
+						{
 							dp->dp_Res1 = 0;
 							dp->dp_Res2 = ERROR_OBJECT_IN_USE;
 
@@ -2059,7 +2101,8 @@ begin:
 
 				/* make sure we have information on this file BEFORE we start */
 
-				if (dp->dp_Type == ACTION_FINDINPUT) {
+				if (dp->dp_Type == ACTION_FINDINPUT)
+				{
 					fi = get_info(ftp_site, sd.path);
 					// if (!fi) {
 					//    dp->dp_Res1 = 0;
@@ -2070,24 +2113,30 @@ begin:
 					//    break;
 					// }
 				}
-				else {
+				else
+				{
 					fi = nil;
 				}
 
-				if (dp->dp_Type == ACTION_FINDINPUT) {
-					if (fi) {
+				if (dp->dp_Type == ACTION_FINDINPUT)
+				{
+					if (fi)
+					{
 						dp->dp_Res2 = open_file(ftp_site, sd.path, false, fi->name);
 					}
-					else {
+					else
+					{
 						dp->dp_Res2 = open_file(ftp_site, sd.path, false, nil);
 					}
 				}
-				else {
+				else
+				{
 					dp->dp_Res2 = open_file(ftp_site, sd.path, true, nil);
 					flush_info(ftp_site, sd.path);
 				}
 
-				if (dp->dp_Res2 != 0) {
+				if (dp->dp_Res2 != 0)
+				{
 					end_split(&sd);
 
 					dp->dp_Res1 = 0;
@@ -2096,10 +2145,12 @@ begin:
 
 				fip = ftp_site->file_list;
 
-				if (fi) {
+				if (fi)
+				{
 					fip->end = fi->size;
 				}
-				else {
+				else
+				{
 					fip->end = 0;
 				}
 
@@ -2115,9 +2166,11 @@ begin:
 				fh->fh_Type = ftp_port;
 				fh->fh_Args = (unsigned long)fip;
 
-				if (dp->dp_Type == ACTION_FINDINPUT) {
+				if (dp->dp_Type == ACTION_FINDINPUT)
+				{
 					o1 = FIRST_BLOCK_SIZE;
-					switch (read_file(ftp_site, fip->first_block, &o1)) {
+					switch (read_file(ftp_site, fip->first_block, &o1))
+					{
 					case ERROR_EOF:
 						fip->eof = true;
 					case NO_ERROR:
@@ -2136,7 +2189,8 @@ begin:
 						break;
 					}
 				}
-				else {
+				else
+				{
 					dp->dp_Res1 = DOSTRUE;
 					dp->dp_Res2 = 0;
 				}
@@ -2146,14 +2200,16 @@ begin:
 			case ACTION_END:
 				DS(kprintf("ACTION_END (Close) fhd $%08lx", dp->dp_Arg1))
 
-					fip = (file_info *)dp->dp_Arg1;
+				fip = (file_info *)dp->dp_Arg1;
 
 				verify(fip, V_file_info);
 
-				if (fip->type == ACTION_FINDINPUT && fip->rpos <= FIRST_BLOCK_SIZE) {
+				if (fip->type == ACTION_FINDINPUT && fip->rpos <= FIRST_BLOCK_SIZE)
+				{
 					fip->closed = true;
 				}
-				else {
+				else
+				{
 					close_file(ftp_site, true);
 				}
 
@@ -2165,10 +2221,11 @@ begin:
 			case ACTION_SEEK:
 				DS(kprintf("ACTION_SEEK fhd $%08lx, pos. %ld, from %ld", dp->dp_Arg1, dp->dp_Arg2, dp->dp_Arg3))
 
-					fip = (file_info *)dp->dp_Arg1;
+				fip = (file_info *)dp->dp_Arg1;
 				verify(fip, V_file_info);
 
-				if (dp->dp_Arg3 == OFFSET_END && dp->dp_Arg2 == 0) {
+				if (dp->dp_Arg3 == OFFSET_END && dp->dp_Arg2 == 0)
+				{
 					/* go to the end of the file ... really we are :) */
 
 					if (fip->seek_end)
@@ -2187,26 +2244,32 @@ begin:
 					break;
 				}
 
-				if (dp->dp_Arg3 == OFFSET_BEGINNING) {
+				if (dp->dp_Arg3 == OFFSET_BEGINNING)
+				{
 					o1 = dp->dp_Arg2;
 				}
-				else if (dp->dp_Arg3 == OFFSET_END) {
+				else if (dp->dp_Arg3 == OFFSET_END)
+				{
 					o1 = fip->end + dp->dp_Arg2;
 				}
-				else if (dp->dp_Arg3 == OFFSET_CURRENT) {
+				else if (dp->dp_Arg3 == OFFSET_CURRENT)
+				{
 					o1 = fip->vpos + dp->dp_Arg2;
 				}
 
-				if (o1 == fip->vpos) {
+				if (o1 == fip->vpos)
+				{
 					/* not actually moving */
 
-					if (fip->seek_end) {
+					if (fip->seek_end)
+					{
 						dp->dp_Res1 = fip->end;
 						dp->dp_Res2 = 0;
 
 						fip->seek_end = false;
 					}
-					else {
+					else
+					{
 						dp->dp_Res1 = fip->vpos;
 						dp->dp_Res2 = 0;
 					}
@@ -2224,7 +2287,8 @@ begin:
 
 						fip->seek_end = false;
 					}
-					else {
+					else
+					{
 						dp->dp_Res1 = fip->vpos;
 						dp->dp_Res2 = 0;
 					}
@@ -2243,7 +2307,8 @@ begin:
 
 						fip->seek_end = false;
 					}
-					else {
+					else
+					{
 						dp->dp_Res1 = fip->vpos;
 						dp->dp_Res2 = 0;
 					}
@@ -2261,7 +2326,7 @@ begin:
 			case ACTION_FH_FROM_LOCK:
 				DS(kprintf("ACTION_FH_FROM_LOCK $%08lx", dp->dp_Arg2 << 2))
 
-					fh = (struct FileHandle *)(dp->dp_Arg1 << 2);
+				fh = (struct FileHandle *)(dp->dp_Arg1 << 2);
 				slock = (lock *)(dp->dp_Arg2 << 2);
 
 				truth(fh != nil);
@@ -2270,20 +2335,24 @@ begin:
 				if (!ftp_site->connected)
 					init_connect(ftp_site);
 
-				if (!ftp_site->connected) {
+				if (!ftp_site->connected)
+				{
 					dp->dp_Res1 = DOSFALSE;
 					dp->dp_Res2 = ERROR_OBJECT_NOT_FOUND;
 
 					break;
 				}
 
-				if (ftp_site->cfile) {
+				if (ftp_site->cfile)
+				{
 					fip = ftp_site->file_list;
 					verify(fip, V_file_info);
 
-					if (fip->closed) {
+					if (fip->closed)
+					{
 						if (strcmp(slock->fname, fip->fname) == 0 &&
-							slock->fl.fl_Access == SHARED_LOCK) {
+							slock->fl.fl_Access == SHARED_LOCK)
+						{
 							/* "reopen" this file */
 
 							fh->fh_Type = ftp_port;
@@ -2301,7 +2370,8 @@ begin:
 
 						close_file(ftp_site, true);
 					}
-					else {
+					else
+					{
 						/* only one file at a time!  :( */
 						dp->dp_Res1 = DOSFALSE;
 						dp->dp_Res2 = ERROR_OBJECT_IN_USE;
@@ -2309,55 +2379,68 @@ begin:
 					}
 				}
 
-				if (slock->fl.fl_Access == SHARED_LOCK) {
+				if (slock->fl.fl_Access == SHARED_LOCK)
+				{
 					fi = get_info(ftp_site, slock->fname);
 				}
-				else {
+				else
+				{
 					fi = nil;
 				}
 
-				if (slock->fl.fl_Access == SHARED_LOCK) {
-					if (fi) {
+				if (slock->fl.fl_Access == SHARED_LOCK)
+				{
+					if (fi)
+					{
 						dp->dp_Res2 = open_file(ftp_site, slock->fname, false, fi->name);
 					}
-					else {
+					else
+					{
 						dp->dp_Res2 = open_file(ftp_site, slock->fname, false, nil);
 					}
 				}
-				else {
+				else
+				{
 					dp->dp_Res2 = open_file(ftp_site, slock->fname, true, nil);
 					flush_info(ftp_site, slock->fname);
 				}
 
-				if (dp->dp_Res2 != 0) {
+				if (dp->dp_Res2 != 0)
+				{
 					dp->dp_Res1 = 0;
 					break;
 				}
 
 				fip = ftp_site->file_list;
 
-				if (fi) {
+				if (fi)
+				{
 					fip->end = fi->size;
 				}
-				else {
+				else
+				{
 					fip->end = 0;
 				}
 
 				fip->port = local;
 
-				if (slock->fl.fl_Access == SHARED_LOCK) {
+				if (slock->fl.fl_Access == SHARED_LOCK)
+				{
 					fip->type = ftp_site->cfile_type = ACTION_FINDINPUT;
 				}
-				else {
+				else
+				{
 					fip->type = ftp_site->cfile_type = ACTION_FINDOUTPUT;
 				}
 
 				fh->fh_Type = ftp_port;
 				fh->fh_Args = (unsigned long)fip;
 
-				if (slock->fl.fl_Access == SHARED_LOCK) {
+				if (slock->fl.fl_Access == SHARED_LOCK)
+				{
 					o1 = FIRST_BLOCK_SIZE;
-					switch (read_file(ftp_site, fip->first_block, &o1)) {
+					switch (read_file(ftp_site, fip->first_block, &o1))
+					{
 					case ERROR_EOF:
 						fip->eof = true;
 					case NO_ERROR:
@@ -2376,21 +2459,25 @@ begin:
 						break;
 					}
 				}
-				else {
+				else
+				{
 					dp->dp_Res1 = DOSTRUE;
 					dp->dp_Res2 = 0;
 				}
 
-				if (dp->dp_Res1) {
+				if (dp->dp_Res1)
+				{
 					/* close the lock */
 					ensure(slock, 0);
 
 					locks = &ftp_site->lock_list;
-					while (*locks && *locks != slock) {
+					while (*locks && *locks != slock)
+					{
 						locks = &(*locks)->next;
 					}
 
-					if (*locks) {
+					if (*locks)
+					{
 						*locks = slock->next;
 						deallocate(slock, V_lock);
 					}
@@ -2401,7 +2488,7 @@ begin:
 			case ACTION_COPY_DIR_FH:
 				DS(kprintf("ACTION_COPY_DIR_FH (DupLockFH) fhd $%08lx", dp->dp_Arg1))
 
-					/* ABA, OLD
+				/* ABA, OLD
 								fh = (struct FileHandle *)(dp->dp_Arg1 << 2);   // !!! "<< 2" muß doch weg?
 								if (!fh) {
 								   dp->dp_Res1 = 0;
@@ -2411,17 +2498,19 @@ begin:
 
 								fip = (file_info *)fh->fh_Args;
 					*/
-					fip = (file_info *)(dp->dp_Arg1); /* 2006-11-27 ABA, BUG FIXING DOSPACKET ARGUMENTS */
+				fip = (file_info *)(dp->dp_Arg1); /* 2006-11-27 ABA, BUG FIXING DOSPACKET ARGUMENTS */
 				verify(fip, V_file_info);
 
-				if (fip->type == ACTION_FINDOUTPUT) {
+				if (fip->type == ACTION_FINDOUTPUT)
+				{
 					dp->dp_Res1 = 0;
 					dp->dp_Res2 = ERROR_OBJECT_IN_USE;
 					break;
 				}
 
 				new_lock = (lock *)allocate(sizeof(*new_lock) + strlen(fip->fname) + 1, V_lock);
-				if (!new_lock) {
+				if (!new_lock)
+				{
 					dp->dp_Res1 = 0;
 					dp->dp_Res2 = ERROR_NO_FREE_STORE;
 					break;
@@ -2433,7 +2522,7 @@ begin:
 
 				new_lock->fl.fl_Link = 0;
 				new_lock->fl.fl_Key = 0;
-				new_lock->fl.fl_Access = SHARED_LOCK;
+				new_lock->fl.fl_Access = SHARED_LOCK ;
 				new_lock->fl.fl_Task = ftp_port;
 				new_lock->fl.fl_Volume = (unsigned long)ftp_volume >> 2;
 
@@ -2450,25 +2539,27 @@ begin:
 			case ACTION_PARENT_FH:
 				DS(kprintf("ACTION_PARENT_FH fhd $%08lx", dp->dp_Arg1))
 
-					//            fh = (struct FileHandle *)(dp->dp_Arg1 << 2);   // !!! "<< 2" muß doch weg?
-					//old            fh = (struct FileHandle *)(dp->dp_Arg1);   // !!! "<< 2" muß doch weg?
-					//            if (!fh) {
-					//               dp->dp_Res1 = 0;
-					//               dp->dp_Res2 = ERROR_OBJECT_NOT_FOUND;
-					//               break;
-					//            }
-					//
-					//            fip = (file_info *)fh->fh_Args;
-					fip = (file_info *)(dp->dp_Arg1); /* 2006-11-27 ABA, bug fixing dospacket argument */
+				//            fh = (struct FileHandle *)(dp->dp_Arg1 << 2);   // !!! "<< 2" muß doch weg?
+				//old            fh = (struct FileHandle *)(dp->dp_Arg1);   // !!! "<< 2" muß doch weg?
+				//            if (!fh) {
+				//               dp->dp_Res1 = 0;
+				//               dp->dp_Res2 = ERROR_OBJECT_NOT_FOUND;
+				//               break;
+				//            }
+				//
+				//            fip = (file_info *)fh->fh_Args;
+				fip = (file_info *)(dp->dp_Arg1); /* 2006-11-27 ABA, bug fixing dospacket argument */
 
 				verify(fip, V_file_info);
 
 				s = fip->fname + strlen(fip->fname) - 1;
 				while (s > fip->fname && *s != '/') s--;
 
-				if (s == fip->fname) {
+				if (s == fip->fname)
+				{
 					new_lock = (lock *)allocate(sizeof(*new_lock) + 1, V_lock);
-					if (!new_lock) {
+					if (!new_lock)
+					{
 						dp->dp_Res1 = 0;
 						dp->dp_Res2 = ERROR_NO_FREE_STORE;
 
@@ -2486,18 +2577,20 @@ begin:
 
 					new_lock->fl.fl_Link = 0;
 					new_lock->fl.fl_Key = 0;
-					new_lock->fl.fl_Access = SHARED_LOCK;
+					new_lock->fl.fl_Access = SHARED_LOCK ;
 					new_lock->fl.fl_Task = ftp_port;
 					new_lock->fl.fl_Volume = (unsigned long)ftp_volume >> 2;
 
 					dp->dp_Res1 = (unsigned long)new_lock >> 2;
 					dp->dp_Res2 = 0;
 				}
-				else {
+				else
+				{
 					*s = 0;
 
 					new_lock = (lock *)allocate(sizeof(*new_lock) + strlen(fip->fname) + 1, V_lock);
-					if (!new_lock) {
+					if (!new_lock)
+					{
 						*s = '/';
 
 						dp->dp_Res1 = 0;
@@ -2516,16 +2609,19 @@ begin:
 
 					new_lock->fl.fl_Link = 0;
 					new_lock->fl.fl_Key = 0;
-					new_lock->fl.fl_Access = SHARED_LOCK;
+					new_lock->fl.fl_Access = SHARED_LOCK ;
 					new_lock->fl.fl_Task = ftp_port;
 					new_lock->fl.fl_Volume = (unsigned long)ftp_volume >> 2;
 
 					/* search for a conflicting lock */
 
 					slock = ftp_site->lock_list;
-					while (slock) {
-						if (strcmp(new_lock->fname, slock->fname) == 0) {
-							if (slock->fl.fl_Access == EXCLUSIVE_LOCK) {
+					while (slock)
+					{
+						if (strcmp(new_lock->fname, slock->fname) == 0)
+						{
+							if (slock->fl.fl_Access == EXCLUSIVE_LOCK)
+							{
 								dp->dp_Res1 = 0;
 								dp->dp_Res2 = ERROR_OBJECT_IN_USE;
 
@@ -2559,7 +2655,7 @@ begin:
 			case ACTION_EXAMINE_FH:
 				DS(kprintf("ACTION_EXAMINE_FH fhd $%08lx", dp->dp_Arg1))
 
-					fh = (struct FileHandle *)(dp->dp_Arg1 << 2);   // !!! "<< 2" muß doch weg?
+				fh = (struct FileHandle *)(dp->dp_Arg1 << 2); // !!! "<< 2" muß doch weg?
 				fip = (file_info *)fh->fh_Args;
 
 				verify(fip, V_file_info);
@@ -2571,16 +2667,19 @@ begin:
 				s = fip->fname + strlen(fip->fname) - 1;
 				while (s > fip->fname && *s != '/') s--;
 
-				if (s == fip->fname) {
+				if (s == fip->fname)
+				{
 					ih = get_dir(ftp_site, "");
 				}
-				else {
+				else
+				{
 					*s = 0;
 					ih = get_dir(ftp_site, fip->fname);
 					*s++ = '/';
 				}
 
-				if (!ih) {
+				if (!ih)
+				{
 					dp->dp_Res1 = DOSFALSE;
 					if (ftp_site->cfile)
 						dp->dp_Res2 = ERROR_OBJECT_IN_USE;
@@ -2591,7 +2690,8 @@ begin:
 				}
 
 				fi = find_info(ih, s);
-				if (!fi) {
+				if (!fi)
+				{
 					dp->dp_Res1 = DOSFALSE;
 					dp->dp_Res2 = ERROR_OBJECT_NOT_FOUND;
 					break;
@@ -2606,9 +2706,10 @@ begin:
 			case action_SUSPEND:
 				DS(kprintf("ACTION_SUPEND"))
 
-					if (ftp_site->connected) {
-						disconnect(ftp_site);
-					}
+				if (ftp_site->connected)
+				{
+					disconnect(ftp_site);
+				}
 
 				dp->dp_Res1 = DOSTRUE;
 				dp->dp_Res2 = 0;
@@ -2618,7 +2719,8 @@ begin:
 
 				idle_packet->sp_Pkt.dp_Port = sync;
 				PutMsg(ftp_port, &idle_packet->sp_Msg);
-				WaitPort(sync); GetMsg(sync);
+				WaitPort(sync);
+				GetMsg(sync);
 
 				continue;
 
@@ -2639,7 +2741,7 @@ begin:
 		reply_msg:
 			DS(kprintf("  -> result = %ld ($%08lx), error = %ld\n", dp->dp_Res1, dp->dp_Res1, dp->dp_Res2))
 
-				dp->dp_Port = ftp_port;
+			dp->dp_Port = ftp_port;
 			PutMsg(reply, dp->dp_Link);
 		}
 	}

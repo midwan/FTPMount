@@ -7,28 +7,29 @@
 
 #define READ_BUFFER_LENGTH 200
 
-typedef struct site_s {
-	struct site_s *next;
+typedef struct site_s
+{
+	struct site_s* next;
 
 	magic_verify;
 
-	struct my_lock *lock_list;
-	struct my_file_info *file_list;
+	struct my_lock* lock_list;
+	struct my_file_info* file_list;
 	struct tcpm *control, *intr, *cfile;
-	struct StandardPacket *death_packet;
+	struct StandardPacket* death_packet;
 	struct MsgPort *port, *sync, *rank;
-	struct info_header *infos;
+	struct info_header* infos;
 	unsigned char *user, *password;
 	unsigned char *cwd, *root;
-	unsigned char *host;
+	unsigned char* host;
 	unsigned long cfile_type;
 	unsigned long abort_signals, disconnect_signals;
-	struct Window *status_window;
+	struct Window* status_window;
 	struct Gadget *abort_gadget, *disconnect_gadget;
 
-	struct IntuitionBase *IBase;
-	struct GfxBase *GBase;
-	struct Library *GTBase;
+	struct IntuitionBase* IBase;
+	struct GfxBase* GBase;
+	struct Library* GTBase;
 #ifdef __amigaos4__
 	struct IntuitionIFace * pIIntuition;
 	struct GraphicsIFace  * pIGraphics;
@@ -49,13 +50,13 @@ typedef struct site_s {
 
 #define V_site 29545
 
-struct MsgPort *get_site(unsigned char *s);
+struct MsgPort* get_site(unsigned char* s);
 void SAVEDS site_handler(void);
-void remove_site(site *);
+void remove_site(site*);
 void shutdown_sites(void);
 void suspend_sites(void);
 
-void state_change(site *, unsigned short);
+void state_change(site*, unsigned short);
 
 #define IDLE_INTERVAL 20   /* 20 second interval */
 
@@ -79,4 +80,3 @@ void state_change(site *, unsigned short);
 #define SS_DELETING 13
 #define SS_MAKEDIR 14
 #define SS_RENAMING 15
-

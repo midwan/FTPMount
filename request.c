@@ -6,7 +6,7 @@
  * AmigaOS4 port (c) 2005-2006 Alexandre BALABAN (alexandre (at) free (dot) fr)
  */
 
-#include	<stdio.h>
+#include <stdio.h>
 
 #include "FTPMount.h" /* 03-03-02 rri */
 #include "site.h"
@@ -19,24 +19,27 @@
 #define V_rastport 1001
 #define V_bitmap 1008
 
-struct RastPort *make_rastport(unsigned long width, unsigned long height, unsigned long depth, GraphicsParamDef)
+struct RastPort* make_rastport(unsigned long width, unsigned long height, unsigned long depth, GraphicsParamDef)
 {
-	struct RastPort *rp;
-	struct BitMap *bm;
+	struct RastPort* rp;
+	struct BitMap* bm;
 	int i;
-	unsigned char *z;
+	unsigned char* z;
 
 	rp = (struct RastPort *)allocate_flags(sizeof(*rp), MEMF_PUBLIC | MEMF_CLEAR, V_rastport);
 	if (!rp) return 0;
 
 	bm = (struct BitMap *)allocate_flags(sizeof(*bm), MEMF_PUBLIC | MEMF_CLEAR, V_bitmap);
-	if (bm) {
+	if (bm)
+	{
 		InitBitMap(bm, depth, width, height);
 
 		bm->Planes[0] = AllocRaster(width, height * depth);
-		if (bm->Planes[0]) {
+		if (bm->Planes[0])
+		{
 			z = (unsigned char *)bm->Planes[0];
-			for (i = 1; i < depth; i++) {
+			for (i = 1; i < depth; i++)
+			{
 				z += bm->BytesPerRow * bm->Rows;
 				bm->Planes[i] = (void *)z;
 			}
@@ -56,7 +59,7 @@ struct RastPort *make_rastport(unsigned long width, unsigned long height, unsign
 	return 0;
 }
 
-void free_rastport(struct RastPort *rp, GraphicsParamDef)
+void free_rastport(struct RastPort* rp, GraphicsParamDef)
 {
 	FreeRaster(rp->BitMap->Planes[0], rp->BitMap->BytesPerRow * 8, rp->BitMap->Rows * rp->BitMap->Depth);
 
@@ -65,25 +68,25 @@ void free_rastport(struct RastPort *rp, GraphicsParamDef)
 }
 
 struct IntuiText nulltext = {
-   0, 0,
-   JAM1,
-   0, 0,
-   (void *)0,
-   "",
-   (void *)0
+	0, 0,
+	JAM1 ,
+	0, 0,
+	(void *)0,
+	"",
+	(void *)0
 };
 
-struct gim *make_gim(unsigned char *name, unsigned long textpen, unsigned long lightpen, unsigned long darkpen, struct Screen *s,
-	IntuitionParamDef, GraphicsParamDef)
+struct gim* make_gim(unsigned char* name, unsigned long textpen, unsigned long lightpen, unsigned long darkpen, struct Screen* s,
+                     IntuitionParamDef, GraphicsParamDef)
 {
 	struct IntuiText txt;
 	int width, height, owidth, oheight;
-	struct gim *gim;
+	struct gim* gim;
 	signed long x, y, Rx, Ry, Rx2, Ry2, R2, new_delta, old_delta;
 
 	txt.FrontPen = textpen;
 	txt.BackPen = 0;
-	txt.DrawMode = JAM2;
+	txt.DrawMode = JAM2 ;
 	txt.LeftEdge = 0;
 	txt.TopEdge = 0;
 	txt.ITextFont = s->Font;
@@ -104,13 +107,15 @@ struct gim *make_gim(unsigned char *name, unsigned long textpen, unsigned long l
 	ensure(gim, V_gim);
 
 	gim->rp1 = make_rastport(owidth, oheight, 3, GraphicsParam);
-	if (!gim->rp1) {
+	if (!gim->rp1)
+	{
 		deallocate(gim, V_gim);
 		return nil;
 	}
 
 	gim->rp2 = make_rastport(owidth, oheight, 3, GraphicsParam);
-	if (!gim->rp2) {
+	if (!gim->rp2)
+	{
 		free_rastport(gim->rp1, GraphicsParam);
 		deallocate(gim, V_gim);
 		return nil;
@@ -143,14 +148,17 @@ struct gim *make_gim(unsigned char *name, unsigned long textpen, unsigned long l
 
 	R2 = Rx2 * Ry2;
 
-	for (x = 0; x < Rx; x++) {
+	for (x = 0; x < Rx; x++)
+	{
 		y = 0;
 		new_delta = abs(R2 - Ry2*x*x - Rx2*y*y);
-		do {
+		do
+		{
 			old_delta = new_delta;
 			y++;
 			new_delta = abs(R2 - Ry2*x*x - Rx2*y*y);
-		} while (old_delta > new_delta);
+		}
+		while (old_delta > new_delta);
 
 		SetAPen(gim->rp1, lightpen);
 
@@ -173,14 +181,17 @@ struct gim *make_gim(unsigned char *name, unsigned long textpen, unsigned long l
 		WritePixel(gim->rp2, owidth - Rx - 1 + x, oheight - Ry - 1 + (y - 1));
 	}
 
-	for (y = 0; y < Ry; y++) {
+	for (y = 0; y < Ry; y++)
+	{
 		x = 0;
 		new_delta = abs(R2 - Ry2 * x * x - Rx2 * y * y);
-		do {
+		do
+		{
 			old_delta = new_delta;
 			x++;
 			new_delta = abs(R2 - Ry2 * x * x - Rx2 * y * y);
-		} while (old_delta > new_delta);
+		}
+		while (old_delta > new_delta);
 
 		SetAPen(gim->rp1, lightpen);
 
@@ -238,7 +249,7 @@ struct gim *make_gim(unsigned char *name, unsigned long textpen, unsigned long l
 	return gim;
 }
 
-void free_gim(struct gim *gim, IntuitionParamDef, GraphicsParamDef)
+void free_gim(struct gim* gim, IntuitionParamDef, GraphicsParamDef)
 {
 	verify(gim, V_gim);
 
@@ -249,9 +260,9 @@ void free_gim(struct gim *gim, IntuitionParamDef, GraphicsParamDef)
 	return;
 }
 
-struct Gadget *make_gadget(struct gim *gim)
+struct Gadget* make_gadget(struct gim* gim)
 {
-	struct Gadget *g;
+	struct Gadget* g;
 
 	if (!gim) return nil;
 
@@ -266,7 +277,7 @@ struct Gadget *make_gadget(struct gim *gim)
 	g->Width = gim->im1.Width;
 	g->Height = gim->im1.Height;
 
-	g->Flags = GFLG_GADGHIMAGE | GFLG_GADGIMAGE;
+	g->Flags = GFLG_GADGHIMAGE | GFLG_GADGIMAGE ;
 	g->Activation = GACT_RELVERIFY;
 	g->GadgetType = GTYP_BOOLGADGET;
 	g->GadgetRender = &gim->im1;
@@ -281,28 +292,28 @@ struct Gadget *make_gadget(struct gim *gim)
 	return g;
 }
 
-void free_gadget(struct Gadget *g)
+void free_gadget(struct Gadget* g)
 {
 	deallocate(g, V_Gadget);
 }
 
-struct Window *connect_req(site *sp, unsigned char *s)
+struct Window* connect_req(site* sp, unsigned char* s)
 {
-	struct Window *w;
+	struct Window* w;
 #ifdef __amigaos4__
 	struct IntuitionIFace * IIntuition;
 	struct GraphicsIFace * IGraphics;
 #else
-	struct IntuitionBase *IntuitionBase;
-	struct GfxBase *GfxBase;
+	struct IntuitionBase* IntuitionBase;
+	struct GfxBase* GfxBase;
 #endif
-	struct Screen *pub_screen;
+	struct Screen* pub_screen;
 	unsigned long screen_modeID;
 	struct Rectangle rect;
-	struct Gadget *cancel;
+	struct Gadget* cancel;
 	struct IntuiText txt;
 	int width, swidth, sheight, fheight;
-	unsigned char *z;
+	unsigned char* z;
 
 	verify(sp, V_site);
 
@@ -315,21 +326,26 @@ struct Window *connect_req(site *sp, unsigned char *s)
 #endif
 
 	pub_screen = LockPubScreen(nil);
-	if (pub_screen) {
+	if (pub_screen)
+	{
 		screen_modeID = GetVPModeID(&pub_screen->ViewPort);
-		if (screen_modeID != INVALID_ID) {
-			if (QueryOverscan(screen_modeID, &rect, OSCAN_TEXT)) {
+		if (screen_modeID != INVALID_ID)
+		{
+			if (QueryOverscan(screen_modeID, &rect, OSCAN_TEXT))
+			{
 				cancel = make_gadget(cancel_gim);
-				if (cancel) {
+				if (cancel)
+				{
 					z = (unsigned char *)allocate(strlen(s) + 19, V_cstr);
-					if (z) {
+					if (z)
+					{
 						strcpy(z, strings[MSG_CONNECTING_TO]);
 						strcat(z, s);
 						strcat(z, " ...");
 
 						txt.FrontPen = 1;
 						txt.BackPen = 0;
-						txt.DrawMode = JAM1;
+						txt.DrawMode = JAM1 ;
 						txt.LeftEdge = 0;
 						txt.TopEdge = 0;
 						txt.ITextFont = pub_screen->Font;
@@ -357,20 +373,21 @@ struct Window *connect_req(site *sp, unsigned char *s)
 						if (swidth < width) swidth = width;
 
 						w = OpenWindowTags(nil,
-							WA_Left, swidth / 2 - pub_screen->LeftEdge - width / 2,
-							WA_Top, sheight / 2 - pub_screen->TopEdge - fheight * 3,
-							WA_Width, width,
-							WA_Height, fheight * 6,
-							WA_Flags, WFLG_DEPTHGADGET | WFLG_DRAGBAR |
-							WFLG_SMART_REFRESH |
-							WFLG_NOCAREREFRESH,
-							WA_IDCMP, IDCMP_GADGETUP,
-							WA_PubScreen, (ULONG)pub_screen,
-							WA_Title, (ULONG)strings[MSG_CONNECTING],
-							TAG_END, 0
-							);
+						                   WA_Left, swidth / 2 - pub_screen->LeftEdge - width / 2,
+						                   WA_Top, sheight / 2 - pub_screen->TopEdge - fheight * 3,
+						                   WA_Width, width,
+						                   WA_Height, fheight * 6,
+						                   WA_Flags, WFLG_DEPTHGADGET | WFLG_DRAGBAR |
+						                   WFLG_SMART_REFRESH |
+						                   WFLG_NOCAREREFRESH,
+						                   WA_IDCMP, IDCMP_GADGETUP,
+						                   WA_PubScreen, (ULONG)pub_screen,
+						                   WA_Title, (ULONG)strings[MSG_CONNECTING],
+						                   TAG_END, 0
+						);
 
-						if (w) {
+						if (w)
+						{
 							UnlockPubScreen(nil, pub_screen);
 							PrintIText(w->RPort, &txt, 0, w->BorderTop);
 							deallocate(z, V_cstr);
@@ -396,15 +413,15 @@ struct Window *connect_req(site *sp, unsigned char *s)
 	return nil;
 }
 
-void close_req(site *sp, struct Window *w)
+void close_req(site* sp, struct Window* w)
 {
-	struct Gadget *cancel;
-	struct Message *msg;
+	struct Gadget* cancel;
+	struct Message* msg;
 
 #ifdef __amigaos4__
 	struct IntuitionIFace * IIntuition;
 #else
-	struct IntuitionBase *IntuitionBase;
+	struct IntuitionBase* IntuitionBase;
 #endif
 
 	verify(sp, V_site);
@@ -427,7 +444,8 @@ void close_req(site *sp, struct Window *w)
 	Permit();
 }
 
-struct phdata {
+struct phdata
+{
 	unsigned char password[MAX_PASS_LENGTH + 1];
 	unsigned char undo[MAX_PASS_LENGTH + 1];
 };
@@ -435,54 +453,59 @@ struct phdata {
 #if defined(__MORPHOS__)
 boolean password_hook(void)
 #else
-boolean SAVEDS ASM password_hook(REG(a0, struct Hook *hook),
-	REG(a2, struct SGWork *sgw),
-	REG(a1, unsigned long *msg))
+boolean SAVEDS ASM password_hook(REG(a0, struct Hook * hook),
+                                 REG(a2, struct SGWork * sgw),
+                                 REG(a1, unsigned long *msg))
 #endif
 {
-#ifdef	__MORPHOS__
+#ifdef __MORPHOS__
 	struct Hook		*hook = (struct Hook *)REG_A0;
 	unsigned long				*msg = (unsigned long *)REG_A1;
 	struct SGWork	*sgw = (struct SGWork *)REG_A2;
 #endif
 
-	struct phdata *phd;
+	struct phdata* phd;
 
 	phd = hook->h_Data;
 
-	if (*msg == SGH_KEY) {
-		switch (sgw->EditOp) {
+	if (*msg == SGH_KEY)
+	{
+		switch (sgw->EditOp)
+		{
 		case EO_REPLACECHAR:
 		case EO_INSERTCHAR:
 			phd->password[sgw->BufferPos - 1] = sgw->WorkBuffer[sgw->BufferPos - 1];
 			sgw->WorkBuffer[sgw->BufferPos - 1] = '*';
 			break;
 		case EO_MOVECURSOR:
-			sgw->Actions &= ~SGA_USE;
-			sgw->Actions |= SGA_BEEP;
+			sgw->Actions &= ~SGA_USE ;
+			sgw->Actions |= SGA_BEEP ;
 			break;
 		case EO_RESET:
 			strcpy(phd->password, phd->undo);
 			break;
 		}
-		if (sgw->BufferPos != sgw->NumChars) {
+		if (sgw->BufferPos != sgw->NumChars)
+		{
 			sgw->BufferPos = sgw->NumChars;
-			sgw->Actions |= SGA_REDISPLAY;
+			sgw->Actions |= SGA_REDISPLAY ;
 		}
 		phd->password[sgw->NumChars] = 0;
 		return true;
 	}
-	else if (*msg == SGH_CLICK) {
+	else if (*msg == SGH_CLICK)
+	{
 		sgw->BufferPos = sgw->NumChars;
-		sgw->Actions |= SGA_REDISPLAY;
+		sgw->Actions |= SGA_REDISPLAY ;
 		return true;
 	}
-	else {
+	else
+	{
 		return false;
 	}
 }
 
-boolean user_pass_request(site *sp, struct Window *canw)
+boolean user_pass_request(site* sp, struct Window* canw)
 /*
  * open a requester asking for username and password, filled in as appropriate
  * Inputs:
@@ -494,22 +517,22 @@ boolean user_pass_request(site *sp, struct Window *canw)
  * true if login is selected, or return is pressed in password field
  */
 {
-#ifdef	__MORPHOS__
+#ifdef __MORPHOS__
 	struct EmulLibEntry	PassHookEmul;
 #endif
 
 	struct Gadget *glist, *gad, *login, *cancel, *userg, *passg;
 	struct NewGadget user, pass;
-	struct Screen *s;
-	void *vi;
+	struct Screen* s;
+	void* vi;
 	unsigned long screen_modeID;
 	struct Rectangle rect;
-	struct Window *w;
+	struct Window* w;
 	signed long swidth, sheight, fheight, wheight;
 	unsigned long signals, csig;
-	struct IntuiMessage *im;
+	struct IntuiMessage* im;
 	struct Hook pass_hook;
-	unsigned char *z;
+	unsigned char* z;
 	struct phdata phd;
 
 #ifdef __amigaos4__
@@ -517,9 +540,9 @@ boolean user_pass_request(site *sp, struct Window *canw)
 	struct GadToolsIFace * IGadTools = sp->pIGadTools;
 	struct GraphicsIFace * IGraphics = sp->pIGraphics;
 #else
-	struct IntuitionBase *IntuitionBase;
-	struct Library *GadToolsBase;
-	struct GfxBase *GfxBase;
+	struct IntuitionBase* IntuitionBase;
+	struct Library* GadToolsBase;
+	struct GfxBase* GfxBase;
 #endif
 
 	verify(sp, V_site);
@@ -536,7 +559,7 @@ boolean user_pass_request(site *sp, struct Window *canw)
 
 	glist = nil;
 
-#ifndef	__MORPHOS__
+#ifndef __MORPHOS__
 	pass_hook.h_Entry = (unsigned long(*)())password_hook;
 	pass_hook.h_SubEntry = (unsigned long(*)())nil;
 	pass_hook.h_Data = (void *)&phd;
@@ -557,16 +580,19 @@ boolean user_pass_request(site *sp, struct Window *canw)
 	if (s->Font) fheight = s->Font->ta_YSize;
 	else fheight = 8;
 
-	if (sp->password) {
+	if (sp->password)
+	{
 		strcpy(phd.password, sp->password);
 		strcpy(phd.undo, sp->password);
 
 		z = sp->password;
-		while (*z) {
+		while (*z)
+		{
 			*z++ = '*';
 		}
 	}
-	else {
+	else
+	{
 		phd.password[0] = 0;
 		phd.undo[0] = 0;
 	}
@@ -574,33 +600,38 @@ boolean user_pass_request(site *sp, struct Window *canw)
 	wheight = fheight * 8;
 
 	vi = GetVisualInfo(s, TAG_END);
-	if (vi != nil) {
+	if (vi != nil)
+	{
 		screen_modeID = GetVPModeID(&s->ViewPort);
-		if (screen_modeID != INVALID_ID) {
-			if (QueryOverscan(screen_modeID, &rect, OSCAN_TEXT)) {
+		if (screen_modeID != INVALID_ID)
+		{
+			if (QueryOverscan(screen_modeID, &rect, OSCAN_TEXT))
+			{
 				swidth = rect.MaxX - rect.MinX + 1;
 				sheight = rect.MaxY - rect.MinY + 1;
 
 				sprintf(sp->read_buffer, strings[MSG_LOGIN_TO], sp->host);
 
 				w = OpenWindowTags(nil,
-					WA_Left, swidth / 4 - s->LeftEdge,
-					WA_Top, sheight / 2 - wheight / 2 - s->TopEdge,
-					WA_Width, swidth / 2,
-					WA_Height, wheight,
-					WA_IDCMP, IDCMP_ACTIVEWINDOW | IDCMP_REFRESHWINDOW |
-					BUTTONIDCMP | STRINGIDCMP,
-					WA_PubScreen, (ULONG)s,
-					WA_Activate, true,
-					WA_DragBar, true,
-					WA_DepthGadget, true,
-					WA_Title, (ULONG)sp->read_buffer,
-					WA_AutoAdjust, true,
-					TAG_END
-					);
-				if (w) {
+				                   WA_Left, swidth / 4 - s->LeftEdge,
+				                   WA_Top, sheight / 2 - wheight / 2 - s->TopEdge,
+				                   WA_Width, swidth / 2,
+				                   WA_Height, wheight,
+				                   WA_IDCMP, IDCMP_ACTIVEWINDOW | IDCMP_REFRESHWINDOW |
+				                   BUTTONIDCMP | STRINGIDCMP,
+				                   WA_PubScreen, (ULONG)s,
+				                   WA_Activate, true,
+				                   WA_DragBar, true,
+				                   WA_DepthGadget, true,
+				                   WA_Title, (ULONG)sp->read_buffer,
+				                   WA_AutoAdjust, true,
+				                   TAG_END
+				);
+				if (w)
+				{
 					gad = CreateContext(&glist);
-					if (gad) {
+					if (gad)
+					{
 						user.ng_LeftEdge = w->Width / 4;
 						user.ng_TopEdge = w->BorderTop + fheight / 2;
 						user.ng_Width = (w->Width * 3 / 4) - w->BorderRight - fheight / 2;
@@ -608,7 +639,7 @@ boolean user_pass_request(site *sp, struct Window *canw)
 						user.ng_GadgetText = strings[MSG_USER_NAME];
 						user.ng_TextAttr = s->Font;
 						user.ng_GadgetID = 1;
-						user.ng_Flags = PLACETEXT_LEFT;
+						user.ng_Flags = PLACETEXT_LEFT ;
 						user.ng_VisualInfo = vi;
 
 						pass.ng_LeftEdge = w->Width / 4;
@@ -618,27 +649,30 @@ boolean user_pass_request(site *sp, struct Window *canw)
 						pass.ng_GadgetText = strings[MSG_PASSWORD_NAME];
 						pass.ng_TextAttr = s->Font;
 						pass.ng_GadgetID = 2;
-						pass.ng_Flags = PLACETEXT_LEFT;
+						pass.ng_Flags = PLACETEXT_LEFT ;
 						pass.ng_VisualInfo = vi;
 
 						userg = gad = CreateGadget(STRING_KIND, gad, &user,
-							GTST_String, (ULONG)sp->user,
-							GTST_MaxChars, MAX_USER_LENGTH,
-							TAG_END
-							);
+						                                      GTST_String, (ULONG)sp->user,
+						                                      GTST_MaxChars, MAX_USER_LENGTH,
+						                                      TAG_END
+						);
 
 						passg = gad = CreateGadget(STRING_KIND, gad, &pass,
-							GTST_String, sp->password,
-							GTST_MaxChars, MAX_PASS_LENGTH,
-							GTST_EditHook, (unsigned long)&pass_hook,
-							TAG_END
-							);
+						                                      GTST_String, sp->password,
+						                                      GTST_MaxChars, MAX_PASS_LENGTH,
+						                                      GTST_EditHook, (unsigned long)&pass_hook,
+						                                      TAG_END
+						);
 
-						if (gad) {
+						if (gad)
+						{
 							login = make_gadget(login_gim);
-							if (login) {
+							if (login)
+							{
 								cancel = make_gadget(cancel_gim);
-								if (cancel) {
+								if (cancel)
+								{
 									login->LeftEdge = fheight / 2 + w->BorderLeft;
 									login->TopEdge = w->Height - w->BorderBottom - login->Height - fheight / 2;
 
@@ -679,8 +713,10 @@ listen:
 	csig = 1 << canw->UserPort->mp_SigBit | sp->abort_signals | sp->disconnect_signals;
 	signals = (1 << w->UserPort->mp_SigBit) | csig;
 
-	while (1) {
-		if (Wait(signals) & csig) {
+	while (1)
+	{
+		if (Wait(signals) & csig)
+		{
 			CloseWindow(w);
 
 			FreeGadgets(glist);
@@ -694,28 +730,35 @@ listen:
 			return false;
 		}
 
-		while (im = GT_GetIMsg(w->UserPort)) {
+		while (im = GT_GetIMsg(w->UserPort))
+		{
 			gad = (struct Gadget *)im->IAddress;
 
-			switch (im->Class) {
+			switch (im->Class)
+			{
 			case IDCMP_ACTIVEWINDOW:
-				if (sp->needs_user) {
+				if (sp->needs_user)
+				{
 					ActivateGadget(userg, w, nil);
 				}
-				else {
+				else
+				{
 					ActivateGadget(passg, w, nil);
 				}
 				break;
 			case IDCMP_GADGETUP:
-				switch (gad->GadgetID) {
+				switch (gad->GadgetID)
+				{
 				case 1:
-					if (im->Code == 0) {
+					if (im->Code == 0)
+					{
 						ActivateGadget(passg, w, nil);
 					}
 					sp->needs_user = false;
 					break;
 				case 2:
-					if (im->Code != 0) {
+					if (im->Code != 0)
+					{
 						break;
 					}
 					/* else fall through to Login */
@@ -724,24 +767,30 @@ listen:
 					if (sp->password) deallocate(sp->password, V_cstr);
 
 					z = ((struct StringInfo *)userg->SpecialInfo)->Buffer;
-					if (z[0] != '\0') {
+					if (z[0] != '\0')
+					{
 						sp->user = (unsigned char *)allocate(strlen(z) + 1, V_cstr);
-						if (sp->user) {
+						if (sp->user)
+						{
 							strcpy(sp->user, z);
 						}
 					}
-					else {
+					else
+					{
 						sp->user = nil;
 					}
 
 					z = phd.password;
-					if (z[0] != '\0') {
+					if (z[0] != '\0')
+					{
 						sp->password = (unsigned char *)allocate(strlen(z) + 1, V_cstr);
-						if (sp->password) {
+						if (sp->password)
+						{
 							strcpy(sp->password, z);
 						}
 					}
-					else {
+					else
+					{
 						sp->password = nil;
 					}
 
@@ -788,15 +837,15 @@ listen:
 	}
 }
 
-struct Window *open_main_window(struct List *site_labels, IntuitionParamDef, GadToolsParamDef, GraphicsParamDef)
+struct Window* open_main_window(struct List* site_labels, IntuitionParamDef, GadToolsParamDef, GraphicsParamDef)
 {
 	struct Gadget *glist, *gad;
 	struct NewGadget ng;
-	struct Screen *s;
-	void *vi;
+	struct Screen* s;
+	void* vi;
 	unsigned long screen_modeID;
 	struct Rectangle rect;
-	struct Window *w;
+	struct Window* w;
 	signed long swidth, sheight;
 
 	glist = nil;
@@ -805,31 +854,36 @@ struct Window *open_main_window(struct List *site_labels, IntuitionParamDef, Gad
 	if (!s) return nil;
 
 	vi = GetVisualInfo(s, TAG_END);
-	if (vi != nil) {
+	if (vi != nil)
+	{
 		screen_modeID = GetVPModeID(&s->ViewPort);
-		if (screen_modeID != INVALID_ID) {
-			if (QueryOverscan(screen_modeID, &rect, OSCAN_TEXT)) {
+		if (screen_modeID != INVALID_ID)
+		{
+			if (QueryOverscan(screen_modeID, &rect, OSCAN_TEXT))
+			{
 				swidth = rect.MaxX - rect.MinX + 1;
 				sheight = rect.MaxY - rect.MinY + 1;
 
 				w = OpenWindowTags(nil,
-					WA_Left, swidth / 3 - s->LeftEdge,
-					WA_Top, sheight / 4 - s->TopEdge,
-					WA_Width, swidth / 3,
-					WA_Height, sheight / 2,
-					WA_IDCMP, IDCMP_CLOSEWINDOW | IDCMP_REFRESHWINDOW | LISTVIEWIDCMP,
-					WA_PubScreen, s,
-					WA_Activate, true,
-					WA_DragBar, true,
-					WA_DepthGadget, true,
-					WA_CloseGadget, true,
-					WA_Title, strings[MSG_CURRENT_SITES],
-					WA_AutoAdjust, true,
-					TAG_END
-					);
-				if (w) {
+				                   WA_Left, swidth / 3 - s->LeftEdge,
+				                   WA_Top, sheight / 4 - s->TopEdge,
+				                   WA_Width, swidth / 3,
+				                   WA_Height, sheight / 2,
+				                   WA_IDCMP, IDCMP_CLOSEWINDOW | IDCMP_REFRESHWINDOW | LISTVIEWIDCMP,
+				                   WA_PubScreen, s,
+				                   WA_Activate, true,
+				                   WA_DragBar, true,
+				                   WA_DepthGadget, true,
+				                   WA_CloseGadget, true,
+				                   WA_Title, strings[MSG_CURRENT_SITES],
+				                   WA_AutoAdjust, true,
+				                   TAG_END
+				);
+				if (w)
+				{
 					gad = CreateContext(&glist);
-					if (gad) {
+					if (gad)
+					{
 						ng.ng_TextAttr = s->Font;
 						ng.ng_VisualInfo = vi;
 						ng.ng_LeftEdge = w->BorderLeft;
@@ -840,11 +894,12 @@ struct Window *open_main_window(struct List *site_labels, IntuitionParamDef, Gad
 						ng.ng_GadgetID = 0;
 						ng.ng_Flags = 0;
 						gad = CreateGadget(LISTVIEW_KIND, gad, &ng,
-							GTLV_ReadOnly, false,
-							GTLV_Labels, site_labels,
-							TAG_END
-							);
-						if (gad) {
+						                                GTLV_ReadOnly, false,
+						                                GTLV_Labels, site_labels,
+						                                TAG_END
+						);
+						if (gad)
+						{
 							AddGList(w, glist, 0, -1, nil);
 
 							RefreshGadgets(glist, w, nil);
@@ -871,14 +926,16 @@ struct Window *open_main_window(struct List *site_labels, IntuitionParamDef, Gad
 	return nil;
 }
 
-void close_main_window(struct Window *w, IntuitionParamDef, GadToolsParamDef)
+void close_main_window(struct Window* w, IntuitionParamDef, GadToolsParamDef)
 {
-	struct Gadget *glist;
-	struct IntuiMessage *im;
+	struct Gadget* glist;
+	struct IntuiMessage* im;
 
 	Forbid();
-	while (im = GT_GetIMsg(w->UserPort)) {
-		if (im->Class == IDCMP_REFRESHWINDOW) {
+	while (im = GT_GetIMsg(w->UserPort))
+	{
+		if (im->Class == IDCMP_REFRESHWINDOW)
+		{
 			GT_BeginRefresh(w);
 			GT_EndRefresh(w, true);
 		}
@@ -895,11 +952,11 @@ void close_main_window(struct Window *w, IntuitionParamDef, GadToolsParamDef)
 #define V_List 19561
 #define V_Node 20079
 
-struct List *site_list(void)
+struct List* site_list(void)
 {
-	struct List *l;
-	struct Node *n;
-	site *sp;
+	struct List* l;
+	struct Node* n;
+	site* sp;
 
 	l = (struct List *)allocate(sizeof(*l), V_List);
 	if (!l) return l;
@@ -908,15 +965,18 @@ struct List *site_list(void)
 
 	Forbid();
 	sp = sites;
-	while (sp) {
+	while (sp)
+	{
 		n = (struct Node *)allocate(sizeof(*n), V_Node);
-		if (!n) {
+		if (!n)
+		{
 			Permit();
 			return l;
 		}
 
 		n->ln_Name = (unsigned char *)allocate(strlen(sp->name) + 1, V_cstr);
-		if (!n->ln_Name) {
+		if (!n->ln_Name)
+		{
 			Permit();
 			deallocate(n, V_Node);
 			return l;
@@ -933,11 +993,12 @@ struct List *site_list(void)
 	return l;
 }
 
-void free_labels(struct List *l)
+void free_labels(struct List* l)
 {
-	struct Node *n;
+	struct Node* n;
 
-	while (n = RemHead(l)) {
+	while (n = RemHead(l))
+	{
 		deallocate(n->ln_Name, V_cstr);
 		deallocate(n, V_Node);
 	}
@@ -945,10 +1006,10 @@ void free_labels(struct List *l)
 	deallocate(l, V_List);
 }
 
-void draw_fill_bar(site *sp, IntuitionParamDef, GraphicsParamDef)
+void draw_fill_bar(site* sp, IntuitionParamDef, GraphicsParamDef)
 {
-	struct Window *w;
-	struct RastPort *rp;
+	struct Window* w;
+	struct RastPort* rp;
 	unsigned long x1, y1, x2, y2, gap;
 
 	verify(sp, V_site);
@@ -989,7 +1050,8 @@ void draw_fill_bar(site *sp, IntuitionParamDef, GraphicsParamDef)
 	y2--;
 	x2--;
 
-	if (sp->file_list) {
+	if (sp->file_list)
+	{
 		verify(sp->file_list, V_file_info);
 
 		x2 = x1 + ((x2 - x1) * sp->file_list->rpos) / sp->file_list->end;
@@ -997,14 +1059,14 @@ void draw_fill_bar(site *sp, IntuitionParamDef, GraphicsParamDef)
 	}
 }
 
-void update_fill_bar(site *sp, IntuitionParamDef, GraphicsParamDef)
+void update_fill_bar(site* sp, IntuitionParamDef, GraphicsParamDef)
 {
-	struct Window *w;
-	struct RastPort *rp;
+	struct Window* w;
+	struct RastPort* rp;
 	unsigned long x1, y1, x2, y2, gap;
 	struct IntuiText txt;
 	unsigned char buffer[20], *z;
-	file_info *fip;
+	file_info* fip;
 
 	verify(sp, V_site);
 
@@ -1013,7 +1075,8 @@ void update_fill_bar(site *sp, IntuitionParamDef, GraphicsParamDef)
 
 	Forbid();
 	fip = sp->file_list;
-	if (!fip) {
+	if (!fip)
+	{
 		Permit();
 		return;
 	}
@@ -1039,10 +1102,11 @@ void update_fill_bar(site *sp, IntuitionParamDef, GraphicsParamDef)
 	y1 += gap + 1;
 	y2 -= gap + 1;
 
-	if (sp->site_state == SS_WRITING || !fip->end) {   /* just print how many k we have transferred */
+	if (sp->site_state == SS_WRITING || !fip->end)
+	{ /* just print how many k we have transferred */
 		txt.FrontPen = textpen;
 		txt.BackPen = 0;
-		txt.DrawMode = JAM2;
+		txt.DrawMode = JAM2 ;
 		txt.LeftEdge = x1;
 		txt.TopEdge = y1;
 		txt.ITextFont = sp->status_window->WScreen->Font;
@@ -1059,31 +1123,36 @@ void update_fill_bar(site *sp, IntuitionParamDef, GraphicsParamDef)
 		x1 = 2;
 		y1 = fip->rpos / 1024;
 		buffer[x1] = '0';
-		while (y1 >= 100000) {
+		while (y1 >= 100000)
+		{
 			buffer[x1]++;
 			y1 -= 100000;
 		}
 		if (buffer[x1] > '0') x1++;
 		buffer[x1] = '0';
-		while (y1 >= 10000) {
+		while (y1 >= 10000)
+		{
 			buffer[x1]++;
 			y1 -= 10000;
 		}
 		if (buffer[x1] > '0' || x1 != 2) x1++;
 		buffer[x1] = '0';
-		while (y1 >= 1000) {
+		while (y1 >= 1000)
+		{
 			buffer[x1]++;
 			y1 -= 1000;
 		}
 		if (buffer[x1] > '0' || x1 != 2) x1++;
 		buffer[x1] = '0';
-		while (y1 >= 100) {
+		while (y1 >= 100)
+		{
 			buffer[x1]++;
 			y1 -= 100;
 		}
 		if (buffer[x1] > '0' || x1 != 2) x1++;
 		buffer[x1] = '0';
-		while (y1 >= 10) {
+		while (y1 >= 10)
+		{
 			buffer[x1]++;
 			y1 -= 10;
 		}
@@ -1109,7 +1178,7 @@ void update_fill_bar(site *sp, IntuitionParamDef, GraphicsParamDef)
 
 	txt.FrontPen = lightpen;
 	txt.BackPen = 0;
-	txt.DrawMode = JAM1;
+	txt.DrawMode = JAM1 ;
 	txt.TopEdge = y1;
 	txt.ITextFont = sp->status_window->WScreen->Font;
 	txt.NextText = nil;
@@ -1127,18 +1196,21 @@ void update_fill_bar(site *sp, IntuitionParamDef, GraphicsParamDef)
 	return;
 }
 
-void draw_state(site *sp, IntuitionParamDef, GraphicsParamDef)
+void draw_state(site* sp, IntuitionParamDef, GraphicsParamDef)
 {
 	struct IntuiText txt;
 
 	/* gadget states */
-	switch (sp->site_state) {
+	switch (sp->site_state)
+	{
 	case SS_DISCONNECTED:
 	case SS_DISCONNECTING:
-		if (!(sp->abort_gadget->Flags & GFLG_DISABLED)) {
+		if (!(sp->abort_gadget->Flags & GFLG_DISABLED))
+		{
 			OffGadget(sp->abort_gadget, sp->status_window, nil);
 		}
-		if (!(sp->disconnect_gadget->Flags & GFLG_DISABLED)) {
+		if (!(sp->disconnect_gadget->Flags & GFLG_DISABLED))
+		{
 			OffGadget(sp->disconnect_gadget, sp->status_window, nil);
 		}
 		break;
@@ -1146,18 +1218,22 @@ void draw_state(site *sp, IntuitionParamDef, GraphicsParamDef)
 	case SS_IDLE:
 	case SS_LOGIN:
 	case SS_ABORTING:
-		if (!(sp->abort_gadget->Flags & GFLG_DISABLED)) {
+		if (!(sp->abort_gadget->Flags & GFLG_DISABLED))
+		{
 			OffGadget(sp->abort_gadget, sp->status_window, nil);
 		}
-		if (sp->disconnect_gadget->Flags & GFLG_DISABLED) {
+		if (sp->disconnect_gadget->Flags & GFLG_DISABLED)
+		{
 			OnGadget(sp->disconnect_gadget, sp->status_window, nil);
 		}
 		break;
 	default:
-		if (sp->abort_gadget->Flags & GFLG_DISABLED) {
+		if (sp->abort_gadget->Flags & GFLG_DISABLED)
+		{
 			OnGadget(sp->abort_gadget, sp->status_window, nil);
 		}
-		if (sp->disconnect_gadget->Flags & GFLG_DISABLED) {
+		if (sp->disconnect_gadget->Flags & GFLG_DISABLED)
+		{
 			OnGadget(sp->disconnect_gadget, sp->status_window, nil);
 		}
 		break;
@@ -1165,7 +1241,7 @@ void draw_state(site *sp, IntuitionParamDef, GraphicsParamDef)
 
 	txt.FrontPen = textpen;
 	txt.BackPen = 0;
-	txt.DrawMode = JAM2;
+	txt.DrawMode = JAM2 ;
 	txt.LeftEdge = 2;
 	txt.TopEdge = 0;
 	txt.ITextFont = sp->status_window->WScreen->Font;
@@ -1173,21 +1249,23 @@ void draw_state(site *sp, IntuitionParamDef, GraphicsParamDef)
 	txt.IText = strings[MSG_STATE_UNKNOWN + sp->site_state];
 
 	PrintIText(sp->status_window->RPort, &txt, sp->status_window->BorderLeft,
-		sp->abort_gadget->TopEdge + sp->abort_gadget->Height / 4);
+	           sp->abort_gadget->TopEdge + sp->abort_gadget->Height / 4);
 
-	if (sp->quick) {
+	if (sp->quick)
+	{
 		txt.LeftEdge += IntuiTextLength(&txt);
 		txt.IText = strings[MSG_QUICK_FLAG];
 		PrintIText(sp->status_window->RPort, &txt, sp->status_window->BorderLeft,
-			sp->abort_gadget->TopEdge + sp->abort_gadget->Height / 4);
+		           sp->abort_gadget->TopEdge + sp->abort_gadget->Height / 4);
 	}
 
-	if (sp->site_state == SS_READING && sp->file_list && sp->file_list->end > 0) {
+	if (sp->site_state == SS_READING && sp->file_list && sp->file_list->end > 0)
+	{
 		draw_fill_bar(sp, IntuitionParam, GraphicsParam);
 	}
 }
 
-void clear_state(site *sp, IntuitionParamDef, GraphicsParamDef)
+void clear_state(site* sp, IntuitionParamDef, GraphicsParamDef)
 {
 	verify(sp, V_site);
 	truth(sp->status_window != nil);
@@ -1196,25 +1274,26 @@ void clear_state(site *sp, IntuitionParamDef, GraphicsParamDef)
 	SetDrMd(sp->status_window->RPort, JAM1);
 
 	RectFill(sp->status_window->RPort, sp->status_window->BorderLeft, sp->status_window->BorderTop,
-		sp->abort_gadget->LeftEdge - 1, sp->status_window->Height - sp->status_window->BorderBottom - 1);
+	         sp->abort_gadget->LeftEdge - 1, sp->status_window->Height - sp->status_window->BorderBottom - 1);
 
 	RectFill(sp->status_window->RPort, sp->abort_gadget->LeftEdge, sp->status_window->BorderTop,
-		sp->status_window->Width - sp->status_window->BorderRight - 1,
-		sp->abort_gadget->TopEdge - 1);
+	         sp->status_window->Width - sp->status_window->BorderRight - 1,
+	         sp->abort_gadget->TopEdge - 1);
 }
 
-void open_status_window(site *sp, struct MsgPort *wport, IntuitionParamDef, GraphicsParamDef)
+void open_status_window(site* sp, struct MsgPort* wport, IntuitionParamDef, GraphicsParamDef)
 {
-	struct Screen *s;
+	struct Screen* s;
 	struct Rectangle rect;
 	unsigned long screen_modeID;
 	struct Gadget *aborg, *disg;
 	unsigned short swidth, sheight, fheight;
-	struct Window *w;
+	struct Window* w;
 
 	verify(sp, V_site);
 
-	if (sp->status_window) {
+	if (sp->status_window)
+	{
 		WindowToFront(sp->status_window);
 		ActivateWindow(sp->status_window);
 		return;
@@ -1227,32 +1306,37 @@ void open_status_window(site *sp, struct MsgPort *wport, IntuitionParamDef, Grap
 	else fheight = 8;
 
 	screen_modeID = GetVPModeID(&s->ViewPort);
-	if (screen_modeID != INVALID_ID) {
-		if (QueryOverscan(screen_modeID, &rect, OSCAN_TEXT)) {
+	if (screen_modeID != INVALID_ID)
+	{
+		if (QueryOverscan(screen_modeID, &rect, OSCAN_TEXT))
+		{
 			aborg = make_gadget(abort_gim);
-			if (aborg) {
+			if (aborg)
+			{
 				aborg->GadgetID = 1;
 				disg = make_gadget(disconnect_gim);
-				if (disg) {
+				if (disg)
+				{
 					disg->GadgetID = 2;
 					swidth = rect.MaxX - rect.MinX + 1;
 					sheight = rect.MaxY - rect.MinY + 1;
 
 					w = OpenWindowTags(nil,
-						WA_Left, swidth / 4 - s->LeftEdge,
-						WA_Top, sheight / 3 - s->TopEdge,
-						WA_Width, swidth / 2,
-						WA_Height, fheight * 4 + disg->Height,
-						WA_Flags, WFLG_DEPTHGADGET | WFLG_DRAGBAR |
-						WFLG_SMART_REFRESH |
-						WFLG_CLOSEGADGET |
-						WFLG_NOCAREREFRESH,
-						WA_IDCMP, 0,
-						WA_PubScreen, s,
-						WA_Title, sp->name,
-						TAG_END, 0
-						);
-					if (w) {
+					                   WA_Left, swidth / 4 - s->LeftEdge,
+					                   WA_Top, sheight / 3 - s->TopEdge,
+					                   WA_Width, swidth / 2,
+					                   WA_Height, fheight * 4 + disg->Height,
+					                   WA_Flags, WFLG_DEPTHGADGET | WFLG_DRAGBAR |
+					                   WFLG_SMART_REFRESH |
+					                   WFLG_CLOSEGADGET |
+					                   WFLG_NOCAREREFRESH,
+					                   WA_IDCMP, 0,
+					                   WA_PubScreen, s,
+					                   WA_Title, sp->name,
+					                   TAG_END, 0
+					);
+					if (w)
+					{
 						UnlockPubScreen(nil, s);
 						w->UserPort = wport;
 						ModifyIDCMP(w, IDCMP_CLOSEWINDOW | IDCMP_GADGETUP);
@@ -1290,11 +1374,11 @@ void open_status_window(site *sp, struct MsgPort *wport, IntuitionParamDef, Grap
 	return;
 }
 
-void close_status_window(site *sp, struct MsgPort *wport, IntuitionParamDef)
+void close_status_window(site* sp, struct MsgPort* wport, IntuitionParamDef)
 {
-	struct IntuiMessage *im;
-	struct Node *succ;
-	struct Window *w;
+	struct IntuiMessage* im;
+	struct Node* succ;
+	struct Window* w;
 
 	verify(sp, V_site);
 
@@ -1304,8 +1388,10 @@ void close_status_window(site *sp, struct MsgPort *wport, IntuitionParamDef)
 
 	Forbid();
 	im = (struct IntuiMessage *)wport->mp_MsgList.lh_Head;
-	while (succ = im->ExecMessage.mn_Node.ln_Succ) {
-		if (im->IDCMPWindow == w) {
+	while (succ = im->ExecMessage.mn_Node.ln_Succ)
+	{
+		if (im->IDCMPWindow == w)
+		{
 			Remove((struct Node *)im);
 			ReplyMsg((struct Message *)im);
 		}
@@ -1328,12 +1414,12 @@ void close_status_window(site *sp, struct MsgPort *wport, IntuitionParamDef)
 
 void SAVEDS status_handler(void)
 {
-	struct Process *me;
+	struct Process* me;
 	struct MsgPort *rank, *sync, *myport, *cxport, *winport;
 	status_message *reserve, *startup, *sm;
 	struct Library *GadToolsBase, *CxBase;
-	struct IntuitionBase *IntuitionBase;
-	struct GfxBase *GfxBase;
+	struct IntuitionBase* IntuitionBase;
+	struct GfxBase* GfxBase;
 #ifdef __amigaos4__
 	struct GadToolsIFace * IGadTools = 0L;
 	struct IntuitionIFace * IIntuition = 0L;
@@ -1341,15 +1427,15 @@ void SAVEDS status_handler(void)
 	struct CommoditiesIFace * ICommodities = 0L; /* 2005-05-14 ABA : OS4 */
 #endif
 	CxObj *broker, *filter, *sender, *translate;
-	CxMsg *cxmsg;
+	CxMsg* cxmsg;
 	unsigned long signals;
 	unsigned long msgid, msgtype;
-	struct Window *mainw;
+	struct Window* mainw;
 	struct NewBroker nb;
-	struct List *site_labels;
-	struct IntuiMessage *imsg;
-	struct Node *n;
-	site *sp;
+	struct List* site_labels;
+	struct IntuiMessage* imsg;
+	struct Node* n;
+	site* sp;
 
 	mainw = nil;
 	site_labels = nil;
@@ -1363,104 +1449,117 @@ void SAVEDS status_handler(void)
 	mem_tracking_on();
 
 	IntuitionBase = (struct IntuitionBase *)OpenLibrary("intuition.library", 36);
-	if (IntuitionBase) {
+	if (IntuitionBase)
+	{
 #ifdef __amigaos4__
 		IIntuition = (struct IntuitionIFace*)GetInterface((struct Library*)IntuitionBase, "main", 1L, 0);
 		if (IIntuition) {
 #endif
-			GfxBase = (struct GfxBase *)OpenLibrary("graphics.library", 36);
-			if (GfxBase) {
+		GfxBase = (struct GfxBase *)OpenLibrary("graphics.library", 36);
+		if (GfxBase)
+		{
 #ifdef __amigaos4__
 				IGraphics = (struct GraphicsIFace*)GetInterface((struct Library*)GfxBase, "main", 1L, 0);
 				if (IGraphics) {
 #endif
-					GadToolsBase = OpenLibrary("gadtools.library", 0);
-					if (GadToolsBase) {
+			GadToolsBase = OpenLibrary("gadtools.library", 0);
+			if (GadToolsBase)
+			{
 #ifdef __amigaos4__
 						IGadTools = (struct GadToolsIFace*)GetInterface((struct Library*)GadToolsBase, "main", 1L, 0);
 						if (IGadTools) {
 #endif
-							CxBase = OpenLibrary("commodities.library", 0);
-							if (CxBase) {
+				CxBase = OpenLibrary("commodities.library", 0);
+				if (CxBase)
+				{
 #ifdef __amigaos4__
 								ICommodities = (struct CommoditiesIFace*)GetInterface((struct Library*)CxBase, "main", 1L, 0);
 								if (ICommodities) {
 #endif
-									rank = CreatePort(0, 0);
-									if (rank) {
-										sync = CreatePort(0, 0);
-										if (sync) {
-											cxport = CreatePort(0, 0);
-											if (cxport) {
-												winport = CreatePort(0, 0);
-												if (winport) {
-													reserve = (status_message *)allocate_flags(sizeof(*reserve), MEMF_PUBLIC, V_status_message);
-													if (reserve) {
-														ensure(reserve, V_status_message);
+					rank = CreatePort(0, 0);
+					if (rank)
+					{
+						sync = CreatePort(0, 0);
+						if (sync)
+						{
+							cxport = CreatePort(0, 0);
+							if (cxport)
+							{
+								winport = CreatePort(0, 0);
+								if (winport)
+								{
+									reserve = (status_message *)allocate_flags(sizeof(*reserve), MEMF_PUBLIC, V_status_message);
+									if (reserve)
+									{
+										ensure(reserve, V_status_message);
 
-														reserve->header.mn_Length = sizeof(*reserve);
-														reserve->header.mn_ReplyPort = sync;
-														reserve->header.mn_Node.ln_Name = "ftpstatus reserve message";
-														reserve->header.mn_Node.ln_Type = NT_MESSAGE;
-														reserve->header.mn_Node.ln_Pri = 0;
+										reserve->header.mn_Length = sizeof(*reserve);
+										reserve->header.mn_ReplyPort = sync;
+										reserve->header.mn_Node.ln_Name = "ftpstatus reserve message";
+										reserve->header.mn_Node.ln_Type = NT_MESSAGE ;
+										reserve->header.mn_Node.ln_Pri = 0;
 
-														nb.nb_Version = NB_VERSION;
-														nb.nb_Name = strings[MSG_BROKER_NAME];
-														nb.nb_Title = "FTPMount v" VERSION "." REVISION;
-														nb.nb_Descr = strings[MSG_BROKER_DESCR];
-														nb.nb_Unique = NBU_DUPLICATE;
-														nb.nb_Flags = COF_SHOW_HIDE;
-														nb.nb_Pri = 0;
-														nb.nb_Port = cxport;
-														nb.nb_ReservedChannel = 0;
+										nb.nb_Version = NB_VERSION ;
+										nb.nb_Name = strings[MSG_BROKER_NAME];
+										nb.nb_Title = "FTPMount v" VERSION "." REVISION;
+										nb.nb_Descr = strings[MSG_BROKER_DESCR];
+										nb.nb_Unique = NBU_DUPLICATE;
+										nb.nb_Flags = COF_SHOW_HIDE;
+										nb.nb_Pri = 0;
+										nb.nb_Port = cxport;
+										nb.nb_ReservedChannel = 0;
 
-														broker = CxBroker(&nb, nil);
-														if (broker) {
-															/* this hotkey stuff taken directly from RKM example */
-															if (filter = CxFilter(strings[MSG_HOTKEY])) {
-																/* if we can't add the hotkey stuff, don't fail */
-																if (sender = CxSender(cxport, 1)) {
-																	if (translate = (CxTranslate(nil))) {
-																		AttachCxObj(broker, filter);
-																		AttachCxObj(filter, sender);
-																		AttachCxObj(filter, translate);
-																	}
-																}
-															}
-															ActivateCxObj(broker, 1l);
-
-															startup->command = 0;
-															ReplyMsg(&startup->header);
-															goto begin_listening;
-														}
-														deallocate(reserve, V_status_message);
+										broker = CxBroker(&nb, nil);
+										if (broker)
+										{
+											/* this hotkey stuff taken directly from RKM example */
+											if (filter = CxFilter(strings[MSG_HOTKEY]))
+											{
+												/* if we can't add the hotkey stuff, don't fail */
+												if (sender = CxSender(cxport, 1))
+												{
+													if (translate = (CxTranslate(nil)))
+													{
+														AttachCxObj(broker, filter);
+														AttachCxObj(filter, sender);
+														AttachCxObj(filter, translate);
 													}
-													DeletePort(winport);
 												}
-												DeletePort(cxport);
 											}
-											DeletePort(sync);
+											ActivateCxObj(broker, 1l);
+
+											startup->command = 0;
+											ReplyMsg(&startup->header);
+											goto begin_listening;
 										}
-										DeletePort(rank);
+										deallocate(reserve, V_status_message);
 									}
+									DeletePort(winport);
+								}
+								DeletePort(cxport);
+							}
+							DeletePort(sync);
+						}
+						DeletePort(rank);
+					}
 #ifdef __amigaos4__
 									DropInterface((struct Interface*)ICommodities);
 								}
 #endif
-								CloseLibrary(CxBase);
-							}
+					CloseLibrary(CxBase);
+				}
 #ifdef __amigaos4__
 							DropInterface((struct Interface*)IGadTools);
 						}
 #endif
-						CloseLibrary(GadToolsBase);
-					}
+				CloseLibrary(GadToolsBase);
+			}
 #ifdef __amigaos4__
 					DropInterface((struct Interface*)IGraphics);
 				}
 #endif
-				CloseLibrary((struct Library *)GfxBase);
-			}
+			CloseLibrary((struct Library *)GfxBase);
+		}
 #ifdef __amigaos4__
 			DropInterface((struct Interface*)IIntuition);
 		}
@@ -1476,18 +1575,22 @@ void SAVEDS status_handler(void)
 begin_listening:
 	signals = (1 << myport->mp_SigBit) | (1 << cxport->mp_SigBit) | (1 << winport->mp_SigBit);
 
-	while (1) {
+	while (1)
+	{
 		Wait(signals);
 
-		while (cxmsg = (CxMsg *)GetMsg(cxport)) {
+		while (cxmsg = (CxMsg *)GetMsg(cxport))
+		{
 			msgid = CxMsgID(cxmsg);
 			msgtype = CxMsgType(cxmsg);
 
 			ReplyMsg((struct Message *)cxmsg);
 
-			switch (msgtype) {
-			case CXM_IEVENT:  /* copied from CXCMD_APPEAR below */
-				if (mainw != nil) {
+			switch (msgtype)
+			{
+			case CXM_IEVENT: /* copied from CXCMD_APPEAR below */
+				if (mainw != nil)
+				{
 					close_main_window(mainw, IntuitionParam, GadToolsParam);
 					mainw = nil;
 					free_labels(site_labels);
@@ -1498,35 +1601,41 @@ begin_listening:
 				signals = (1 << cxport->mp_SigBit) |
 					(1 << myport->mp_SigBit) |
 					(1 << winport->mp_SigBit);
-				if (mainw != nil) {
+				if (mainw != nil)
+				{
 					signals |= (1 << mainw->UserPort->mp_SigBit);
 				}
 
 				break;
 			case CXM_COMMAND:
-				switch (msgid) {
+				switch (msgid)
+				{
 				case CXCMD_DISABLE:
 					reserve->command = SM_SUSPEND;
 					PutMsg(status_control, &reserve->header);
-					WaitPort(sync); GetMsg(sync);
+					WaitPort(sync);
+					GetMsg(sync);
 
 					ActivateCxObj(broker, 0l);
 					break;
 				case CXCMD_ENABLE:
 					reserve->command = SM_RESUME;
 					PutMsg(status_control, &reserve->header);
-					WaitPort(sync); GetMsg(sync);
+					WaitPort(sync);
+					GetMsg(sync);
 
 					ActivateCxObj(broker, 1l);
 					break;
 				case CXCMD_KILL:
 					reserve->command = SM_KILL;
 					PutMsg(status_control, &reserve->header);
-					WaitPort(sync); GetMsg(sync);
+					WaitPort(sync);
+					GetMsg(sync);
 
 					break;
 				case CXCMD_APPEAR:
-					if (mainw != nil) {
+					if (mainw != nil)
+					{
 						close_main_window(mainw, IntuitionParam, GadToolsParam);
 						mainw = nil;
 						free_labels(site_labels);
@@ -1537,13 +1646,15 @@ begin_listening:
 					signals = (1 << cxport->mp_SigBit) |
 						(1 << myport->mp_SigBit) |
 						(1 << winport->mp_SigBit);
-					if (mainw != nil) {
+					if (mainw != nil)
+					{
 						signals |= (1 << mainw->UserPort->mp_SigBit);
 					}
 
 					break;
 				case CXCMD_DISAPPEAR:
-					if (mainw != nil) {
+					if (mainw != nil)
+					{
 						close_main_window(mainw, IntuitionParam, GadToolsParam);
 						mainw = nil;
 						free_labels(site_labels);
@@ -1557,8 +1668,10 @@ begin_listening:
 			}
 		}
 
-		while (mainw && (imsg = GT_GetIMsg(mainw->UserPort))) {
-			switch (imsg->Class) {
+		while (mainw && (imsg = GT_GetIMsg(mainw->UserPort)))
+		{
+			switch (imsg->Class)
+			{
 			case IDCMP_CLOSEWINDOW:
 				GT_ReplyIMsg(imsg);
 				close_main_window(mainw, IntuitionParam, GadToolsParam);
@@ -1580,20 +1693,25 @@ begin_listening:
 				mainw = nil;
 
 				n = site_labels->lh_Head;
-				while (msgid-- && (n->ln_Succ)) {
+				while (msgid-- && (n->ln_Succ))
+				{
 					n = n->ln_Succ;
 				}
 
-				if (n->ln_Succ) {
+				if (n->ln_Succ)
+				{
 					sp = sites;
-					while (sp) {
-						if (strcmp(sp->name, n->ln_Name) == 0) {
+					while (sp)
+					{
+						if (strcmp(sp->name, n->ln_Name) == 0)
+						{
 							break;
 						}
 						sp = sp->next;
 					}
 
-					if (sp) {
+					if (sp)
+					{
 						open_status_window(sp, winport, IntuitionParam, GraphicsParam);
 					}
 				}
@@ -1610,21 +1728,25 @@ begin_listening:
 			GT_ReplyIMsg(imsg);
 		}
 
-		while (imsg = (struct IntuiMessage *)GetMsg(winport)) {
+		while (imsg = (struct IntuiMessage *)GetMsg(winport))
+		{
 			sp = (site *)imsg->IDCMPWindow->UserData;
 			verify(sp, V_site);
 
-			switch (imsg->Class) {
+			switch (imsg->Class)
+			{
 			case IDCMP_CLOSEWINDOW:
 				ReplyMsg((struct Message *)imsg);
 				close_status_window(sp, winport, IntuitionParam);
 				continue;
 			case IDCMP_GADGETUP:
-				if (((struct Gadget *)imsg->IAddress)->GadgetID == 1) {
+				if (((struct Gadget *)imsg->IAddress)->GadgetID == 1)
+				{
 					/* abort */
 					Signal(sp->port->mp_SigTask, sp->abort_signals);
 				}
-				else {
+				else
+				{
 					/* disconnect */
 					Signal(sp->port->mp_SigTask, sp->disconnect_signals);
 				}
@@ -1634,18 +1756,22 @@ begin_listening:
 			ReplyMsg((struct Message *)imsg);
 		}
 
-		while (sm = (status_message *)GetMsg(myport)) {
+		while (sm = (status_message *)GetMsg(myport))
+		{
 			verify(sm, V_status_message);
 
-			switch (sm->command) {
+			switch (sm->command)
+			{
 			case SM_KILL:
-				if (mainw != nil) {
+				if (mainw != nil)
+				{
 					close_main_window(mainw, IntuitionParam, GadToolsParam);
 					free_labels(site_labels);
 				}
 
 				Forbid();
-				while (cxmsg = (CxMsg *)GetMsg(cxport)) {
+				while (cxmsg = (CxMsg *)GetMsg(cxport))
+				{
 					ReplyMsg((struct Message *)cxmsg);
 				}
 
@@ -1677,7 +1803,8 @@ begin_listening:
 				ReplyMsg(&sm->header);
 				return;
 			case SM_NEW_SITE:
-				if (sm->data) {
+				if (sm->data)
+				{
 					open_status_window(sm->this_site, winport, IntuitionParam, GraphicsParam);
 				}
 				break;
@@ -1685,13 +1812,15 @@ begin_listening:
 				close_status_window(sm->this_site, winport, IntuitionParam);
 				break;
 			case SM_STATE_CHANGE:
-				if (sm->this_site->status_window) {
+				if (sm->this_site->status_window)
+				{
 					clear_state(sm->this_site, IntuitionParam, GraphicsParam);
 					draw_state(sm->this_site, IntuitionParam, GraphicsParam);
 				}
 				break;
 			case SM_PROGRESS:
-				if (sm->this_site->status_window) {
+				if (sm->this_site->status_window)
+				{
 					update_fill_bar(sm->this_site, IntuitionParam, GraphicsParam);
 				}
 				break;
@@ -1700,4 +1829,3 @@ begin_listening:
 		}
 	}
 }
-

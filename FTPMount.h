@@ -43,7 +43,7 @@
 #define INLINES_AS_MACROS 1	/* SAS doesn't seem to do inlines properly */
 #endif
 
-#ifndef	__MORPHOS__
+#ifndef __MORPHOS__
 #include <proto/bsdsocket.h> /* 2003-03-02 rri */
 #else
 #include	 <proto/socket.h>
@@ -119,15 +119,13 @@ static inline void free(void *p)
 # define SAVEDS __saveds
 # define ASM
 # define REG(x,y) __reg(#x) y
-#else
-# error add #defines for your compiler...
 #endif
 #endif
 #endif
 
 /* evtypes.h */
 
-typedef void(*ptf)();
+typedef void (*ptf)();
 
 #ifdef TRUE
 #undef TRUE
@@ -153,10 +151,12 @@ typedef void(*ptf)();
 #undef NULL
 #endif
 
-static void * const nil = 0;
-static void * const NULL = 0;
+static void* const nil = 0;
+static void* const NULL = 0;
 
-typedef enum { false = (1 == 0), true = (1 == 1) } boolean;
+typedef enum
+{ false = (1 == 0), true = (1 == 1)
+} boolean;
 
 /* NB: this only works for y a power of 2 */
 #define ROUND_UP(x, y) ((x + y - 1) & (~(y - 1)))
@@ -171,13 +171,14 @@ typedef enum { false = (1 == 0), true = (1 == 1) } boolean;
 
 #define V_lock 27759
 
-typedef struct my_lock {
+typedef struct my_lock
+{
 	struct FileLock fl;
 
 	magic_verify;
 
-	struct my_lock *next;
-	struct MsgPort *port;
+	struct my_lock* next;
+	struct MsgPort* port;
 	unsigned long rfsl, lastkey;
 	unsigned char fname[1];
 } lock;
@@ -190,11 +191,11 @@ typedef struct my_lock {
 typedef struct my_file_info
 {
 	magic_verify;
-	struct my_file_info *next;
+	struct my_file_info* next;
 	unsigned long rfarg; /* real file arg */
 	unsigned long rpos, vpos, end; /* real file position, virtual file position, file end */
-	struct MsgPort *port;
-	struct tcpm *tm;
+	struct MsgPort* port;
+	struct tcpm* tm;
 	unsigned short type;
 	boolean seek_end, eof, closed;
 	unsigned char first_block[FIRST_BLOCK_SIZE];
@@ -218,15 +219,15 @@ typedef struct my_file_info
 
 /*global struct ExecBase *SysBase;
 global struct DosLibrary *DOSBase; */
-global struct IntuitionBase *IntuitionBase;
-global struct GfxBase *GfxBase;
-global struct Library *GadToolsBase;
-global struct Library *IconBase;
+global struct IntuitionBase* IntuitionBase;
+global struct GfxBase* GfxBase;
+global struct Library* GadToolsBase;
+global struct Library* IconBase;
 
 #if defined(__MORPHOS__) || defined(__amigaos4__)
 global struct Library *LocaleBase; /* 12-04-04 itix */
 #else
-global struct LocaleBase *LocaleBase; /* 03-03-01 rri */
+global struct LocaleBase* LocaleBase; /* 03-03-01 rri */
 #endif
 
 #ifdef __amigaos4__
@@ -258,34 +259,34 @@ global struct DosList *ftp_device, *ftp_volume;
 
 global BPTR ftpdir_lock, ftphosts_lock;
 
-global struct tcpm *prime; /* the numero uno tcp message */
+global struct tcpm* prime; /* the numero uno tcp message */
 
 global unsigned char unique_buffer[25];
 
 global unsigned short ftp_port_number;
-global struct site_s *sites;
+global struct site_s* sites;
 
-global unsigned char *anon_login;
+global unsigned char* anon_login;
 
-global struct Message *local_msg;
-global struct MsgPort *local_port;
+global struct Message* local_msg;
+global struct MsgPort* local_port;
 
 global struct gim *cancel_gim, *abort_gim, *disconnect_gim, *login_gim;
 
-global struct status_message *status_mess;
+global struct status_message* status_mess;
 global struct MsgPort *status_control, *status_port;
 
 global unsigned long darkpen, lightpen, textpen, fillpen;
 
-global struct my_lock *orphaned_locks;
+global struct my_lock* orphaned_locks;
 
 global unsigned short year;
 
-global struct Locale *my_locale;
-global struct Catalog *cat;
+global struct Locale* my_locale;
+global struct Catalog* cat;
 
-global unsigned char *volume_name;
+global unsigned char* volume_name;
 
 #ifdef DECLARE_GLOBALS_HERE
-unsigned char *ver = (unsigned char*)"$VER: FTPMount " VERSION "." REVISION " (2015-08-09)";
+unsigned char* ver = (unsigned char*)"$VER: FTPMount " VERSION "." REVISION " (2015-08-09)";
 #endif
