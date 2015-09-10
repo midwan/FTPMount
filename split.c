@@ -254,7 +254,7 @@ resolve:
 	/* ok, we don't have a '/' so check for .info or Unnamed or
 	   Disk or Default ... they are "special" */
 	if (strcasecmp(s, "Disk") == 0 ||
-		strcasecmp(s, "Unnamed", 7) == 0 ||
+		strncasecmp(s, "Unnamed", 7) == 0 ||
 		strcasecmp(s, ".backdrop") == 0 ||
 		strcasecmp(s, "Default") == 0 ||
 		strcasecmp(&s[strlen(s) - 5], ".info") == 0)
