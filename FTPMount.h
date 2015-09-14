@@ -139,18 +139,6 @@ typedef void (*ptf)();
 #undef NULL
 #endif
 
-#ifdef TRUE
-#undef TRUE
-#endif
-
-#ifdef FALSE
-#undef FALSE
-#endif
-
-#ifdef NULL
-#undef NULL
-#endif
-
 static void* const nil = 0;
 static void* const NULL = 0;
 
