@@ -49,7 +49,7 @@ void setup_strings(void);
 void cleanup_strings(void);
 
 /*void SAVEDS start(void) */
-int main(void)
+int SAVEDS main(void)
 {
 	struct Process* me;
 	struct Message* msg;
@@ -58,7 +58,7 @@ int main(void)
 	struct DateTime dtime;
 	unsigned char temp[15];
 
-	SysBase = *(struct ExecBase **)4;
+  SysBase = *(struct ExecBase **)4;
 
 #ifdef __amigaos4__
 	IExec = (struct ExecIFace *)((struct ExecBase *)SysBase)->MainInterface;

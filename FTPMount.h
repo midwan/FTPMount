@@ -217,12 +217,13 @@ typedef struct my_file_info
 #define global extern
 #endif
 
-/*global struct ExecBase *SysBase;
-global struct DosLibrary *DOSBase; */
+global struct ExecBase *SysBase;
+global struct DosLibrary *DOSBase;
 global struct IntuitionBase* IntuitionBase;
 global struct GfxBase* GfxBase;
 global struct Library* GadToolsBase;
 global struct Library* IconBase;
+global struct Library *CxBase;
 
 #if defined(__MORPHOS__) || defined(__amigaos4__)
 global struct Library *LocaleBase; /* 12-04-04 itix */
