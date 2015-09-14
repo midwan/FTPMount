@@ -2,7 +2,7 @@
 vc +aos68k -c99 -I$NDK_INC -I$RS_INC -I$POSIX_INC -lamiga -lposix *.c -o bin/FTPMount-Handler
 
 # Compile for 68060
-vc +aos68k -c99 -cpu=68060 -I$NDK_INC -I$RS_INC -I$POSIX_INC -lamiga -lposix *.c -o bin/FTPMount-Handler
+vc +aos68k -c99 -cpu=68060 -I$NDK_INC -I$RS_INC -I$POSIX_INC -lamiga -lposix *.c -o bin/FTPMount-Handler-060
 
 # Compile files only (don't link)
 #vc +aos68k -c99 -I$NDK_INC -I$RS_INC -I$POSIX_INC -lamiga -c *.c
